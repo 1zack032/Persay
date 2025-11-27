@@ -3,6 +3,9 @@
 
 Central configuration for the application.
 Update these settings for different environments (dev, staging, production).
+
+Copyright (c) 2024-2025 Menza. All Rights Reserved.
+This software is proprietary and confidential.
 """
 
 import secrets
