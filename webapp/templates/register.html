@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Menza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #030306;
+            --bg-secondary: #08080c;
+            --bg-card: #0c0c12;
+            --bg-card-inner: #101018;
+            --bg-input: #0a0a10;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --text-dim: #6b7280;
+            --text-muted: #4b5563;
+            --border: rgba(255, 255, 255, 0.04);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.1);
+            --error: #ef4444;
+            --error-bg: rgba(239, 68, 68, 0.1);
+            --success: #10b981;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.08), transparent),
+                radial-gradient(ellipse 50% 50% at 0% 50%, rgba(139, 92, 246, 0.05), transparent);
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 1.75rem;
+        }
+
+        .logo {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin: 0 auto 1.25rem;
+        }
+
+        .card-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.375rem;
+            letter-spacing: -0.02em;
+        }
+
+        .card-header p {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+
+        .error {
+            background: var(--error-bg);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--error);
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        input[type="text"]:hover,
+        input[type="password"]:hover {
+            border-color: var(--border-hover);
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Checkbox Styling */
+        .checkbox-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            background: var(--bg-input);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            margin-top: 1px;
+        }
+
+        .checkbox-custom::after {
+            content: '✓';
+            color: white;
+            font-size: 0.75rem;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.2s;
+        }
+
+        .checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .checkbox-label input[type="checkbox"]:checked + .checkbox-custom::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .checkbox-text {
+            flex: 1;
+        }
+
+        .checkbox-text a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        .checkbox-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Legal Section */
+        .legal-section {
+            background: var(--bg-card-inner);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .legal-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-family: inherit;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 30px var(--accent-glow), 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .card-footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .card-footer a {
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .card-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Features list */
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 0.625rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-glow);
+            border-radius: 50%;
+            font-size: 0.625rem;
+            color: var(--accent-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    
+    <div class="container">
+        <a href="/" class="back-link">← Back to home</a>
+        
+        <div class="card">
+            <div class="card-header">
+                <div class="logo">🔐</div>
+                <h1>Create Account</h1>
+                <p>Join Menza for secure messaging</p>
+            </div>
+            
+            {% if error %}
+            <div class="error">{{ error }}</div>
+            {% endif %}
+            
+            <form method="POST" id="registerForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" required autocomplete="username" minlength="3" maxlength="20">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Create a strong password" required autocomplete="new-password" minlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required autocomplete="new-password">
+                </div>
+                
+                <div class="legal-section">
+                    <div class="legal-title">Terms & Verification</div>
+                    
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="age_verified" required>
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">I am 18 years of age or older</span>
+                        </label>
+                    </div>
+                    
+                    <div class="checkbox-group" style="margin-bottom: 0;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="terms_accepted" required>
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">I agree to the <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+            
+            <div class="card-footer">
+                Already have an account? <a href="/login">Sign in</a>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <span>End-to-end encrypted messages</span>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">👤</div>
+                    <span>Private by design</span>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <span>Real-time messaging</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Validate password match
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm_password').value;
+            
+            if (password !== confirm) {
+                e.preventDefault();
+                alert('Passwords do not match');
+            }
+        });
+    </script>
+</body>
+</html>

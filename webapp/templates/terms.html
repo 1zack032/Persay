@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - Menza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #050508;
+            --bg-secondary: #0a0a0f;
+            --bg-card: #0f0f15;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-dim: #52525b;
+            --border: rgba(255, 255, 255, 0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.08), transparent);
+            pointer-events: none;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(5, 5, 8, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 8rem 2rem 4rem;
+        }
+
+        .header {
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .meta {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 2.5rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--text-primary);
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        ul, ol {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight-box {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .warning-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .warning-box p {
+            margin: 0;
+            color: #f59e0b;
+        }
+
+        a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .toc {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .toc h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc a {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .toc a:hover {
+            color: var(--accent-primary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-dim);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <nav>
+        <a href="/" class="logo">
+            <div class="logo-icon">🔐</div>
+            Menza
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>Terms of Service</h1>
+            <p class="meta">Last updated: November 2025 • Effective: November 2025</p>
+        </div>
+
+        <div class="content">
+            <div class="toc">
+                <h4>Table of Contents</h4>
+                <ul>
+                    <li><a href="#acceptance">1. Acceptance of Terms</a></li>
+                    <li><a href="#eligibility">2. Eligibility</a></li>
+                    <li><a href="#account">3. Your Account</a></li>
+                    <li><a href="#service">4. The Service</a></li>
+                    <li><a href="#acceptable-use">5. Acceptable Use</a></li>
+                    <li><a href="#prohibited">6. Prohibited Activities</a></li>
+                    <li><a href="#encryption">7. Encryption & Security</a></li>
+                    <li><a href="#privacy">8. Privacy</a></li>
+                    <li><a href="#intellectual-property">9. Intellectual Property</a></li>
+                    <li><a href="#termination">10. Termination</a></li>
+                    <li><a href="#disclaimers">11. Disclaimers</a></li>
+                    <li><a href="#liability">12. Limitation of Liability</a></li>
+                    <li><a href="#export">13. Export Controls</a></li>
+                    <li><a href="#disputes">14. Dispute Resolution</a></li>
+                    <li><a href="#changes">15. Changes to Terms</a></li>
+                    <li><a href="#contact">16. Contact</a></li>
+                </ul>
+            </div>
+
+            <h2 id="acceptance">1. Acceptance of Terms</h2>
+            <p>By accessing or using Menza ("Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, do not use the Service.</p>
+            <p>These Terms constitute a legally binding agreement between you and Menza ("we", "us", or "our").</p>
+
+            <h2 id="eligibility">2. Eligibility</h2>
+            <div class="warning-box">
+                <p><strong>⚠️ Age Requirement:</strong> You must be at least 18 years old to use Menza. By using the Service, you represent and warrant that you are at least 18 years of age.</p>
+            </div>
+            <p>If we discover that you are under 18, we will immediately terminate your account and delete any associated data.</p>
+            <p>You must also:</p>
+            <ul>
+                <li>Have the legal capacity to enter into a binding agreement</li>
+                <li>Not be prohibited from using the Service under applicable laws</li>
+                <li>Not be located in a country subject to U.S. government sanctions</li>
+            </ul>
+
+            <h2 id="account">3. Your Account</h2>
+            <h3>3.1 Account Creation</h3>
+            <p>To use Menza, you must create an account with a username and password. You are responsible for:</p>
+            <ul>
+                <li>Providing accurate information</li>
+                <li>Maintaining the security of your account credentials</li>
+                <li>All activities that occur under your account</li>
+            </ul>
+
+            <h3>3.2 Account Security</h3>
+            <p>You are solely responsible for maintaining the confidentiality of your password and encryption keys. We recommend using a strong, unique password.</p>
+            
+            <div class="highlight-box">
+                <p><strong>Important:</strong> If you lose your password, you may lose access to your encrypted messages. We cannot recover your encryption keys.</p>
+            </div>
+
+            <h2 id="service">4. The Service</h2>
+            <p>Menza provides an end-to-end encrypted messaging service. We provide the Service "as is" and may:</p>
+            <ul>
+                <li>Modify, suspend, or discontinue features at any time</li>
+                <li>Impose limits on usage</li>
+                <li>Update these Terms as needed</li>
+            </ul>
+
+            <h2 id="acceptable-use">5. Acceptable Use</h2>
+            <p>You agree to use Menza only for lawful purposes. You may:</p>
+            <ul>
+                <li>Send and receive private encrypted messages</li>
+                <li>Communicate with other registered users</li>
+                <li>Use the Service in accordance with these Terms</li>
+            </ul>
+
+            <h2 id="prohibited">6. Prohibited Activities</h2>
+            <p>You may NOT use Menza to:</p>
+            <ul>
+                <li><strong>Illegal Activities:</strong> Engage in any illegal activities or promote illegal conduct</li>
+                <li><strong>Harassment:</strong> Harass, threaten, or intimidate other users</li>
+                <li><strong>Harmful Content:</strong> Share content involving child exploitation, terrorism, or violence</li>
+                <li><strong>Spam:</strong> Send unsolicited messages or spam</li>
+                <li><strong>Malware:</strong> Distribute viruses, malware, or harmful code</li>
+                <li><strong>Impersonation:</strong> Impersonate others or misrepresent your identity</li>
+                <li><strong>Abuse:</strong> Attempt to gain unauthorized access to our systems</li>
+                <li><strong>Circumvention:</strong> Circumvent security measures or access restrictions</li>
+                <li><strong>Commercial Use:</strong> Use the Service for unauthorized commercial purposes</li>
+            </ul>
+            <p>Violation of these rules may result in immediate account termination and reporting to law enforcement where appropriate.</p>
+
+            <h2 id="encryption">7. Encryption & Security</h2>
+            <h3>7.1 End-to-End Encryption</h3>
+            <p>Menza uses end-to-end encryption to protect your messages. This means:</p>
+            <ul>
+                <li>Only you and your recipient can read your messages</li>
+                <li>We cannot decrypt your messages</li>
+                <li>Your encryption keys are stored only on your device</li>
+            </ul>
+
+            <h3>7.2 Your Responsibility</h3>
+            <p>You are responsible for:</p>
+            <ul>
+                <li>Keeping your password and device secure</li>
+                <li>Understanding that we cannot recover lost passwords or keys</li>
+                <li>Backing up any important information</li>
+            </ul>
+
+            <h3>7.3 No Backdoors</h3>
+            <p>We do not and will not build backdoors into our encryption. We cannot provide decrypted message content to anyone, including law enforcement.</p>
+
+            <h2 id="privacy">8. Privacy</h2>
+            <p>Your use of the Service is also governed by our <a href="/privacy">Privacy Policy</a>, which describes how we collect, use, and protect your information.</p>
+
+            <h2 id="intellectual-property">9. Intellectual Property</h2>
+            <h3>9.1 Our Rights</h3>
+            <p>Menza and its logos, designs, and content are protected by intellectual property laws. You may not copy, modify, or distribute our materials without permission.</p>
+
+            <h3>9.2 Your Content</h3>
+            <p>You retain ownership of any content you send through the Service. By using Menza, you grant us a limited license to transmit your encrypted content for the purpose of delivering messages.</p>
+
+            <h3>9.3 Independence Statement</h3>
+            <p>Menza is an independent service. We are NOT affiliated with, endorsed by, sponsored by, or in any way officially connected with any other messaging application, social media platform, or technology company. Any similarities in functionality are the result of implementing standard encryption protocols and common messaging features.</p>
+
+            <h3>9.4 Third-Party Trademarks</h3>
+            <p>All third-party trademarks, service marks, and trade names referenced anywhere are the property of their respective owners. Such references, if any, are for identification purposes only and do not imply endorsement or affiliation.</p>
+
+            <h2 id="termination">10. Termination</h2>
+            <h3>10.1 By You</h3>
+            <p>You may delete your account at any time through the app settings. Upon deletion, we will remove your data in accordance with our Privacy Policy.</p>
+
+            <h3>10.2 By Us</h3>
+            <p>We may suspend or terminate your account if you:</p>
+            <ul>
+                <li>Violate these Terms</li>
+                <li>Engage in prohibited activities</li>
+                <li>Pose a security risk</li>
+            </ul>
+
+            <h2 id="disclaimers">11. Disclaimers</h2>
+            <p>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED. WE DISCLAIM ALL WARRANTIES INCLUDING:</p>
+            <ul>
+                <li>MERCHANTABILITY</li>
+                <li>FITNESS FOR A PARTICULAR PURPOSE</li>
+                <li>NON-INFRINGEMENT</li>
+                <li>UNINTERRUPTED OR ERROR-FREE SERVICE</li>
+            </ul>
+
+            <h3>11.1 Security Disclaimers</h3>
+            <p>While we implement industry-standard encryption (AES-256), we make no guarantees that:</p>
+            <ul>
+                <li>The Service is immune to all security vulnerabilities</li>
+                <li>Your communications are protected against all possible threats</li>
+                <li>The encryption cannot be compromised through methods outside our control (e.g., device compromise, weak passwords, social engineering)</li>
+            </ul>
+            <p>Security is a shared responsibility. We encourage users to use strong passwords, keep devices secure, and follow security best practices.</p>
+
+            <h2 id="liability">12. Limitation of Liability</h2>
+            <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, PERSAY SHALL NOT BE LIABLE FOR:</p>
+            <ul>
+                <li>Indirect, incidental, or consequential damages</li>
+                <li>Loss of data, profits, or goodwill</li>
+                <li>Service interruptions</li>
+                <li>Actions of other users</li>
+            </ul>
+            <p>Our total liability shall not exceed the amount you paid us in the 12 months preceding the claim, or $100, whichever is greater.</p>
+
+            <h2 id="export">13. Export Controls</h2>
+            <p>Menza contains encryption technology subject to export regulations. By using the Service, you represent that:</p>
+            <ul>
+                <li>You are not located in a country subject to U.S. government embargo (Cuba, Iran, North Korea, Syria, Crimea)</li>
+                <li>You are not on any U.S. government prohibited party list</li>
+                <li>You will not use the Service in violation of export laws</li>
+            </ul>
+
+            <h2 id="disputes">14. Dispute Resolution</h2>
+            <h3>14.1 Governing Law</h3>
+            <p>These Terms are governed by the laws of [Jurisdiction], without regard to conflict of law principles.</p>
+
+            <h3>14.2 Informal Resolution</h3>
+            <p>Before filing any claim, you agree to contact us at legal@persay.app to attempt informal resolution for at least 30 days.</p>
+
+            <h3>14.3 Arbitration</h3>
+            <p>Any disputes that cannot be resolved informally shall be resolved through binding arbitration, except where prohibited by law. You waive the right to participate in class actions.</p>
+
+            <h2 id="changes">15. Changes to Terms</h2>
+            <p>We may update these Terms from time to time. Material changes will be communicated via the app or email. Continued use after changes constitutes acceptance.</p>
+
+            <h2 id="contact">16. Contact</h2>
+            <p>For questions about these Terms:</p>
+            <ul>
+                <li><strong>Email:</strong> legal@persay.app</li>
+                <li><strong>Support:</strong> support@persay.app</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 Menza. All rights reserved. <a href="/terms">Terms of Service</a> • <a href="/privacy">Privacy Policy</a></p>
+    </footer>
+</body>
+</html>
+

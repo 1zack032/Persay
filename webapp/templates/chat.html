@@ -1,0 +1,4192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Menza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Font Options for Preview -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #020205;
+            --bg-secondary: #06060a;
+            --bg-card: #0a0a10;
+            --bg-card-inner: #0e0e16;
+            --bg-card-hover: #121220;
+            --bg-input: #08080e;
+            --accent-primary: #7c3aed;
+            --accent-secondary: #a855f7;
+            --accent-tertiary: #06b6d4;
+            --accent-glow: rgba(124, 58, 237, 0.2);
+            --neon-glow: 0 0 20px rgba(124, 58, 237, 0.4);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-dim: #64748b;
+            --text-muted: #475569;
+            --border: rgba(124, 58, 237, 0.08);
+            --border-subtle: rgba(255, 255, 255, 0.04);
+            --border-hover: rgba(124, 58, 237, 0.2);
+            --success: #22c55e;
+            --message-sent: rgba(124, 58, 237, 0.15);
+            --message-received: rgba(255, 255, 255, 0.03);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+            
+            /* Font Variables - Change this to switch fonts */
+            --font-primary: 'Space Grotesk', sans-serif;
+            --font-display: 'Orbitron', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 340px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-title {
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 0.01em;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
+        }
+
+        .logo-text {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* Action Bar - Write & Search */
+        .action-bar {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.625rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(6, 182, 212, 0.04));
+            border: 1px solid rgba(124, 58, 237, 0.15);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: var(--font-primary);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .action-btn:hover::before {
+            left: 100%;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(6, 182, 212, 0.08));
+            border-color: rgba(124, 58, 237, 0.3);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .action-btn.icon-only {
+            padding: 0.875rem 1.25rem;
+        }
+
+        .action-btn.icon-only svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            transition: all 0.2s;
+        }
+
+        .action-btn.icon-only:hover svg {
+            stroke: var(--accent-secondary);
+            filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.5));
+            color: var(--text-primary);
+        }
+
+        .action-btn.active {
+            background: var(--accent-glow);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .action-btn .icon {
+            font-size: 1rem;
+        }
+
+        /* Futuristic Write Button */
+        .action-btn.futuristic-write {
+            position: relative;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(6, 182, 212, 0.1));
+            border: 1px solid rgba(168, 85, 247, 0.25);
+        }
+
+        .action-btn.futuristic-write::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(6, 182, 212, 0.4));
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.3s;
+            filter: blur(8px);
+        }
+
+        .action-btn.futuristic-write:hover {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(6, 182, 212, 0.15));
+            border-color: rgba(168, 85, 247, 0.5);
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.3), inset 0 0 15px rgba(168, 85, 247, 0.1);
+        }
+
+        .action-btn.futuristic-write:hover::after {
+            opacity: 1;
+        }
+
+        .action-btn.futuristic-write svg {
+            filter: drop-shadow(0 0 3px rgba(168, 85, 247, 0.4));
+        }
+
+        .action-btn.futuristic-write:hover svg {
+            stroke: #a855f7;
+            filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.7));
+        }
+
+        .write-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 30px;
+            height: 30px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .action-btn.futuristic-write:hover .write-glow {
+            opacity: 1;
+            animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+        }
+
+        /* Channels Navigation Link */
+        .channels-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            margin-top: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(6, 182, 212, 0.03));
+            border: 1px solid rgba(124, 58, 237, 0.1);
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .channels-nav-link:hover {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(6, 182, 212, 0.06));
+            border-color: rgba(124, 58, 237, 0.25);
+            color: var(--text-primary);
+            transform: translateX(2px);
+        }
+
+        .channels-nav-link .channels-icon {
+            font-size: 1rem;
+        }
+
+        .channels-nav-link .channels-text {
+            flex: 1;
+        }
+
+        .channels-nav-link svg {
+            opacity: 0.5;
+            transition: all 0.2s;
+        }
+
+        .channels-nav-link:hover svg {
+            opacity: 1;
+            transform: translateX(2px);
+            stroke: var(--accent-secondary);
+        }
+
+        /* Dropdown Panel */
+        .dropdown-panel {
+            display: none;
+            margin-top: 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-panel.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.875rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.15s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            font-family: inherit;
+            font-size: 0.9375rem;
+            text-align: left;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .dropdown-item:not(:last-child) {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dropdown-item .item-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card-inner);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+        }
+
+        .dropdown-item:hover .item-icon {
+            background: var(--accent-glow);
+        }
+
+        .dropdown-item .item-info {
+            flex: 1;
+        }
+
+        .dropdown-item .item-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            margin-bottom: 0.125rem;
+        }
+
+        .dropdown-item .item-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Search Input (in dropdown) */
+        .search-panel {
+            padding: 0.75rem;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .search-tabs {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.75rem;
+            padding: 0.25rem;
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
+        }
+
+        .search-tab {
+            flex: 1;
+            padding: 0.5rem;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .search-tab:hover {
+            color: var(--text-secondary);
+        }
+
+        .search-tab.active {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .search-results {
+            margin-top: 0.75rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .search-result-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .search-result-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .search-result-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .search-result-type {
+            font-size: 0.6875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Contacts Section */
+        .contacts-section {
+            padding: 0.75rem 1.25rem 0.5rem;
+        }
+
+        .section-label {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+
+        .contacts {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .contact {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            margin-bottom: 0.25rem;
+        }
+
+        .contact:hover {
+            background: var(--bg-card);
+        }
+
+        .contact.active {
+            background: var(--bg-card-hover);
+        }
+
+        .contact-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #374151, #1f2937);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .contact.active .contact-avatar,
+        .contact:hover .contact-avatar {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .status-indicator {
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-secondary);
+            background: var(--text-muted);
+        }
+
+        .status-indicator.online {
+            background: var(--success);
+        }
+
+        .contact-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contact-name {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            margin-bottom: 0.125rem;
+            letter-spacing: -0.01em;
+        }
+
+        .contact-status {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        /* Empty Contacts State */
+        .empty-contacts {
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        .empty-contacts p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .empty-contacts p:last-child {
+            font-size: 0.8125rem;
+            margin-top: 0.375rem;
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            padding: 0.875rem 1.25rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .nav-btn:hover {
+            background: var(--bg-card);
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-btn.channels {
+            background: var(--accent-glow);
+            border-color: rgba(99, 102, 241, 0.2);
+            color: var(--accent-primary);
+        }
+
+        .nav-btn.channels:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .logout-btn {
+            color: var(--text-secondary);
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            position: relative;
+            min-width: 0;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            padding: 1rem 1.5rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chat-header-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .chat-header-info h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .chat-header-info p {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .online-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+        }
+
+        .encryption-badge {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 0.875rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: var(--radius-full);
+            font-size: 0.6875rem;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .chat-settings-btn {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-left: 0.5rem;
+        }
+
+        .chat-settings-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        /* Auto-delete indicator */
+        .auto-delete-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.375rem 0.625rem;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: var(--radius-full);
+            font-size: 0.6875rem;
+            color: #f59e0b;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        /* Messages Container */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.625rem;
+        }
+
+        .message {
+            max-width: 65%;
+            display: flex;
+            flex-direction: column;
+            animation: messageIn 0.2s ease;
+            position: relative;
+        }
+
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.sent {
+            align-self: flex-end;
+        }
+
+        .message.received {
+            align-self: flex-start;
+        }
+
+        .message-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .message.sent .message-wrapper {
+            flex-direction: row-reverse;
+        }
+
+        .message-bubble {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.9375rem;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message.sent .message-bubble {
+            background: var(--message-sent);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.received .message-bubble {
+            background: var(--message-received);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Message Actions (Delete) */
+        .message-actions {
+            display: none;
+            align-items: center;
+            gap: 0.25rem;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .message:hover .message-actions {
+            display: flex;
+            opacity: 1;
+        }
+
+        .message-action-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.15s;
+        }
+
+        .message-action-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+        }
+
+        .message-action-btn.delete:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .message-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            margin-top: 0.25rem;
+            padding: 0 0.25rem;
+        }
+
+        .message.sent .message-meta {
+            justify-content: flex-end;
+        }
+
+        .message-time {
+            font-size: 0.6875rem;
+            color: var(--text-muted);
+        }
+
+        .message-encrypted {
+            font-size: 0.625rem;
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .message-expiry {
+            font-size: 0.5625rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+        }
+
+        /* Message deleted state */
+        .message.deleted .message-bubble {
+            background: transparent;
+            border: 1px dashed var(--border);
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* System message */
+        .system-message {
+            display: flex;
+            justify-content: center;
+            padding: 1rem 0;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .system-message-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        .system-message-content.fresh-start {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(99, 102, 241, 0.1));
+            border-color: rgba(16, 185, 129, 0.2);
+            color: var(--text-primary);
+        }
+
+        /* Empty/No Chat State */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 72px;
+            height: 72px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .empty-state h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.375rem;
+            letter-spacing: -0.01em;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            max-width: 280px;
+            font-size: 0.9375rem;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 1rem 1.25rem;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.625rem;
+            align-items: flex-end;
+        }
+
+        .message-input-container {
+            flex: 1;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 0.25rem;
+            transition: all 0.2s;
+        }
+
+        .message-input-container:focus-within {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            resize: none;
+            outline: none;
+            max-height: 120px;
+        }
+
+        .message-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .send-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Calculator Preview */
+        .calc-preview {
+            display: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+            animation: slideUp 0.2s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .calc-preview.show {
+            display: block;
+        }
+
+        .calc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.625rem 1rem;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(99, 102, 241, 0.1));
+            border-bottom: 1px solid var(--border);
+        }
+
+        .calc-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .calc-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .calc-hint {
+            font-size: 0.6875rem;
+            color: var(--text-muted);
+            background: var(--bg-card-inner);
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .calc-insert-btn {
+            padding: 0.5rem 1rem;
+            background: var(--success);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: white;
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .calc-insert-btn:hover {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        @media (max-width: 480px) {
+            .calc-hint {
+                display: none;
+            }
+            
+            .calc-insert-btn {
+                padding: 0.625rem 1.25rem;
+                font-size: 0.8125rem;
+            }
+        }
+
+        .calc-results {
+            padding: 0.75rem 1rem;
+        }
+
+        .calc-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.375rem 0;
+            font-size: 0.875rem;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+
+        .calc-expression {
+            color: var(--text-secondary);
+        }
+
+        .calc-equals {
+            color: var(--text-muted);
+            margin: 0 0.5rem;
+        }
+
+        .calc-result {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .calc-total {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card-inner);
+            border-top: 1px solid var(--border);
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+
+        .calc-total-label {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .calc-total-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-hover);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 420px;
+            max-height: 80vh;
+            overflow: hidden;
+            animation: modalIn 0.2s ease;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            font-size: 1.25rem;
+            transition: all 0.15s;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            outline: none;
+            margin-bottom: 1rem;
+        }
+
+        .modal-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .user-select-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+        }
+
+        .user-select-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .user-select-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .user-select-item.selected {
+            background: var(--accent-glow);
+        }
+
+        .user-select-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .user-select-name {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .user-select-check {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: white;
+        }
+
+        .user-select-item.selected .user-select-check {
+            display: flex;
+        }
+
+        /* Group Creation Tabs */
+        .group-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+
+        .group-tab {
+            flex: 1;
+            padding: 0.625rem 0.75rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+        }
+
+        .group-tab:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .group-tab.active {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(168, 85, 247, 0.05));
+            border-color: rgba(168, 85, 247, 0.3);
+            color: #a855f7;
+        }
+
+        .group-tab-content {
+            display: none;
+        }
+
+        .group-tab-content.active {
+            display: block;
+        }
+
+        /* Selected Members Preview */
+        .selected-members-preview {
+            background: rgba(168, 85, 247, 0.08);
+            border: 1px solid rgba(168, 85, 247, 0.15);
+            border-radius: var(--radius-md);
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .selected-members-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .selected-member-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.625rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            font-size: 0.75rem;
+        }
+
+        .selected-member-chip .remove {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.625rem;
+        }
+
+        .selected-member-chip .remove:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        /* Invite Link Section */
+        .invite-link-section {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .invite-link-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .invite-link-box {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .invite-link-box .modal-input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .invite-copy-btn {
+            padding: 0.625rem 1rem;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: var(--radius-md);
+            color: #10b981;
+            font-family: inherit;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .invite-copy-btn:hover {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(16, 185, 129, 0.1));
+        }
+
+        .generate-link-btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .generate-link-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+        }
+
+        .search-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            gap: 0.5rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .modal-btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .modal-btn-secondary {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .modal-btn-secondary:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* Shared Notes */
+        .shared-notes-btn {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-left: 0.5rem;
+        }
+
+        .shared-notes-btn:hover {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(239, 68, 68, 0.1));
+            border-color: rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+
+        .shared-notes-btn {
+            position: relative;
+        }
+
+        .notes-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 10px;
+            height: 10px;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            border-radius: 50%;
+            border: 2px solid var(--bg-secondary);
+        }
+
+        .shared-notes-container {
+            background: linear-gradient(135deg, rgba(30, 30, 35, 0.95), rgba(20, 20, 25, 0.98));
+            border: 1px solid rgba(245, 158, 11, 0.15);
+            border-radius: var(--radius-lg);
+            margin: 0.75rem 1.25rem;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        }
+
+        .shared-notes-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(239, 68, 68, 0.08));
+            border-bottom: 1px solid rgba(245, 158, 11, 0.1);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .shared-notes-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #f59e0b;
+        }
+
+        .add-note-btn {
+            padding: 0.375rem 0.75rem;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: var(--radius-sm);
+            color: #f59e0b;
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .add-note-btn:hover {
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        .shared-notes-list {
+            display: flex;
+            flex-direction: column;
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 0.75rem;
+            gap: 0.625rem;
+        }
+
+        .shared-notes-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .shared-notes-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .shared-notes-list::-webkit-scrollbar-thumb {
+            background: rgba(245, 158, 11, 0.3);
+            border-radius: 3px;
+        }
+
+        .shared-note-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.875rem;
+            padding: 1rem 1.125rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+        }
+
+        .shared-note-item:hover {
+            background: rgba(245, 158, 11, 0.04);
+            border-color: rgba(245, 158, 11, 0.12);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .note-icon {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .note-icon.locked {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.04));
+            border: 1px solid rgba(239, 68, 68, 0.15);
+        }
+
+        .note-icon.unlocked {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.04));
+            border: 1px solid rgba(16, 185, 129, 0.15);
+        }
+
+        .note-icon.pending {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.04));
+            border: 1px solid rgba(245, 158, 11, 0.15);
+        }
+
+        .note-icon.delete-pending {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.08));
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .note-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .note-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 0.375rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .note-title-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-badge {
+            font-size: 0.5625rem;
+            padding: 0.1875rem 0.4375rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            flex-shrink: 0;
+        }
+
+        .note-badge.edited {
+            background: rgba(124, 58, 237, 0.12);
+            color: #a78bfa;
+            border: 1px solid rgba(124, 58, 237, 0.15);
+        }
+
+        .note-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .note-meta-divider {
+            opacity: 0.4;
+            margin: 0 0.125rem;
+        }
+
+        .note-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.3125rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .note-status.needs-phrase {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.15);
+        }
+
+        .note-status.delete-requested {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.15);
+        }
+
+        .note-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-end;
+        }
+
+        .note-actions-row {
+            display: flex;
+            gap: 0.375rem;
+        }
+
+        .note-action-btn {
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .note-action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .note-action-btn.unlock {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(168, 85, 247, 0.04));
+            border-color: rgba(168, 85, 247, 0.18);
+            color: #a855f7;
+        }
+
+        .note-action-btn.unlock:hover {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.08));
+            border-color: rgba(168, 85, 247, 0.3);
+        }
+
+        .note-action-btn.view {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.04));
+            border-color: rgba(16, 185, 129, 0.18);
+            color: #10b981;
+        }
+
+        .note-action-btn.view:hover {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.08));
+        }
+
+        .note-action-btn.edit {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(59, 130, 246, 0.04));
+            border-color: rgba(59, 130, 246, 0.18);
+            color: #3b82f6;
+        }
+
+        .note-action-btn.edit:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.08));
+        }
+
+        .note-action-btn.set-phrase {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.04));
+            border-color: rgba(245, 158, 11, 0.18);
+            color: #f59e0b;
+        }
+
+        .note-action-btn.set-phrase:hover {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.08));
+        }
+
+        .note-action-btn.delete {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            padding: 0.5rem;
+        }
+
+        .note-action-btn.delete:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.25);
+        }
+
+        .note-action-btn.confirm-delete {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-color: #ef4444;
+            color: white;
+        }
+
+        .note-action-btn.confirm-delete:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+
+        .delete-status {
+            font-size: 0.6875rem;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .empty-notes {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-md);
+            margin: 0.25rem;
+        }
+
+        .empty-notes-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            opacity: 0.5;
+        }
+
+        /* Unlocked Note Content */
+        .unlocked-note-content {
+            background: var(--bg-card-inner);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .unlocked-note-content h4 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+            color: var(--success);
+        }
+
+        .unlocked-note-content pre {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+        }
+
+        /* Phrase Input */
+        .phrase-input-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .phrase-input {
+            flex: 1;
+            padding: 0.625rem 0.875rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .phrase-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .phrase-submit-btn {
+            padding: 0.625rem 1rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-family: inherit;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .phrase-submit-btn:hover {
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        /* Phrase Setup Prompt Toast */
+        .phrase-prompt-toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            max-width: 340px;
+            background: var(--bg-card);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .toast-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .toast-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .toast-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .toast-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: linear-gradient(180deg, rgba(2, 2, 5, 0.98), rgba(6, 6, 10, 0.95));
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.1);
+        }
+
+        .top-nav .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .top-nav .nav-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-size: 0.875rem;
+            font-weight: 700;
+            box-shadow: 0 0 12px rgba(124, 58, 237, 0.3);
+        }
+
+        .top-nav .nav-logo-text {
+            font-family: var(--font-display);
+            font-size: 1.125rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+        }
+
+        .nav-tab {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-family: var(--font-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        .nav-tab.active {
+            color: var(--text-primary);
+            background: rgba(124, 58, 237, 0.15);
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 1px;
+        }
+
+        .nav-tab.logout {
+            color: var(--text-muted);
+        }
+
+        .nav-tab.logout:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Adjust main layout for top nav */
+        .app-container {
+            display: flex;
+            height: calc(100vh - 56px);
+            width: 100%;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 280px;
+            }
+            
+            .message {
+                max-width: 80%;
+            }
+
+            .top-nav {
+                padding: 0 1rem;
+            }
+
+            .nav-tab {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8125rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <a href="/" class="nav-logo">
+            <div class="nav-logo-icon">M</div>
+            <span class="nav-logo-text">Menza</span>
+        </a>
+        <div class="nav-tabs">
+            <a href="/chat" class="nav-tab active">Messages</a>
+            <a href="/channels" class="nav-tab">Channels</a>
+            <a href="/settings" class="nav-tab">Settings</a>
+            <a href="/logout" class="nav-tab logout">Sign Out</a>
+        </div>
+    </nav>
+
+    <!-- App Container -->
+    <div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">Chats</div>
+            <div class="user-avatar">{{ username[0].upper() }}</div>
+        </div>
+
+        <!-- Action Bar - Search & Write -->
+        <div class="action-bar">
+            <div class="action-buttons">
+                <button class="action-btn icon-only" id="searchBtn" onclick="togglePanel('search')" title="Search">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                </button>
+                <button class="action-btn icon-only futuristic-write" id="writeBtn" onclick="togglePanel('write')" title="Compose">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="14 2 18 6 7 17 3 17 3 13 14 2"/>
+                        <line x1="3" y1="22" x2="21" y2="22"/>
+                        <path d="M18 6L22 2"/>
+                    </svg>
+                    <span class="write-glow"></span>
+                </button>
+            </div>
+            
+            <!-- Channels Link -->
+            <a href="/channels" class="channels-nav-link">
+                <span class="channels-icon">📺</span>
+                <span class="channels-text">Channels</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </a>
+
+            <!-- Write Panel -->
+            <div class="dropdown-panel" id="writePanel">
+                <button class="dropdown-item" onclick="startNewMessage()">
+                    <div class="item-icon">💬</div>
+                    <div class="item-info">
+                        <div class="item-title">New Message</div>
+                        <div class="item-desc">Start a private conversation</div>
+                    </div>
+                </button>
+                <button class="dropdown-item" onclick="startNewGroup()">
+                    <div class="item-icon">👥</div>
+                    <div class="item-info">
+                        <div class="item-title">New Group</div>
+                        <div class="item-desc">Create a group chat</div>
+                    </div>
+                </button>
+                <a href="/channel/create" class="dropdown-item">
+                    <div class="item-icon">📺</div>
+                    <div class="item-info">
+                        <div class="item-title">New Channel</div>
+                        <div class="item-desc">Broadcast to subscribers</div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Search Panel -->
+            <div class="dropdown-panel" id="searchPanel">
+                <div class="search-panel">
+                    <div class="search-input-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" 
+                               class="search-input" 
+                               placeholder="Search..." 
+                               id="globalSearch"
+                               oninput="handleSearch(this.value)">
+                    </div>
+                    <div class="search-tabs">
+                        <button class="search-tab active" data-type="all" onclick="setSearchType('all')">All</button>
+                        <button class="search-tab" data-type="users" onclick="setSearchType('users')">Users</button>
+                        <button class="search-tab" data-type="messages" onclick="setSearchType('messages')">Messages</button>
+                        <button class="search-tab" data-type="channels" onclick="setSearchType('channels')">Channels</button>
+                    </div>
+                    <div class="search-results" id="searchResults">
+                        <!-- Results will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="contacts-section">
+            <div class="section-label">Messages</div>
+        </div>
+
+        <div class="contacts" id="contacts">
+            {% for user in all_users %}
+            <div class="contact" data-username="{{ user }}" onclick="selectContact('{{ user }}')">
+                <div class="contact-avatar">
+                    {{ user[0].upper() }}
+                    <div class="status-indicator" id="status-{{ user }}"></div>
+                </div>
+                <div class="contact-info">
+                    <div class="contact-name">{{ user }}</div>
+                    <div class="contact-status">Click to start chatting</div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% if not all_users %}
+            <div class="empty-contacts">
+                <p>No contacts yet</p>
+                <p>Share Menza with friends to start chatting!</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="/logout" class="nav-btn logout-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+                </svg>
+                Sign Out
+            </a>
+        </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area">
+        <!-- Empty State (No chat selected) -->
+        <div class="empty-state" id="empty-state">
+            <div class="empty-icon">💬</div>
+            <h2>Your Messages</h2>
+            <p>Select a conversation from the sidebar to start messaging securely.</p>
+        </div>
+
+        <!-- Active Chat (hidden by default) -->
+        <div id="active-chat" style="display: none; flex: 1; flex-direction: column;">
+            <div class="chat-header">
+                <div class="chat-header-avatar" id="chat-avatar">?</div>
+                <div class="chat-header-info">
+                    <h2 id="chat-username">Username</h2>
+                    <p id="chat-status">
+                        <span class="online-dot" id="chat-status-dot" style="display: none;"></span>
+                        <span id="chat-status-text">Offline</span>
+                    </p>
+                </div>
+                <div class="encryption-badge">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    End-to-End Encrypted
+                </div>
+                <button class="shared-notes-btn" id="sharedNotesBtn" onclick="toggleSharedNotes()" title="Shared Notes">
+                    📝
+                    <span class="notes-badge" id="notesBadge" style="display: none;"></span>
+                </button>
+                <button class="chat-settings-btn" onclick="openChatSettings()" title="Chat Settings">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Shared Notes Panel -->
+            <div class="shared-notes-container" id="sharedNotesPanel" style="display: none;">
+                <div class="shared-notes-header">
+                    <div class="shared-notes-title">
+                        📝 Shared Notes
+                        <span style="font-size: 0.6875rem; color: var(--text-muted); font-weight: 400;">(Secured with personal phrases)</span>
+                    </div>
+                    <button class="add-note-btn" onclick="openCreateNoteModal()">+ Add Note</button>
+                </div>
+                <div class="shared-notes-list" id="sharedNotesList">
+                    <div class="empty-notes">No shared notes yet. Create one to securely share with this conversation.</div>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messages">
+                <!-- Messages will be inserted here -->
+            </div>
+
+            <div class="input-area">
+                <!-- Calculator Preview -->
+                <div class="calc-preview" id="calcPreview">
+                    <div class="calc-header">
+                        <div class="calc-title">🧮 Calculator</div>
+                        <div class="calc-actions">
+                            <span class="calc-hint">⏎ Enter to insert</span>
+                            <button class="calc-insert-btn" onclick="insertCalculatedText()">Insert Results</button>
+                        </div>
+                    </div>
+                    <div class="calc-results" id="calcResults">
+                        <!-- Calculated results will appear here -->
+                    </div>
+                    <div class="calc-total" id="calcTotal" style="display: none;">
+                        <span class="calc-total-label">Total</span>
+                        <span class="calc-total-value" id="calcTotalValue">0</span>
+                    </div>
+                </div>
+
+                <div class="message-input-container">
+                    <textarea 
+                        class="message-input" 
+                        id="message-input" 
+                        placeholder="Type a message..." 
+                        rows="1"
+                        onkeydown="handleKeyDown(event)"
+                        oninput="autoResize(this); detectCalculations(this.value)"
+                    ></textarea>
+                </div>
+                <button class="send-btn" onclick="sendMessage()" id="send-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    </div> <!-- Close app-container -->
+
+    <!-- New Message Modal -->
+    <div class="modal-overlay" id="newMessageModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>New Message</h3>
+                <button class="modal-close" onclick="closeModal('newMessageModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="modal-input" placeholder="Search users..." id="newMessageSearch" oninput="filterUsers(this.value)">
+                <div class="user-select-list" id="userSelectList">
+                    {% for user in all_users %}
+                    <div class="user-select-item" onclick="selectUserForMessage('{{ user }}')">
+                        <div class="user-select-avatar">{{ user[0].upper() }}</div>
+                        <div class="user-select-name">{{ user }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Group Modal -->
+    <div class="modal-overlay" id="newGroupModal">
+        <div class="modal" style="max-width: 520px;">
+            <div class="modal-header">
+                <h3>👥 Create Group</h3>
+                <button class="modal-close" onclick="closeModal('newGroupModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="modal-input" placeholder="Group name..." id="groupName" style="margin-bottom: 1rem;">
+                
+                <!-- Selected Members Preview -->
+                <div id="selectedMembersPreview" class="selected-members-preview" style="display: none;">
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">Selected members:</p>
+                    <div id="selectedMembersList" class="selected-members-list"></div>
+                </div>
+                
+                <!-- Tabs for adding members -->
+                <div class="group-tabs">
+                    <button class="group-tab active" onclick="switchGroupTab('contacts')">
+                        <span>👤</span> Contacts
+                    </button>
+                    <button class="group-tab" onclick="switchGroupTab('search')">
+                        <span>🔍</span> Search
+                    </button>
+                    <button class="group-tab" onclick="switchGroupTab('invite')">
+                        <span>🔗</span> Invite Link
+                    </button>
+                </div>
+                
+                <!-- Contacts Tab -->
+                <div id="groupContactsTab" class="group-tab-content active">
+                    <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.75rem;">Select from your contacts:</p>
+                    <div class="user-select-list" id="groupUserList">
+                        {% for user in all_users %}
+                        <div class="user-select-item" data-username="{{ user }}" onclick="toggleGroupMember(this, '{{ user }}')">
+                            <div class="user-select-avatar">{{ user[0].upper() }}</div>
+                            <div class="user-select-name">{{ user }}</div>
+                            <div class="user-select-check">✓</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Search Tab -->
+                <div id="groupSearchTab" class="group-tab-content">
+                    <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.75rem;">Search by username:</p>
+                    <input type="text" class="modal-input" placeholder="Enter username..." id="groupSearchInput" oninput="searchUsersForGroup(this.value)" style="margin-bottom: 0.75rem;">
+                    <div class="user-select-list" id="groupSearchResults">
+                        <div class="search-placeholder">
+                            <span style="font-size: 1.5rem; opacity: 0.5;">🔍</span>
+                            <p style="color: var(--text-muted); font-size: 0.8125rem;">Type a username to search</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Invite Link Tab -->
+                <div id="groupInviteTab" class="group-tab-content">
+                    <div class="invite-link-section">
+                        <div class="invite-link-icon">🔗</div>
+                        <h4 style="margin-bottom: 0.5rem;">Invite via Link</h4>
+                        <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 1rem;">
+                            Generate an invite link that anyone can use to join your group.
+                        </p>
+                        <div class="invite-link-box" id="groupInviteLinkBox" style="display: none;">
+                            <input type="text" class="modal-input" id="groupInviteLink" readonly style="font-family: monospace; font-size: 0.75rem;">
+                            <button class="invite-copy-btn" onclick="copyGroupInviteLink()">📋 Copy</button>
+                        </div>
+                        <button class="generate-link-btn" id="generateGroupLinkBtn" onclick="generateGroupInviteLink()">
+                            ✨ Generate Invite Link
+                        </button>
+                        <p style="font-size: 0.6875rem; color: var(--text-muted); margin-top: 0.75rem;">
+                            ⚠️ Anyone with this link can join. You can revoke it anytime.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('newGroupModal')">Cancel</button>
+                <button class="modal-btn modal-btn-primary" onclick="createGroup()">Create Group</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Settings Modal -->
+    <div class="modal-overlay" id="chatSettingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>⚙️ Chat Settings</h3>
+                <button class="modal-close" onclick="closeModal('chatSettingsModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- Auto-Delete Settings -->
+                <div class="settings-section">
+                    <div class="settings-label">
+                        <span class="settings-icon">⏱️</span>
+                        <div>
+                            <div class="settings-title">Auto-Delete Messages</div>
+                            <div class="settings-desc">Messages will automatically be deleted after the selected time period</div>
+                        </div>
+                    </div>
+                    <div class="settings-options" id="autoDeleteOptions">
+                        <label class="settings-option">
+                            <input type="radio" name="auto_delete" value="never" checked>
+                            <span class="option-radio"></span>
+                            <span class="option-text">Never</span>
+                        </label>
+                        <label class="settings-option">
+                            <input type="radio" name="auto_delete" value="1_day">
+                            <span class="option-radio"></span>
+                            <span class="option-text">1 Day</span>
+                        </label>
+                        <label class="settings-option">
+                            <input type="radio" name="auto_delete" value="1_week">
+                            <span class="option-radio"></span>
+                            <span class="option-text">1 Week</span>
+                        </label>
+                        <label class="settings-option">
+                            <input type="radio" name="auto_delete" value="1_month">
+                            <span class="option-radio"></span>
+                            <span class="option-text">1 Month</span>
+                        </label>
+                        <label class="settings-option">
+                            <input type="radio" name="auto_delete" value="1_year">
+                            <span class="option-radio"></span>
+                            <span class="option-text">1 Year</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div style="border-top: 1px solid var(--border); margin: 1.25rem 0;"></div>
+
+                <!-- Start Fresh / Clear Chat -->
+                <div class="settings-section danger-section">
+                    <div class="settings-label">
+                        <span class="settings-icon">🗑️</span>
+                        <div>
+                            <div class="settings-title">Start Fresh</div>
+                            <div class="settings-desc">Clear all messages and start a new conversation. This cannot be undone.</div>
+                        </div>
+                    </div>
+                    <button class="danger-btn" onclick="confirmClearChat()">
+                        Clear All Messages
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('chatSettingsModal')">Cancel</button>
+                <button class="modal-btn modal-btn-primary" onclick="saveChatSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Chat Confirmation Modal -->
+    <div class="modal-overlay" id="clearChatModal">
+        <div class="modal" style="max-width: 360px;">
+            <div class="modal-header">
+                <h3>⚠️ Clear All Messages?</h3>
+                <button class="modal-close" onclick="closeModal('clearChatModal')">×</button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🗑️</div>
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    This will permanently delete all messages in this conversation for <strong>both you and <span id="clearChatFriend"></span></strong>.
+                </p>
+                <p style="color: #ef4444; font-size: 0.875rem; font-weight: 500;">
+                    This action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('clearChatModal')">Cancel</button>
+                <button class="modal-btn" style="background: #ef4444; color: white;" onclick="clearChat()">Yes, Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Shared Note Modal -->
+    <div class="modal-overlay" id="createNoteModal">
+        <div class="modal" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3>📝 Create Shared Note</h3>
+                <button class="modal-close" onclick="closeModal('createNoteModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 1rem;">
+                    Create a secure note that both you and <strong id="noteRecipientName"></strong> can access with your own unique secret phrases.
+                    Each person sets their own phrase for privacy.
+                </p>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.5rem;">Note Title</label>
+                    <input type="text" class="modal-input" id="noteTitle" placeholder="e.g., Secret Project Details">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.5rem;">Note Content</label>
+                    <textarea class="modal-input" id="noteContent" placeholder="Enter the sensitive information to share..." rows="4" style="resize: vertical;"></textarea>
+                </div>
+                <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.5rem; color: #f59e0b;">🔐 Your Secret Phrase</label>
+                    <input type="text" class="modal-input" id="creatorPhrase" placeholder="Type a memorable phrase only you know..." style="background: var(--bg-card); border-color: rgba(245, 158, 11, 0.3);">
+                    <p style="font-size: 0.6875rem; color: var(--text-muted); margin-top: 0.5rem;">
+                        You'll need to type this exact phrase to unlock the note. The other person will set their own phrase.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('createNoteModal')">Cancel</button>
+                <button class="modal-btn" style="background: linear-gradient(135deg, #f59e0b, #ef4444); color: white;" onclick="createSharedNote()">Create Note</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Set Phrase Modal -->
+    <div class="modal-overlay" id="setPhraseModal">
+        <div class="modal" style="max-width: 420px;">
+            <div class="modal-header">
+                <h3>🔐 Set Your Secret Phrase</h3>
+                <button class="modal-close" onclick="closeModal('setPhraseModal')">×</button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
+                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
+                    <strong id="phraseNoteCreator"></strong> shared a note with you:
+                </p>
+                <p style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem; color: #f59e0b;" id="phraseNoteTitle"></p>
+                <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 1rem;">
+                    Set your own secret phrase to unlock this note. Only you will know your phrase.
+                </p>
+                <input type="hidden" id="setPhraseNoteId">
+                <input type="text" class="modal-input" id="userPhrase" placeholder="Enter your secret phrase..." style="text-align: center;">
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('setPhraseModal')">Later</button>
+                <button class="modal-btn modal-btn-primary" onclick="setNotePhrase()">Set Phrase</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unlock Note Modal -->
+    <div class="modal-overlay" id="unlockNoteModal">
+        <div class="modal" style="max-width: 420px;">
+            <div class="modal-header">
+                <h3>🔓 Unlock Note</h3>
+                <button class="modal-close" onclick="closeModal('unlockNoteModal')">×</button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+                <p style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;" id="unlockNoteTitle"></p>
+                <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 1rem;">
+                    Enter your secret phrase to unlock this note.
+                </p>
+                <input type="hidden" id="unlockNoteId">
+                <input type="text" class="modal-input" id="unlockPhrase" placeholder="Type your secret phrase..." style="text-align: center;" onkeydown="if(event.key==='Enter')unlockNote()">
+                <p id="unlockError" style="color: #ef4444; font-size: 0.8125rem; margin-top: 0.75rem; display: none;">Incorrect phrase. Try again.</p>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('unlockNoteModal')">Cancel</button>
+                <button class="modal-btn modal-btn-primary" onclick="unlockNote()">Unlock</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Unlocked Note Modal -->
+    <div class="modal-overlay" id="viewNoteModal">
+        <div class="modal" style="max-width: 540px;">
+            <div class="modal-header">
+                <h3>📝 <span id="viewNoteTitle"></span></h3>
+                <button class="modal-close" onclick="closeModal('viewNoteModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.03)); border: 1px solid rgba(16, 185, 129, 0.15); border-radius: var(--radius-md); padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--success); font-size: 0.8125rem; font-weight: 600;">
+                            <span style="background: rgba(16, 185, 129, 0.15); padding: 0.25rem 0.5rem; border-radius: var(--radius-sm);">🔓 Unlocked</span>
+                        </div>
+                        <span id="viewNoteEditInfo" style="font-size: 0.6875rem; color: var(--text-muted);"></span>
+                    </div>
+                    <div id="viewNoteContent" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9375rem; color: var(--text-primary); white-space: pre-wrap; word-wrap: break-word; margin: 0; line-height: 1.7; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05);"></div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0;">
+                        Created by <strong id="viewNoteCreator"></strong>
+                    </p>
+                    <input type="hidden" id="viewNoteId">
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button class="modal-btn" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05)); border: 1px solid rgba(59, 130, 246, 0.2); color: #3b82f6;" onclick="editFromViewModal()">✏️ Edit Note</button>
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('viewNoteModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Note Modal -->
+    <div class="modal-overlay" id="editNoteModal">
+        <div class="modal" style="max-width: 520px;">
+            <div class="modal-header">
+                <h3>✏️ Edit Shared Note</h3>
+                <button class="modal-close" onclick="closeModal('editNoteModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editNoteId">
+                
+                <div style="margin-bottom: 1.25rem;">
+                    <label style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-secondary);">Note Title</label>
+                    <input type="text" class="modal-input" id="editNoteTitle" placeholder="Note title">
+                </div>
+                
+                <div style="margin-bottom: 1.25rem;">
+                    <label style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-secondary);">Note Content</label>
+                    <textarea class="modal-input" id="editNoteContent" placeholder="Note content..." rows="5" style="resize: vertical; min-height: 120px;"></textarea>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(168, 85, 247, 0.03)); border: 1px solid rgba(168, 85, 247, 0.15); border-radius: var(--radius-md); padding: 1rem;">
+                    <label style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.5rem; color: #a855f7;">🔐 Confirm Your Phrase</label>
+                    <input type="password" class="modal-input" id="editNotePhrase" placeholder="Enter your secret phrase to save changes..." style="background: var(--bg-card); border-color: rgba(168, 85, 247, 0.25);">
+                    <p style="font-size: 0.6875rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 0;">
+                        Your phrase is required to authorize changes to this note.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal('editNoteModal')">Cancel</button>
+                <button class="modal-btn" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white;" onclick="saveNoteEdit()">💾 Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Settings Modal Styles */
+        .settings-section {
+            margin-bottom: 1rem;
+        }
+
+        .settings-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.875rem;
+        }
+
+        .settings-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+
+        .settings-title {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            margin-bottom: 0.125rem;
+        }
+
+        .settings-desc {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .settings-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .settings-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.875rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 0.875rem;
+        }
+
+        .settings-option:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+        }
+
+        .settings-option input {
+            display: none;
+        }
+
+        .option-radio {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--text-muted);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .option-radio::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.15s;
+        }
+
+        .settings-option input:checked + .option-radio {
+            border-color: var(--accent-primary);
+        }
+
+        .settings-option input:checked + .option-radio::after {
+            transform: scale(1);
+        }
+
+        .settings-option input:checked ~ .option-text {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .option-text {
+            color: var(--text-secondary);
+        }
+
+        .danger-section .settings-label {
+            margin-bottom: 0.75rem;
+        }
+
+        .danger-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius-md);
+            color: #ef4444;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .danger-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+    </style>
+
+    <script>
+        // ============================================
+        // PANEL & MODAL FUNCTIONS
+        // ============================================
+        
+        let activePanel = null;
+        let searchType = 'all';
+        let selectedGroupMembers = [];
+        
+        function togglePanel(panel) {
+            const writePanel = document.getElementById('writePanel');
+            const searchPanel = document.getElementById('searchPanel');
+            const writeBtn = document.getElementById('writeBtn');
+            const searchBtn = document.getElementById('searchBtn');
+            
+            // Close all first
+            writePanel.classList.remove('show');
+            searchPanel.classList.remove('show');
+            writeBtn.classList.remove('active');
+            searchBtn.classList.remove('active');
+            
+            if (activePanel === panel) {
+                activePanel = null;
+                return;
+            }
+            
+            activePanel = panel;
+            
+            if (panel === 'write') {
+                writePanel.classList.add('show');
+                writeBtn.classList.add('active');
+            } else if (panel === 'search') {
+                searchPanel.classList.add('show');
+                searchBtn.classList.add('active');
+                document.getElementById('globalSearch').focus();
+            }
+        }
+        
+        function setSearchType(type) {
+            searchType = type;
+            document.querySelectorAll('.search-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.type === type);
+            });
+            handleSearch(document.getElementById('globalSearch').value);
+        }
+        
+        function handleSearch(query) {
+            const resultsDiv = document.getElementById('searchResults');
+            
+            if (!query.trim()) {
+                resultsDiv.innerHTML = '';
+                return;
+            }
+            
+            // Search through users
+            const allUsers = Array.from(document.querySelectorAll('.contact')).map(c => c.dataset.username);
+            const matchedUsers = allUsers.filter(u => u.toLowerCase().includes(query.toLowerCase()));
+            
+            let html = '';
+            
+            if (searchType === 'all' || searchType === 'users') {
+                matchedUsers.forEach(user => {
+                    html += `
+                        <div class="search-result-item" onclick="selectContact('${user}'); togglePanel('search');">
+                            <div class="search-result-avatar">${user[0].toUpperCase()}</div>
+                            <div>
+                                <div class="search-result-name">${user}</div>
+                                <div class="search-result-type">User</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            if (!html && query.length > 0) {
+                html = '<div style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">No results found</div>';
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        function startNewMessage() {
+            togglePanel('write');
+            document.getElementById('newMessageModal').classList.add('show');
+        }
+        
+        function startNewGroup() {
+            togglePanel('write');
+            selectedGroupMembers = [];
+            currentGroupInviteCode = null;
+            
+            // Reset all selections
+            document.querySelectorAll('#groupUserList .user-select-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.getElementById('groupName').value = '';
+            document.getElementById('groupSearchInput').value = '';
+            document.getElementById('groupSearchResults').innerHTML = `
+                <div class="search-placeholder">
+                    <span style="font-size: 1.5rem; opacity: 0.5;">🔍</span>
+                    <p style="color: var(--text-muted); font-size: 0.8125rem;">Type a username to search</p>
+                </div>`;
+            
+            // Reset invite link
+            document.getElementById('groupInviteLinkBox').style.display = 'none';
+            document.getElementById('generateGroupLinkBtn').innerHTML = '✨ Generate Invite Link';
+            
+            // Reset tabs to first tab
+            switchGroupTab('contacts');
+            
+            // Hide selected members preview
+            document.getElementById('selectedMembersPreview').style.display = 'none';
+            
+            document.getElementById('newGroupModal').classList.add('show');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+        
+        function selectUserForMessage(username) {
+            closeModal('newMessageModal');
+            selectContact(username);
+        }
+        
+        function filterUsers(query) {
+            const items = document.querySelectorAll('#userSelectList .user-select-item');
+            items.forEach(item => {
+                const name = item.querySelector('.user-select-name').textContent.toLowerCase();
+                item.style.display = name.includes(query.toLowerCase()) ? 'flex' : 'none';
+            });
+        }
+        
+        function toggleGroupMember(element, username) {
+            element.classList.toggle('selected');
+            const index = selectedGroupMembers.indexOf(username);
+            if (index > -1) {
+                selectedGroupMembers.splice(index, 1);
+            } else {
+                selectedGroupMembers.push(username);
+            }
+            updateSelectedMembersPreview();
+            
+            // Also sync selection in search results if visible
+            syncMemberSelection(username, element.classList.contains('selected'));
+        }
+        
+        function updateSelectedMembersPreview() {
+            const preview = document.getElementById('selectedMembersPreview');
+            const list = document.getElementById('selectedMembersList');
+            
+            if (selectedGroupMembers.length === 0) {
+                preview.style.display = 'none';
+                return;
+            }
+            
+            preview.style.display = 'block';
+            list.innerHTML = selectedGroupMembers.map(member => `
+                <div class="selected-member-chip">
+                    <span>${member}</span>
+                    <button class="remove" onclick="removeMemberFromGroup('${member}')" title="Remove">×</button>
+                </div>
+            `).join('');
+        }
+        
+        function removeMemberFromGroup(username) {
+            const index = selectedGroupMembers.indexOf(username);
+            if (index > -1) {
+                selectedGroupMembers.splice(index, 1);
+            }
+            
+            // Update UI
+            document.querySelectorAll(`.user-select-item[data-username="${username}"]`).forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            updateSelectedMembersPreview();
+        }
+        
+        function syncMemberSelection(username, isSelected) {
+            // Sync selection across contacts and search results
+            document.querySelectorAll(`.user-select-item[data-username="${username}"]`).forEach(el => {
+                if (isSelected) {
+                    el.classList.add('selected');
+                } else {
+                    el.classList.remove('selected');
+                }
+            });
+        }
+        
+        function switchGroupTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.group-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.group-tab[onclick*="${tab}"]`).classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.group-tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`group${tab.charAt(0).toUpperCase() + tab.slice(1)}Tab`).classList.add('active');
+        }
+        
+        function searchUsersForGroup(query) {
+            const resultsContainer = document.getElementById('groupSearchResults');
+            
+            if (!query.trim()) {
+                resultsContainer.innerHTML = `
+                    <div class="search-placeholder">
+                        <span style="font-size: 1.5rem; opacity: 0.5;">🔍</span>
+                        <p style="color: var(--text-muted); font-size: 0.8125rem;">Type a username to search</p>
+                    </div>`;
+                return;
+            }
+            
+            // Filter users based on query
+            const allUsers = [{% for user in all_users %}'{{ user }}',{% endfor %}];
+            const filtered = allUsers.filter(u => 
+                u.toLowerCase().includes(query.toLowerCase()) && u !== myUsername
+            );
+            
+            if (filtered.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="search-placeholder">
+                        <span style="font-size: 1.5rem; opacity: 0.5;">😕</span>
+                        <p style="color: var(--text-muted); font-size: 0.8125rem;">No users found matching "${query}"</p>
+                    </div>`;
+                return;
+            }
+            
+            resultsContainer.innerHTML = filtered.map(user => {
+                const isSelected = selectedGroupMembers.includes(user);
+                return `
+                    <div class="user-select-item ${isSelected ? 'selected' : ''}" data-username="${user}" onclick="toggleGroupMember(this, '${user}')">
+                        <div class="user-select-avatar">${user[0].toUpperCase()}</div>
+                        <div class="user-select-name">${user}</div>
+                        <div class="user-select-check">✓</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        let currentGroupInviteCode = null;
+        
+        function generateGroupInviteLink() {
+            // Generate a random invite code
+            currentGroupInviteCode = 'grp_' + Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 6);
+            const inviteLink = `${window.location.origin}/join/${currentGroupInviteCode}`;
+            
+            document.getElementById('groupInviteLink').value = inviteLink;
+            document.getElementById('groupInviteLinkBox').style.display = 'flex';
+            document.getElementById('generateGroupLinkBtn').innerHTML = '🔄 Regenerate Link';
+            
+            showToast('✨ Invite link generated!', 'success');
+        }
+        
+        function copyGroupInviteLink() {
+            const linkInput = document.getElementById('groupInviteLink');
+            linkInput.select();
+            document.execCommand('copy');
+            showToast('📋 Invite link copied to clipboard!', 'success');
+        }
+        
+        function createGroup() {
+            const groupName = document.getElementById('groupName').value.trim();
+            if (!groupName) {
+                alert('Please enter a group name');
+                return;
+            }
+            if (selectedGroupMembers.length === 0) {
+                alert('Please select at least one member');
+                return;
+            }
+            // TODO: Implement group creation with backend
+            const inviteCode = currentGroupInviteCode || null;
+            console.log('Creating group:', { 
+                name: groupName, 
+                members: selectedGroupMembers, 
+                inviteCode 
+            });
+            
+            showToast(`👥 Group "${groupName}" created with ${selectedGroupMembers.length} member(s)!`, 'success');
+            closeModal('newGroupModal');
+        }
+        
+        // Close panels when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.action-bar') && activePanel) {
+                togglePanel(activePanel);
+            }
+        });
+        
+        // ============================================
+        // ENCRYPTION FUNCTIONS
+        // ============================================
+        
+        const myUsername = "{{ username }}";
+        let currentFriend = null;
+        let socket = null;
+        let onlineUsers = new Set();
+        
+        async function deriveKey(password) {
+            const encoder = new TextEncoder();
+            const keyMaterial = await crypto.subtle.importKey(
+                "raw",
+                encoder.encode(password),
+                "PBKDF2",
+                false,
+                ["deriveKey"]
+            );
+            
+            return crypto.subtle.deriveKey(
+                {
+                    name: "PBKDF2",
+                    salt: encoder.encode("persay-salt"),
+                    iterations: 100000,
+                    hash: "SHA-256"
+                },
+                keyMaterial,
+                { name: "AES-GCM", length: 256 },
+                false,
+                ["encrypt", "decrypt"]
+            );
+        }
+        
+        async function encryptMessage(message, sharedSecret) {
+            const key = await deriveKey(sharedSecret);
+            const encoder = new TextEncoder();
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            
+            const encrypted = await crypto.subtle.encrypt(
+                { name: "AES-GCM", iv: iv },
+                key,
+                encoder.encode(message)
+            );
+            
+            const combined = new Uint8Array(iv.length + encrypted.byteLength);
+            combined.set(iv);
+            combined.set(new Uint8Array(encrypted), iv.length);
+            
+            return btoa(String.fromCharCode(...combined));
+        }
+        
+        async function decryptMessage(encryptedBase64, sharedSecret) {
+            try {
+                const key = await deriveKey(sharedSecret);
+                const combined = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
+                
+                const iv = combined.slice(0, 12);
+                const encrypted = combined.slice(12);
+                
+                const decrypted = await crypto.subtle.decrypt(
+                    { name: "AES-GCM", iv: iv },
+                    key,
+                    encrypted
+                );
+                
+                return new TextDecoder().decode(decrypted);
+            } catch (e) {
+                console.error("Decryption failed:", e);
+                return "[Unable to decrypt]";
+            }
+        }
+        
+        function getSharedSecret(user1, user2) {
+            const sorted = [user1, user2].sort();
+            return `persay-shared-${sorted[0]}-${sorted[1]}-secret`;
+        }
+        
+        // ============================================
+        // SOCKET.IO CONNECTION
+        // ============================================
+        
+        function initSocket() {
+            socket = io();
+            
+            socket.on('connect', () => {
+                console.log('Connected to server');
+            });
+            
+            socket.on('online_list', (data) => {
+                onlineUsers = new Set(data.users);
+                updateOnlineStatus();
+            });
+            
+            socket.on('user_online', (data) => {
+                onlineUsers.add(data.username);
+                updateOnlineStatus();
+            });
+            
+            socket.on('user_offline', (data) => {
+                onlineUsers.delete(data.username);
+                updateOnlineStatus();
+            });
+            
+            socket.on('chat_history', async (data) => {
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = '';
+                
+                // Update settings if provided
+                if (data.settings) {
+                    currentChatSettings = data.settings;
+                    updateAutoDeleteUI(data.settings.auto_delete);
+                }
+                
+                for (const msg of data.messages) {
+                    await displayMessage(msg);
+                }
+                
+                scrollToBottom();
+            });
+            
+            socket.on('new_message', async (data) => {
+                await displayMessage(data);
+                scrollToBottom();
+            });
+            
+            // Message deletion events
+            socket.on('message_deleted', (data) => {
+                const msgEl = document.getElementById(`msg-${data.message_id}`);
+                if (msgEl) {
+                    msgEl.remove();
+                }
+            });
+            
+            socket.on('chat_cleared', (data) => {
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = '';
+                
+                // Clear shared notes as well
+                unlockedNotes = {};
+                const notesList = document.getElementById('sharedNotesList');
+                if (notesList) {
+                    notesList.innerHTML = '<div class="empty-notes">No shared notes yet. Create one to securely share with this conversation.</div>';
+                }
+                
+                // Show system message about new chat
+                showSystemMessage(`🔄 Chat cleared by ${data.cleared_by}. A fresh conversation has started.`);
+                
+                closeModal('clearChatModal');
+                closeModal('chatSettingsModal');
+            });
+            
+            socket.on('settings_updated', (data) => {
+                currentChatSettings = data.settings;
+                updateAutoDeleteUI(data.settings.auto_delete);
+            });
+            
+            // Shared Notes Events
+            socket.on('shared_note_created', (data) => {
+                console.log('Note created:', data);
+                // Refresh the notes list silently (don't force panel open)
+                if (sharedNotesVisible) {
+                    setTimeout(() => loadSharedNotes(), 100);
+                }
+            });
+            
+            socket.on('prompt_set_phrase', (data) => {
+                // Only show prompt if we didn't create the note
+                if (data.created_by !== myUsername) {
+                    showSetPhrasePrompt(data);
+                }
+            });
+            
+            socket.on('phrase_set_success', (data) => {
+                closeModal('setPhraseModal');
+                loadSharedNotes();
+                // Show success toast
+                showToast('✓ Your secret phrase has been set!', 'success');
+            });
+            
+            socket.on('note_unlocked', (data) => {
+                closeModal('unlockNoteModal');
+                // Store unlocked content temporarily
+                unlockedNotes[data.note_id] = data;
+                showUnlockedNote(data);
+            });
+            
+            socket.on('note_unlock_failed', (data) => {
+                document.getElementById('unlockError').style.display = 'block';
+                document.getElementById('unlockPhrase').select();
+            });
+            
+            socket.on('shared_notes_list', (data) => {
+                console.log('📝 Received shared_notes_list:', data.notes);
+                renderSharedNotes(data.notes);
+                updateNotesBadge(data.notes);
+            });
+            
+            socket.on('note_error', (data) => {
+                showToast(data.error, 'error');
+            });
+            
+            // Note deletion events
+            socket.on('note_deleted', (data) => {
+                showToast('📝 Shared note deleted by mutual agreement', 'success');
+                delete unlockedNotes[data.note_id];
+                loadSharedNotes();
+            });
+            
+            socket.on('note_delete_requested', (data) => {
+                if (data.requested_by !== myUsername) {
+                    showToast(`${data.requested_by} wants to delete a shared note. Agree in the notes panel.`, 'info');
+                }
+                loadSharedNotes();
+            });
+            
+            socket.on('note_delete_cancelled', (data) => {
+                loadSharedNotes();
+            });
+            
+            // Note editing events
+            socket.on('note_edit_success', (data) => {
+                closeModal('editNoteModal');
+                showToast('✏️ Note updated successfully!', 'success');
+                
+                // Update the unlocked note cache with new values
+                if (unlockedNotes[data.note_id]) {
+                    const editTitle = document.getElementById('editNoteTitle').value.trim();
+                    const editContent = document.getElementById('editNoteContent').value.trim();
+                    if (editTitle) unlockedNotes[data.note_id].title = editTitle;
+                    if (editContent) unlockedNotes[data.note_id].content = editContent;
+                }
+                
+                loadSharedNotes();
+            });
+            
+            socket.on('note_edited', (data) => {
+                // Another user edited a note
+                if (data.edited_by !== myUsername) {
+                    showToast(`✏️ ${data.edited_by} edited a shared note`, 'info');
+                }
+                
+                // Clear the unlocked cache for this note so user has to re-unlock to see changes
+                delete unlockedNotes[data.note_id];
+                
+                loadSharedNotes();
+            });
+        }
+        
+        function updateOnlineStatus() {
+            document.querySelectorAll('.contact').forEach(contact => {
+                const username = contact.dataset.username;
+                const statusDot = document.getElementById(`status-${username}`);
+                if (statusDot) {
+                    statusDot.classList.toggle('online', onlineUsers.has(username));
+                }
+            });
+            
+            if (currentFriend) {
+                const isOnline = onlineUsers.has(currentFriend);
+                document.getElementById('chat-status-dot').style.display = isOnline ? 'block' : 'none';
+                document.getElementById('chat-status-text').textContent = isOnline ? 'Online' : 'Offline';
+            }
+        }
+        
+        // ============================================
+        // CHAT FUNCTIONS
+        // ============================================
+        
+        function selectContact(username) {
+            currentFriend = username;
+            
+            document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
+            const contactEl = document.querySelector(`[data-username="${username}"]`);
+            if (contactEl) contactEl.classList.add('active');
+            
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('active-chat').style.display = 'flex';
+            
+            // Hide shared notes panel when switching chats
+            const notesPanel = document.getElementById('sharedNotesPanel');
+            if (notesPanel) {
+                notesPanel.style.display = 'none';
+                sharedNotesVisible = false;
+            }
+            
+            // Clear unlocked notes cache for new chat
+            unlockedNotes = {};
+            
+            document.getElementById('chat-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('chat-username').textContent = username;
+            updateOnlineStatus();
+            
+            socket.emit('join_chat', { friend: username });
+            
+            document.getElementById('message-input').focus();
+        }
+        
+        async function displayMessage(msg) {
+            const messagesDiv = document.getElementById('messages');
+            const sharedSecret = getSharedSecret(myUsername, currentFriend);
+            
+            const decryptedText = await decryptMessage(msg.encrypted, sharedSecret);
+            
+            const isSent = msg.from === myUsername;
+            const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const messageId = msg.id || '';
+            
+            // Check if message has expiry
+            let expiryHtml = '';
+            if (msg.expires_at) {
+                const expiryDate = new Date(msg.expires_at);
+                const expiryText = formatExpiryTime(expiryDate);
+                expiryHtml = `<span class="message-expiry">⏱️ ${expiryText}</span>`;
+            }
+            
+            // Delete button (only for sent messages)
+            const deleteBtn = isSent ? `
+                <div class="message-actions">
+                    <button class="message-action-btn delete" onclick="deleteMessage('${messageId}')" title="Delete message">
+                        🗑️
+                    </button>
+                </div>
+            ` : '';
+            
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${isSent ? 'sent' : 'received'}`;
+            messageEl.id = `msg-${messageId}`;
+            messageEl.innerHTML = `
+                <div class="message-wrapper">
+                    <div class="message-bubble">${escapeHtml(decryptedText)}</div>
+                    ${deleteBtn}
+                </div>
+                <div class="message-meta">
+                    <span class="message-encrypted">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0110 0v4"/>
+                        </svg>
+                        encrypted
+                    </span>
+                    ${expiryHtml}
+                    <span class="message-time">${time}</span>
+                </div>
+            `;
+            
+            messagesDiv.appendChild(messageEl);
+        }
+        
+        function formatExpiryTime(date) {
+            const now = new Date();
+            const diff = date - now;
+            
+            if (diff <= 0) return 'expiring';
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            
+            if (days > 30) return `${Math.floor(days / 30)}mo`;
+            if (days > 0) return `${days}d`;
+            if (hours > 0) return `${hours}h`;
+            return 'soon';
+        }
+        
+        function showSystemMessage(text, type = 'fresh-start') {
+            const messagesDiv = document.getElementById('messages');
+            
+            const systemMsg = document.createElement('div');
+            systemMsg.className = 'system-message';
+            systemMsg.innerHTML = `
+                <div class="system-message-content ${type}">
+                    ${text}
+                </div>
+            `;
+            
+            messagesDiv.appendChild(systemMsg);
+            scrollToBottom();
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if (!message || !currentFriend) return;
+            
+            const sharedSecret = getSharedSecret(myUsername, currentFriend);
+            const encrypted = await encryptMessage(message, sharedSecret);
+            
+            socket.emit('send_message', {
+                to: currentFriend,
+                encrypted_message: encrypted
+            });
+            
+            input.value = '';
+            input.style.height = 'auto';
+            input.focus();
+        }
+        
+        function handleKeyDown(event) {
+            const calcPreview = document.getElementById('calcPreview');
+            const isCalcVisible = calcPreview && calcPreview.classList.contains('show');
+            
+            // Enter key
+            if (event.key === 'Enter') {
+                // Shift+Enter: Add new line
+                if (event.shiftKey) {
+                    return; // Allow default behavior
+                }
+                
+                // If calculator is showing, insert results
+                if (isCalcVisible && lastCalculations.length > 0) {
+                    event.preventDefault();
+                    insertCalculatedText();
+                    return;
+                }
+                
+                // Plain Enter: Send message
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+        
+        function scrollToBottom() {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // ============================================
+        // CHAT SETTINGS & MESSAGE DELETION
+        // ============================================
+        
+        let currentChatSettings = { auto_delete: 'never' };
+        
+        function openChatSettings() {
+            if (!currentFriend) return;
+            
+            // Set current setting in modal
+            const currentValue = currentChatSettings.auto_delete || 'never';
+            document.querySelector(`input[name="auto_delete"][value="${currentValue}"]`).checked = true;
+            
+            document.getElementById('chatSettingsModal').classList.add('show');
+        }
+        
+        function saveChatSettings() {
+            const selectedOption = document.querySelector('input[name="auto_delete"]:checked');
+            if (!selectedOption) return;
+            
+            const period = selectedOption.value;
+            
+            socket.emit('set_auto_delete', {
+                friend: currentFriend,
+                period: period
+            });
+            
+            closeModal('chatSettingsModal');
+        }
+        
+        function updateAutoDeleteUI(period) {
+            // Update the badge in chat header if needed
+            const existingBadge = document.querySelector('.auto-delete-badge');
+            if (existingBadge) {
+                existingBadge.remove();
+            }
+            
+            if (period && period !== 'never') {
+                const label = {
+                    '1_day': '1 day',
+                    '1_week': '1 week',
+                    '1_month': '1 month',
+                    '1_year': '1 year'
+                }[period] || period;
+                
+                const badge = document.createElement('div');
+                badge.className = 'auto-delete-badge';
+                badge.innerHTML = `⏱️ Auto-delete: ${label}`;
+                
+                const encBadge = document.querySelector('.encryption-badge');
+                if (encBadge) {
+                    encBadge.insertAdjacentElement('afterend', badge);
+                }
+            }
+        }
+        
+        function confirmClearChat() {
+            document.getElementById('clearChatFriend').textContent = currentFriend;
+            document.getElementById('clearChatModal').classList.add('show');
+        }
+        
+        function clearChat() {
+            if (!currentFriend) return;
+            
+            socket.emit('clear_chat', {
+                friend: currentFriend
+            });
+        }
+        
+        function deleteMessage(messageId) {
+            if (!messageId || !currentFriend) return;
+            
+            socket.emit('delete_message', {
+                friend: currentFriend,
+                message_id: messageId
+            });
+        }
+        
+        // ============================================
+        // SHARED NOTES FUNCTIONS
+        // ============================================
+        
+        let sharedNotesVisible = false;
+        let unlockedNotes = {};  // Cache of unlocked notes
+        
+        function toggleSharedNotes() {
+            const panel = document.getElementById('sharedNotesPanel');
+            sharedNotesVisible = !sharedNotesVisible;
+            panel.style.display = sharedNotesVisible ? 'block' : 'none';
+            
+            if (sharedNotesVisible && currentFriend) {
+                loadSharedNotes();
+            }
+        }
+        
+        function updateNotesBadge(notes) {
+            const badge = document.getElementById('notesBadge');
+            if (badge) {
+                badge.style.display = (notes && notes.length > 0) ? 'block' : 'none';
+            }
+        }
+        
+        function loadSharedNotes() {
+            if (!currentFriend) return;
+            
+            socket.emit('get_shared_notes', {
+                friend: currentFriend
+            });
+        }
+        
+        function renderSharedNotes(notes) {
+            const container = document.getElementById('sharedNotesList');
+            console.log('📝 Rendering notes:', notes, 'Container:', container);
+            
+            if (!notes || notes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-notes">
+                        <div class="empty-notes-icon">📝</div>
+                        No shared notes yet.<br>
+                        <span style="opacity: 0.7;">Create one to securely share with this conversation.</span>
+                    </div>`;
+                return;
+            }
+            
+            container.innerHTML = notes.map(note => {
+                let iconClass = 'locked';
+                let iconEmoji = '🔒';
+                let primaryBtn = '';
+                let editBtn = '';
+                let deleteBtn = '';
+                let statusBadge = '';
+                
+                // Check if there's a pending delete request
+                const deleteRequests = note.delete_requested_by || [];
+                const iRequestedDelete = deleteRequests.includes(myUsername);
+                const otherRequestedDelete = deleteRequests.length > 0 && !iRequestedDelete;
+                
+                // Check if note was edited
+                const editedBadge = note.last_edited_by ? 
+                    `<span class="note-badge edited">Edited</span>` : '';
+                
+                if (unlockedNotes[note.id]) {
+                    iconClass = 'unlocked';
+                    iconEmoji = '🔓';
+                    primaryBtn = `<button class="note-action-btn view" onclick="viewUnlockedNote('${note.id}')">👁️ View</button>`;
+                    editBtn = `<button class="note-action-btn edit" onclick="openEditNoteModal('${note.id}')" title="Edit note">✏️ Edit</button>`;
+                } else if (!note.has_phrase) {
+                    iconClass = 'pending';
+                    iconEmoji = '⏳';
+                    primaryBtn = `<button class="note-action-btn set-phrase" onclick="openSetPhraseModal('${note.id}', '${escapeHtml(note.title)}', '${note.created_by}')">🔑 Set Phrase</button>`;
+                    statusBadge = `<div class="note-status needs-phrase">⚠️ Phrase required to access</div>`;
+                } else {
+                    primaryBtn = `<button class="note-action-btn unlock" onclick="openUnlockModal('${note.id}', '${escapeHtml(note.title)}')">🔓 Unlock</button>`;
+                }
+                
+                // Delete button logic
+                if (otherRequestedDelete && !iRequestedDelete) {
+                    iconClass = 'delete-pending';
+                    iconEmoji = '⚠️';
+                    statusBadge = `<div class="note-status delete-requested">🗑️ ${currentFriend} wants to delete</div>`;
+                    deleteBtn = `<button class="note-action-btn confirm-delete" onclick="confirmDeleteNote('${note.id}')" title="Agree to delete">✓ Agree</button>`;
+                } else if (iRequestedDelete) {
+                    statusBadge = `<div class="note-status delete-requested">⏳ Waiting for ${currentFriend}</div>`;
+                    deleteBtn = `<button class="note-action-btn delete" onclick="cancelDeleteNote('${note.id}')" title="Cancel">↩️</button>`;
+                } else {
+                    deleteBtn = `<button class="note-action-btn delete" onclick="requestDeleteNote('${note.id}')" title="Request to delete">🗑️</button>`;
+                }
+                
+                const date = new Date(note.created_at);
+                const timeStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + 
+                               ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                // Build meta text
+                let metaText = `Created by ${note.created_by} <span class="note-meta-divider">•</span> ${timeStr}`;
+                if (note.last_edited_by) {
+                    const editDate = new Date(note.last_edited_at);
+                    const editTimeStr = editDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    metaText += ` <span class="note-meta-divider">•</span> Edited by ${note.last_edited_by}`;
+                }
+                
+                return `
+                    <div class="shared-note-item">
+                        <div class="note-icon ${iconClass}">${iconEmoji}</div>
+                        <div class="note-info">
+                            <div class="note-title">
+                                <span class="note-title-text">${escapeHtml(note.title)}</span>
+                                ${editedBadge}
+                            </div>
+                            <div class="note-meta">${metaText}</div>
+                            ${statusBadge}
+                        </div>
+                        <div class="note-actions">
+                            <div class="note-actions-row">
+                                ${primaryBtn}
+                                ${editBtn}
+                            </div>
+                            <div class="note-actions-row">
+                                ${deleteBtn}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function openCreateNoteModal() {
+            if (!currentFriend) return;
+            
+            document.getElementById('noteRecipientName').textContent = currentFriend;
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+            document.getElementById('creatorPhrase').value = '';
+            document.getElementById('createNoteModal').classList.add('show');
+        }
+        
+        function createSharedNote() {
+            const title = document.getElementById('noteTitle').value.trim();
+            const content = document.getElementById('noteContent').value.trim();
+            const phrase = document.getElementById('creatorPhrase').value.trim();
+            
+            if (!title || !content || !phrase) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+            
+            if (phrase.length < 4) {
+                showToast('Phrase must be at least 4 characters', 'error');
+                return;
+            }
+            
+            console.log('Creating shared note:', { friend: currentFriend, title, content });
+            
+            socket.emit('create_shared_note', {
+                friend: currentFriend,
+                title: title,
+                content: content,
+                phrase: phrase
+            });
+            
+            closeModal('createNoteModal');
+            showToast('📝 Shared note created!', 'success');
+        }
+        
+        function showSetPhrasePrompt(data) {
+            // Show a toast notification prompting user to set their phrase
+            document.getElementById('phraseNoteCreator').textContent = data.created_by;
+            document.getElementById('phraseNoteTitle').textContent = data.title;
+            document.getElementById('setPhraseNoteId').value = data.note_id;
+            document.getElementById('userPhrase').value = '';
+            document.getElementById('setPhraseModal').classList.add('show');
+        }
+        
+        function openSetPhraseModal(noteId, title, creator) {
+            document.getElementById('phraseNoteCreator').textContent = creator;
+            document.getElementById('phraseNoteTitle').textContent = title;
+            document.getElementById('setPhraseNoteId').value = noteId;
+            document.getElementById('userPhrase').value = '';
+            document.getElementById('setPhraseModal').classList.add('show');
+        }
+        
+        function setNotePhrase() {
+            const noteId = document.getElementById('setPhraseNoteId').value;
+            const phrase = document.getElementById('userPhrase').value.trim();
+            
+            if (!phrase) {
+                showToast('Please enter a phrase', 'error');
+                return;
+            }
+            
+            if (phrase.length < 4) {
+                showToast('Phrase must be at least 4 characters', 'error');
+                return;
+            }
+            
+            socket.emit('set_note_phrase', {
+                note_id: noteId,
+                phrase: phrase
+            });
+        }
+        
+        function openUnlockModal(noteId, title) {
+            document.getElementById('unlockNoteTitle').textContent = title;
+            document.getElementById('unlockNoteId').value = noteId;
+            document.getElementById('unlockPhrase').value = '';
+            document.getElementById('unlockError').style.display = 'none';
+            document.getElementById('unlockNoteModal').classList.add('show');
+            
+            setTimeout(() => {
+                document.getElementById('unlockPhrase').focus();
+            }, 100);
+        }
+        
+        function unlockNote() {
+            const noteId = document.getElementById('unlockNoteId').value;
+            const phrase = document.getElementById('unlockPhrase').value.trim();
+            
+            if (!phrase) {
+                document.getElementById('unlockError').textContent = 'Please enter your phrase';
+                document.getElementById('unlockError').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('unlockError').style.display = 'none';
+            
+            socket.emit('unlock_note', {
+                note_id: noteId,
+                phrase: phrase
+            });
+        }
+        
+        function showUnlockedNote(data) {
+            document.getElementById('viewNoteTitle').textContent = data.title;
+            document.getElementById('viewNoteContent').textContent = data.content;
+            document.getElementById('viewNoteCreator').textContent = data.created_by;
+            document.getElementById('viewNoteId').value = data.note_id;
+            
+            // Show edit info if available
+            const editInfoEl = document.getElementById('viewNoteEditInfo');
+            if (data.last_edited_by) {
+                const editDate = new Date(data.last_edited_at);
+                editInfoEl.textContent = `Last edited by ${data.last_edited_by}`;
+            } else {
+                editInfoEl.textContent = '';
+            }
+            
+            document.getElementById('viewNoteModal').classList.add('show');
+            
+            // Refresh the notes list to show unlocked status
+            loadSharedNotes();
+        }
+        
+        function viewUnlockedNote(noteId) {
+            const note = unlockedNotes[noteId];
+            if (note) {
+                showUnlockedNote(note);
+            }
+        }
+        
+        // ============================================
+        // NOTE EDITING FUNCTIONS
+        // ============================================
+        
+        function openEditNoteModal(noteId) {
+            const note = unlockedNotes[noteId];
+            if (!note) {
+                showToast('Please unlock the note first to edit it', 'error');
+                return;
+            }
+            
+            document.getElementById('editNoteId').value = noteId;
+            document.getElementById('editNoteTitle').value = note.title;
+            document.getElementById('editNoteContent').value = note.content;
+            document.getElementById('editNotePhrase').value = '';
+            
+            document.getElementById('editNoteModal').classList.add('show');
+        }
+        
+        function editFromViewModal() {
+            const noteId = document.getElementById('viewNoteId').value;
+            closeModal('viewNoteModal');
+            openEditNoteModal(noteId);
+        }
+        
+        function saveNoteEdit() {
+            const noteId = document.getElementById('editNoteId').value;
+            const newTitle = document.getElementById('editNoteTitle').value.trim();
+            const newContent = document.getElementById('editNoteContent').value.trim();
+            const phrase = document.getElementById('editNotePhrase').value.trim();
+            
+            if (!newTitle && !newContent) {
+                showToast('Please enter a title or content', 'error');
+                return;
+            }
+            
+            if (!phrase) {
+                showToast('Please enter your phrase to save changes', 'error');
+                return;
+            }
+            
+            socket.emit('edit_shared_note', {
+                note_id: noteId,
+                title: newTitle,
+                content: newContent,
+                phrase: phrase,
+                friend: currentFriend
+            });
+        }
+        
+        // ============================================
+        // NOTE DELETION FUNCTIONS
+        // ============================================
+        
+        function requestDeleteNote(noteId) {
+            if (!currentFriend) return;
+            
+            socket.emit('request_delete_note', {
+                note_id: noteId,
+                friend: currentFriend
+            });
+            
+            showToast('Delete request sent. Waiting for ' + currentFriend + ' to agree.', 'info');
+        }
+        
+        function confirmDeleteNote(noteId) {
+            if (!currentFriend) return;
+            
+            socket.emit('request_delete_note', {
+                note_id: noteId,
+                friend: currentFriend
+            });
+        }
+        
+        function cancelDeleteNote(noteId) {
+            if (!currentFriend) return;
+            
+            socket.emit('cancel_delete_request', {
+                note_id: noteId,
+                friend: currentFriend
+            });
+            
+            showToast('Delete request cancelled', 'info');
+        }
+        
+        // ============================================
+        // CALCULATOR FUNCTIONS
+        // ============================================
+        
+        let lastCalculations = [];
+        let lastTotal = 0;
+        
+        function detectCalculations(text) {
+            const preview = document.getElementById('calcPreview');
+            const resultsContainer = document.getElementById('calcResults');
+            const totalContainer = document.getElementById('calcTotal');
+            const totalValue = document.getElementById('calcTotalValue');
+            
+            // Pattern to match math expressions: number operator number
+            // Supports: x, *, ×, +, -, /, ÷
+            const mathPattern = /(\d+(?:\.\d+)?)\s*([x×*+\-\/÷])\s*(\d+(?:\.\d+)?)/gi;
+            
+            const lines = text.split('\n');
+            const calculations = [];
+            
+            lines.forEach(line => {
+                const matches = line.matchAll(mathPattern);
+                for (const match of matches) {
+                    const num1 = parseFloat(match[1]);
+                    const operator = match[2].toLowerCase();
+                    const num2 = parseFloat(match[3]);
+                    
+                    let result;
+                    let displayOperator = operator;
+                    
+                    switch(operator) {
+                        case 'x':
+                        case '×':
+                        case '*':
+                            result = num1 * num2;
+                            displayOperator = 'x';
+                            break;
+                        case '+':
+                            result = num1 + num2;
+                            break;
+                        case '-':
+                            result = num1 - num2;
+                            break;
+                        case '/':
+                        case '÷':
+                            result = num2 !== 0 ? num1 / num2 : 0;
+                            displayOperator = '÷';
+                            break;
+                        default:
+                            continue;
+                    }
+                    
+                    calculations.push({
+                        expression: `${num1}${displayOperator}${num2}`,
+                        original: match[0],
+                        result: result
+                    });
+                }
+            });
+            
+            if (calculations.length > 0) {
+                // Build HTML for results
+                let html = calculations.map(calc => `
+                    <div class="calc-line">
+                        <span class="calc-expression">${calc.expression}</span>
+                        <span>
+                            <span class="calc-equals">=</span>
+                            <span class="calc-result">${formatNumber(calc.result)}</span>
+                        </span>
+                    </div>
+                `).join('');
+                
+                resultsContainer.innerHTML = html;
+                
+                // Calculate and show total if multiple calculations
+                if (calculations.length > 1) {
+                    const total = calculations.reduce((sum, calc) => sum + calc.result, 0);
+                    totalValue.textContent = formatNumber(total);
+                    totalContainer.style.display = 'flex';
+                    lastTotal = total;
+                } else {
+                    totalContainer.style.display = 'none';
+                    lastTotal = calculations[0].result;
+                }
+                
+                lastCalculations = calculations;
+                preview.classList.add('show');
+            } else {
+                lastCalculations = [];
+                lastTotal = 0;
+                preview.classList.remove('show');
+            }
+        }
+        
+        function formatNumber(num) {
+            // Format number with commas for thousands and limit decimal places
+            if (Number.isInteger(num)) {
+                return num.toLocaleString();
+            }
+            return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
+        }
+        
+        function insertCalculatedText() {
+            if (lastCalculations.length === 0) return;
+            
+            const textarea = document.getElementById('message-input');
+            let text = textarea.value;
+            
+            // Build the result text
+            let resultLines = lastCalculations.map(calc => 
+                `${calc.expression}=${formatNumber(calc.result)}`
+            );
+            
+            // Add total if multiple calculations
+            if (lastCalculations.length > 1) {
+                resultLines.push(`Total=${formatNumber(lastTotal)}`);
+            }
+            
+            // Replace the original text with the calculated results
+            textarea.value = resultLines.join('\n');
+            
+            // Hide the preview
+            document.getElementById('calcPreview').classList.remove('show');
+            
+            // Resize textarea
+            autoResize(textarea);
+            
+            // Focus back on textarea
+            textarea.focus();
+        }
+        
+        function showToast(message, type = 'info') {
+            // Remove existing toasts
+            const existing = document.querySelector('.simple-toast');
+            if (existing) existing.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = 'simple-toast';
+            toast.style.cssText = `
+                position: fixed;
+                top: 1rem;
+                right: 1rem;
+                padding: 0.75rem 1.25rem;
+                background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : 'var(--bg-card)'};
+                color: white;
+                border-radius: var(--radius-md);
+                font-size: 0.875rem;
+                font-weight: 500;
+                z-index: 3000;
+                animation: slideIn 0.3s ease;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // Override selectContact to also load shared notes
+        const originalSelectContact = selectContact;
+        selectContact = function(username) {
+            originalSelectContact(username);
+            
+            // Reset shared notes state
+            unlockedNotes = {};
+            if (sharedNotesVisible) {
+                loadSharedNotes();
+            }
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initSocket();
+        });
+        
+        // ============================================
+        // FONT PREVIEW (TEMPORARY - FOR SELECTION)
+        // ============================================
+        
+    </script>
+</body>
+</html>

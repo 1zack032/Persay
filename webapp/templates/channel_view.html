@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ channel.name }} - Menza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.0/socket.io.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #030306;
+            --bg-secondary: #08080c;
+            --bg-card: #0c0c12;
+            --bg-card-inner: #101018;
+            --bg-card-hover: #14141e;
+            --bg-input: #0a0a10;
+            --accent-primary: {{ channel.branding.accent_color }};
+            --accent-secondary: #8b5cf6;
+            --accent-glow: {{ channel.branding.accent_color }}15;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --text-dim: #6b7280;
+            --text-muted: #4b5563;
+            --border: rgba(255, 255, 255, 0.04);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.1);
+            --success: #10b981;
+            --like-color: #ef4444;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 340px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+        }
+
+        .logo-icon {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .logo-text {
+            font-size: 1.125rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        /* Sidebar Actions */
+        .sidebar-actions {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .action-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* Section Label */
+        .section-label {
+            padding: 0.75rem 1.25rem 0.5rem;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Channel List */
+        .channel-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 0.5rem;
+        }
+
+        .channel-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .channel-item:hover {
+            background: var(--bg-card);
+        }
+
+        .channel-item.active {
+            background: var(--accent-glow);
+            border: 1px solid {{ channel.branding.accent_color }}30;
+        }
+
+        .channel-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+        }
+
+        .channel-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .channel-name {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .channel-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .channel-badge {
+            padding: 0.125rem 0.375rem;
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            font-size: 0.5625rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-radius: var(--radius-sm);
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            padding: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: all 0.15s;
+            font-size: 0.875rem;
+        }
+
+        .footer-link:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        /* Main Content Area */
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        /* Channel Header */
+        .channel-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.875rem 1.25rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.375rem;
+            background: var(--accent-glow);
+            color: var(--accent-primary);
+        }
+
+        .header-info {
+            flex: 1;
+        }
+
+        .header-name {
+            font-size: 1.0625rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .header-stats {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .visibility-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: var(--radius-full);
+            font-size: 0.6875rem;
+            font-weight: 600;
+        }
+
+        .visibility-badge.public {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .visibility-badge.private {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-dim);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .header-btn {
+            padding: 0.625rem 1rem;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .header-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        .header-btn.primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            color: white;
+        }
+
+        .header-btn.subscribed {
+            background: var(--accent-glow);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* Role badges */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-full);
+            font-size: 0.625rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .role-badge.admin { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .role-badge.mod { background: rgba(99, 102, 241, 0.15); color: #6366f1; }
+        .role-badge.viewer { background: rgba(107, 114, 128, 0.15); color: var(--text-dim); }
+
+        /* Posts Container */
+        .posts-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Post */
+        .post {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            transition: all 0.2s;
+        }
+
+        .post:hover {
+            border-color: var(--border-hover);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.875rem;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-glow);
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+        }
+
+        .post-meta {
+            flex: 1;
+        }
+
+        .post-author {
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .post-time {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .post-content {
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .post-content strong { color: var(--text-primary); font-weight: 600; }
+        .post-content em { font-style: italic; }
+        .post-content code {
+            background: var(--bg-card-inner);
+            padding: 0.125rem 0.375rem;
+            border-radius: var(--radius-sm);
+            font-family: 'Monaco', monospace;
+            font-size: 0.875em;
+            color: var(--accent-primary);
+        }
+        .post-content .highlight {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.2));
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+        }
+
+        .linked-post {
+            background: var(--bg-card-inner);
+            border-left: 3px solid var(--accent-primary);
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .linked-post-label {
+            font-size: 0.75rem;
+            color: var(--accent-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        /* Post Actions */
+        .post-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn-post {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 0.875rem;
+            background: var(--bg-card-inner);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.8125rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn-post:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+        }
+
+        .action-btn-post.liked {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: var(--like-color);
+        }
+
+        /* Reactions */
+        .reactions-container {
+            display: flex;
+            gap: 0.375rem;
+            flex-wrap: wrap;
+        }
+
+        .reaction-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.375rem 0.625rem;
+            background: var(--bg-card-inner);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            font-size: 0.8125rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .reaction-badge:hover,
+        .reaction-badge.active {
+            background: var(--accent-glow);
+            border-color: var(--accent-primary);
+        }
+
+        .reaction-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .reaction-picker {
+            position: relative;
+        }
+
+        .reaction-dropdown {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            margin-bottom: 0.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+
+        .reaction-dropdown.show {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+            max-width: 200px;
+        }
+
+        .reaction-emoji {
+            padding: 0.375rem;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: background 0.15s;
+            font-size: 1.125rem;
+        }
+
+        .reaction-emoji:hover {
+            background: var(--bg-card-hover);
+        }
+
+        /* Comments Section */
+        .comments-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .comments-list {
+            display: none;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .comments-list.show {
+            display: flex;
+        }
+
+        .comment {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-card-inner);
+            border-radius: var(--radius-md);
+        }
+
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: white;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            font-size: 0.8125rem;
+        }
+
+        .comment-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .comment-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .comment-input-wrapper {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.625rem;
+        }
+
+        .comment-input {
+            flex: 1;
+            padding: 0.625rem 0.875rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.875rem;
+            outline: none;
+        }
+
+        .comment-input:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .comment-submit {
+            padding: 0.625rem 0.875rem;
+            background: var(--accent-primary);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: white;
+            font-family: inherit;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Empty State */
+        .empty-posts {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-posts-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-posts h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        /* Calculator Preview */
+        .calc-preview {
+            display: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+            animation: slideUp 0.2s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .calc-preview.show { display: block; }
+
+        .calc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.625rem 1rem;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(99, 102, 241, 0.1));
+            border-bottom: 1px solid var(--border);
+        }
+
+        .calc-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .calc-insert-btn {
+            padding: 0.5rem 1rem;
+            background: var(--success);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: white;
+            font-family: inherit;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .calc-results { padding: 0.75rem 1rem; }
+
+        .calc-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.375rem 0;
+            font-size: 0.875rem;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+
+        .calc-expression { color: var(--text-secondary); }
+        .calc-equals { color: var(--text-muted); margin: 0 0.5rem; }
+        .calc-result { color: var(--success); font-weight: 600; }
+
+        .calc-total {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card-inner);
+            border-top: 1px solid var(--border);
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+
+        .calc-total-label { font-size: 0.875rem; font-weight: 700; color: var(--accent-primary); }
+        .calc-total-value { font-size: 1rem; font-weight: 700; color: var(--accent-primary); }
+
+        /* Input Area (Post Composer) */
+        .input-area {
+            padding: 1rem 1.25rem;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+        }
+
+        .composer-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .composer-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-glow);
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .composer-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .post-input-container {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 0.25rem;
+            transition: all 0.2s;
+        }
+
+        .post-input-container:focus-within {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .post-input {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            resize: none;
+            outline: none;
+            min-height: 60px;
+            max-height: 150px;
+        }
+
+        .post-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .composer-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+        }
+
+        .formatting-buttons {
+            display: flex;
+            gap: 0.375rem;
+        }
+
+        .format-btn {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .format-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .post-btn {
+            padding: 0.625rem 1.5rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .post-btn:hover {
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* Members Panel */
+        .members-panel {
+            display: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin: 0.75rem 1.25rem;
+            padding: 1rem;
+        }
+
+        .members-panel.show {
+            display: block;
+        }
+
+        .members-panel h3 {
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .members-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+        }
+
+        .member-item:hover {
+            background: var(--bg-card-inner);
+        }
+
+        .member-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .member-name {
+            flex: 1;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 280px;
+            }
+        }
+        /* Top Navigation Bar */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: linear-gradient(180deg, rgba(3, 3, 6, 0.98), rgba(8, 8, 12, 0.95));
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .top-nav .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .top-nav .nav-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #7c3aed, #06b6d4);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+
+        .top-nav .nav-logo-text {
+            font-size: 1.125rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+        }
+
+        .nav-tab {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        .nav-tab.active {
+            color: var(--text-primary);
+            background: rgba(124, 58, 237, 0.15);
+        }
+
+        .nav-tab.logout:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+            padding-top: 56px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <a href="/" class="nav-logo">
+            <div class="nav-logo-icon">M</div>
+            <span class="nav-logo-text">Menza</span>
+        </a>
+        <div class="nav-tabs">
+            <a href="/chat" class="nav-tab">Messages</a>
+            <a href="/channels" class="nav-tab active">Channels</a>
+            <a href="/settings" class="nav-tab">Settings</a>
+            <a href="/logout" class="nav-tab logout">Sign Out</a>
+        </div>
+    </nav>
+
+    <div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="channel-nav">
+                <span class="logo-text">Channels</span>
+            </div>
+            <div class="user-avatar">{{ username[0].upper() }}</div>
+        </div>
+
+        <div class="sidebar-actions">
+            <a href="/channel/create" class="action-btn primary">
+                ✨ Create
+            </a>
+            <a href="/channels" class="action-btn">
+                🔍 Discover
+            </a>
+        </div>
+
+        <div class="section-label">Your Channels</div>
+        <div class="channel-list">
+            {% for ch in my_channels %}
+            <a href="/channel/{{ ch.id }}" class="channel-item {% if ch.id == channel.id %}active{% endif %}">
+                <div class="channel-avatar" style="background: {{ ch.branding.accent_color }}15; color: {{ ch.branding.accent_color }};">
+                    {{ ch.branding.avatar_emoji }}
+                </div>
+                <div class="channel-info">
+                    <div class="channel-name">{{ ch.name }}</div>
+                    <div class="channel-meta">{{ ch.subscribers|length }} members</div>
+                </div>
+                <span class="channel-badge">Owner</span>
+            </a>
+            {% endfor %}
+        </div>
+
+        {% if subscribed_channels %}
+        <div class="section-label">Subscribed</div>
+        <div class="channel-list">
+            {% for ch in subscribed_channels %}
+            <a href="/channel/{{ ch.id }}" class="channel-item {% if ch.id == channel.id %}active{% endif %}">
+                <div class="channel-avatar" style="background: {{ ch.branding.accent_color }}15; color: {{ ch.branding.accent_color }};">
+                    {{ ch.branding.avatar_emoji }}
+                </div>
+                <div class="channel-info">
+                    <div class="channel-name">{{ ch.name }}</div>
+                    <div class="channel-meta">{{ ch.subscribers|length }} members</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="sidebar-footer">
+            <a href="/chat" class="footer-link">
+                💬 Back to Messages
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-area">
+        <!-- Channel Header -->
+        <div class="channel-header">
+            <div class="header-avatar">{{ channel.branding.avatar_emoji }}</div>
+            <div class="header-info">
+                <div class="header-name">{{ channel.name }}</div>
+                <div class="header-stats">
+                    <span>👥 {{ channel.subscribers|length }} members</span>
+                    <span>📝 {{ posts|length }} posts</span>
+                    {% if can_manage %}
+                    <span class="visibility-badge {% if channel.discoverable %}public{% else %}private{% endif %}">
+                        {% if channel.discoverable %}🌟 Public{% else %}🔒 Private{% endif %}
+                    </span>
+                    {% endif %}
+                    {% if user_role %}
+                    <span class="role-badge {{ user_role }}">
+                        {% if is_owner %}👑 Owner{% elif user_role == 'admin' %}👑 Admin{% elif user_role == 'mod' %}✏️ Mod{% else %}👁️ Viewer{% endif %}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="header-actions">
+                {% if not is_subscribed and not is_owner %}
+                <form action="/channel/{{ channel.id }}/subscribe" method="POST" style="display: inline;">
+                    <button type="submit" class="header-btn primary">Join Channel</button>
+                </form>
+                {% elif is_subscribed and not is_owner %}
+                <form action="/channel/{{ channel.id }}/unsubscribe" method="POST" style="display: inline;">
+                    <button type="submit" class="header-btn subscribed">✓ Joined</button>
+                </form>
+                {% endif %}
+                <button class="header-btn" onclick="toggleMembers()">👥 Members</button>
+                {% if can_manage %}
+                <a href="/channel/{{ channel.id }}/settings" class="header-btn">⚙️ Settings</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Members Panel (Toggle) -->
+        <div class="members-panel" id="membersPanel">
+            <h3>👥 Members ({{ members_with_roles|length }})</h3>
+            <div class="members-list">
+                {% for member in members_with_roles %}
+                <div class="member-item">
+                    <div class="member-avatar">{{ member.username[0]|upper }}</div>
+                    <div class="member-name">@{{ member.username }}</div>
+                    {% if member.is_owner %}
+                    <span class="role-badge admin">👑 Owner</span>
+                    {% elif member.role == 'admin' %}
+                    <span class="role-badge admin">👑 Admin</span>
+                    {% elif member.role == 'mod' %}
+                    <span class="role-badge mod">✏️ Mod</span>
+                    {% else %}
+                    <span class="role-badge viewer">👁️</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Posts -->
+        <div class="posts-container">
+            {% if posts %}
+                {% for post in posts %}
+                <div class="post" id="post-{{ post.id }}">
+                    <div class="post-header">
+                        <div class="post-avatar">{{ channel.branding.avatar_emoji }}</div>
+                        <div class="post-meta">
+                            <div class="post-author">{{ post.author }}</div>
+                            <div class="post-time">{{ post.timestamp[:16].replace('T', ' ') }}</div>
+                        </div>
+                    </div>
+                    
+                    {% if post.linked_post and post.linked_post in channel_posts %}
+                    <div class="linked-post">
+                        <div class="linked-post-label">🔗 Replying to previous post</div>
+                        {{ channel_posts[post.linked_post].content[:100] }}...
+                    </div>
+                    {% endif %}
+                    
+                    <div class="post-content" id="content-{{ post.id }}">{{ post.content }}</div>
+                    
+                    <div class="post-actions">
+                        <button class="action-btn-post {% if username in post.likes %}liked{% endif %}" 
+                                onclick="toggleLike('{{ post.id }}')" id="like-btn-{{ post.id }}">
+                            ❤️ <span id="like-count-{{ post.id }}">{{ post.likes|length }}</span>
+                        </button>
+                        
+                        <div class="reactions-container" id="reactions-{{ post.id }}">
+                            {% for emoji, users in post.reactions.items() %}
+                            <button class="reaction-badge {% if username in users %}active{% endif %}" 
+                                    onclick="addReaction('{{ post.id }}', '{{ emoji }}')">
+                                {{ emoji }} <span class="reaction-count">{{ users|length }}</span>
+                            </button>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="reaction-picker">
+                            <button class="action-btn-post" onclick="toggleReactionPicker('{{ post.id }}')">
+                                😀 React
+                            </button>
+                            <div class="reaction-dropdown" id="reaction-picker-{{ post.id }}">
+                                {% for emoji in ['👍', '❤️', '🔥', '👏', '😂', '😮', '😢', '🎉', '💯', '🚀', '💡', '⭐'] %}
+                                <span class="reaction-emoji" onclick="addReaction('{{ post.id }}', '{{ emoji }}')">{{ emoji }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <button class="action-btn-post" onclick="toggleComments('{{ post.id }}')">
+                            💬 <span id="comment-count-{{ post.id }}">{{ post.comments|length }}</span>
+                        </button>
+                    </div>
+
+                    <div class="comments-section">
+                        <div class="comments-list" id="comments-{{ post.id }}">
+                            {% for comment in post.comments %}
+                            <div class="comment">
+                                <div class="comment-avatar">{{ comment.author[0].upper() }}</div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <span class="comment-author">{{ comment.author }}</span>
+                                        <span class="comment-time">{{ comment.timestamp[:16].replace('T', ' ') }}</span>
+                                    </div>
+                                    <div class="comment-text">{{ comment.content }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            <div class="comment-input-wrapper">
+                                <input type="text" class="comment-input" placeholder="Write a comment..." 
+                                       id="comment-input-{{ post.id }}" onkeypress="handleCommentKey(event, '{{ post.id }}')">
+                                <button class="comment-submit" onclick="submitComment('{{ post.id }}')">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="empty-posts">
+                <div class="empty-posts-icon">📝</div>
+                <h3>No posts yet</h3>
+                <p>{% if can_post %}Create your first post below!{% else %}Check back later for new content.{% endif %}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Post Composer (Admins & Moderators Only) -->
+        {% if can_post %}
+        <div class="input-area">
+            <!-- Calculator Preview -->
+            <div class="calc-preview" id="calcPreview">
+                <div class="calc-header">
+                    <div class="calc-title">🧮 Calculator</div>
+                    <button class="calc-insert-btn" type="button" onclick="insertCalculatedText()">Insert Results</button>
+                </div>
+                <div class="calc-results" id="calcResults"></div>
+                <div class="calc-total" id="calcTotal" style="display: none;">
+                    <span class="calc-total-label">Total</span>
+                    <span class="calc-total-value" id="calcTotalValue">0</span>
+                </div>
+            </div>
+
+            <form action="/channel/{{ channel.id }}/post" method="POST">
+                <div class="composer-header">
+                    <div class="composer-avatar">{{ channel.branding.avatar_emoji }}</div>
+                    <span class="composer-label">Create a new post</span>
+                </div>
+                <div class="post-input-container">
+                    <textarea name="content" class="post-input" placeholder="Share something with your subscribers..." required id="postContent" oninput="detectCalculations(this.value)"></textarea>
+                </div>
+                <select name="linked_post" style="display: none;" id="linkedPostSelect">
+                    <option value="">No linked post</option>
+                    {% for post in posts %}
+                    <option value="{{ post.id }}">{{ post.content[:50] }}...</option>
+                    {% endfor %}
+                </select>
+                <div class="composer-toolbar">
+                    <div class="formatting-buttons">
+                        <button type="button" class="format-btn" onclick="insertFormat('**', '**')" title="Bold">B</button>
+                        <button type="button" class="format-btn" onclick="insertFormat('*', '*')" title="Italic" style="font-style: italic;">I</button>
+                        <button type="button" class="format-btn" onclick="insertFormat('`', '`')" title="Code">&lt;&gt;</button>
+                        <button type="button" class="format-btn" onclick="insertFormat('==', '==')" title="Highlight">🖍️</button>
+                        <button type="button" class="format-btn" onclick="toggleLinkPost()" title="Link to previous post">🔗</button>
+                    </div>
+                    <button type="submit" class="post-btn">Post</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    </div> <!-- Close app-container -->
+
+    <script>
+        const socket = io();
+        const channelId = '{{ channel.id }}';
+        const currentUser = '{{ username }}';
+
+        // Join channel room for real-time updates
+        socket.emit('join_channel', { channel_id: channelId });
+
+        // Format post content
+        function formatContent(content) {
+            return content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/__(.*?)__/g, '<u>$1</u>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/==(.*?)==/g, '<span class="highlight">$1</span>');
+        }
+
+        // Apply formatting to all posts on load
+        document.querySelectorAll('.post-content').forEach(el => {
+            el.innerHTML = formatContent(el.textContent);
+        });
+
+        // Insert formatting at cursor
+        function insertFormat(before, after) {
+            const textarea = document.getElementById('postContent');
+            if (!textarea) return;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selected = text.substring(start, end);
+            
+            textarea.value = text.substring(0, start) + before + selected + after + text.substring(end);
+            textarea.focus();
+            textarea.setSelectionRange(start + before.length, end + before.length);
+        }
+
+        // Toggle link post selector
+        function toggleLinkPost() {
+            const select = document.getElementById('linkedPostSelect');
+            if (select) {
+                select.style.display = select.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        // Toggle like
+        function toggleLike(postId) {
+            socket.emit('toggle_like', { post_id: postId });
+        }
+
+        // Add reaction
+        function addReaction(postId, emoji) {
+            socket.emit('add_reaction', { post_id: postId, emoji: emoji });
+            document.querySelectorAll('.reaction-dropdown').forEach(el => el.classList.remove('show'));
+        }
+
+        // Toggle reaction picker
+        function toggleReactionPicker(postId) {
+            const picker = document.getElementById(`reaction-picker-${postId}`);
+            document.querySelectorAll('.reaction-dropdown').forEach(el => {
+                if (el !== picker) el.classList.remove('show');
+            });
+            picker.classList.toggle('show');
+        }
+
+        // Toggle comments
+        function toggleComments(postId) {
+            const comments = document.getElementById(`comments-${postId}`);
+            comments.classList.toggle('show');
+        }
+
+        // Handle comment key
+        function handleCommentKey(event, postId) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                submitComment(postId);
+            }
+        }
+
+        // Submit comment
+        function submitComment(postId) {
+            const input = document.getElementById(`comment-input-${postId}`);
+            const content = input.value.trim();
+            
+            if (content) {
+                socket.emit('add_comment', { post_id: postId, content: content });
+                input.value = '';
+            }
+        }
+
+        // Toggle members panel
+        function toggleMembers() {
+            const panel = document.getElementById('membersPanel');
+            panel.classList.toggle('show');
+        }
+
+        // Socket event handlers
+        socket.on('like_updated', (data) => {
+            const btn = document.getElementById(`like-btn-${data.post_id}`);
+            const count = document.getElementById(`like-count-${data.post_id}`);
+            if (btn && count) {
+                count.textContent = data.like_count;
+                if (data.liked_by.includes(currentUser)) {
+                    btn.classList.add('liked');
+                } else {
+                    btn.classList.remove('liked');
+                }
+            }
+        });
+
+        socket.on('reaction_added', (data) => {
+            // Reload page to show updated reactions (simple approach)
+            location.reload();
+        });
+
+        socket.on('comment_added', (data) => {
+            const commentsList = document.getElementById(`comments-${data.post_id}`);
+            const countEl = document.getElementById(`comment-count-${data.post_id}`);
+            
+            if (commentsList) {
+                const commentHtml = `
+                    <div class="comment">
+                        <div class="comment-avatar">${data.author[0].toUpperCase()}</div>
+                        <div class="comment-content">
+                            <div class="comment-header">
+                                <span class="comment-author">${data.author}</span>
+                                <span class="comment-time">Just now</span>
+                            </div>
+                            <div class="comment-text">${data.content}</div>
+                        </div>
+                    </div>
+                `;
+                const inputWrapper = commentsList.querySelector('.comment-input-wrapper');
+                inputWrapper.insertAdjacentHTML('beforebegin', commentHtml);
+                commentsList.classList.add('show');
+            }
+            
+            if (countEl) {
+                countEl.textContent = parseInt(countEl.textContent) + 1;
+            }
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.reaction-picker')) {
+                document.querySelectorAll('.reaction-dropdown').forEach(el => el.classList.remove('show'));
+            }
+        });
+
+        // ============================================
+        // CALCULATOR FUNCTIONS
+        // ============================================
+        
+        let lastCalculations = [];
+        let lastTotal = 0;
+        
+        function detectCalculations(text) {
+            const preview = document.getElementById('calcPreview');
+            const resultsContainer = document.getElementById('calcResults');
+            const totalContainer = document.getElementById('calcTotal');
+            const totalValue = document.getElementById('calcTotalValue');
+            
+            if (!preview) return;
+            
+            // Pattern to match math expressions: number operator number
+            const mathPattern = /(\d+(?:\.\d+)?)\s*([x×*+\-\/÷])\s*(\d+(?:\.\d+)?)/gi;
+            
+            const lines = text.split('\n');
+            const calculations = [];
+            
+            lines.forEach(line => {
+                const matches = line.matchAll(mathPattern);
+                for (const match of matches) {
+                    const num1 = parseFloat(match[1]);
+                    const operator = match[2].toLowerCase();
+                    const num2 = parseFloat(match[3]);
+                    
+                    let result;
+                    let displayOperator = operator;
+                    
+                    switch(operator) {
+                        case 'x':
+                        case '×':
+                        case '*':
+                            result = num1 * num2;
+                            displayOperator = 'x';
+                            break;
+                        case '+':
+                            result = num1 + num2;
+                            break;
+                        case '-':
+                            result = num1 - num2;
+                            break;
+                        case '/':
+                        case '÷':
+                            result = num2 !== 0 ? num1 / num2 : 0;
+                            displayOperator = '÷';
+                            break;
+                        default:
+                            continue;
+                    }
+                    
+                    calculations.push({
+                        expression: `${num1}${displayOperator}${num2}`,
+                        result: result
+                    });
+                }
+            });
+            
+            if (calculations.length > 0) {
+                let html = calculations.map(calc => `
+                    <div class="calc-line">
+                        <span class="calc-expression">${calc.expression}</span>
+                        <span>
+                            <span class="calc-equals">=</span>
+                            <span class="calc-result">${formatNumber(calc.result)}</span>
+                        </span>
+                    </div>
+                `).join('');
+                
+                resultsContainer.innerHTML = html;
+                
+                if (calculations.length > 1) {
+                    const total = calculations.reduce((sum, calc) => sum + calc.result, 0);
+                    totalValue.textContent = formatNumber(total);
+                    totalContainer.style.display = 'flex';
+                    lastTotal = total;
+                } else {
+                    totalContainer.style.display = 'none';
+                    lastTotal = calculations[0].result;
+                }
+                
+                lastCalculations = calculations;
+                preview.classList.add('show');
+            } else {
+                lastCalculations = [];
+                lastTotal = 0;
+                preview.classList.remove('show');
+            }
+        }
+        
+        function formatNumber(num) {
+            if (Number.isInteger(num)) {
+                return num.toLocaleString();
+            }
+            return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
+        }
+        
+        function insertCalculatedText() {
+            if (lastCalculations.length === 0) return;
+            
+            const textarea = document.getElementById('postContent');
+            
+            let resultLines = lastCalculations.map(calc => 
+                `${calc.expression}=${formatNumber(calc.result)}`
+            );
+            
+            if (lastCalculations.length > 1) {
+                resultLines.push(`Total=${formatNumber(lastTotal)}`);
+            }
+            
+            textarea.value = resultLines.join('\n');
+            document.getElementById('calcPreview').classList.remove('show');
+            textarea.focus();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel Settings - {{ channel.name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #030306;
+            --bg-secondary: #08080c;
+            --bg-card: #0c0c12;
+            --bg-card-inner: #101018;
+            --bg-card-hover: #14141e;
+            --bg-input: #0a0a10;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --text-dim: #6b7280;
+            --text-muted: #4b5563;
+            --border: rgba(255, 255, 255, 0.04);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.1);
+            --success: #10b981;
+            --error: #ef4444;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            margin-bottom: 2rem;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.25rem;
+        }
+
+        .header-info h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.02em;
+        }
+
+        .header-info p {
+            color: var(--text-muted);
+            font-size: 0.9375rem;
+        }
+
+        /* Settings Section */
+        .settings-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-body {
+            padding: 1.25rem;
+        }
+
+        /* Toggle Row */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .toggle-info h3 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.9375rem;
+        }
+
+        .toggle-info p {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(22px);
+            background: white;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: var(--radius-full);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            margin-top: 0.625rem;
+        }
+
+        .status-badge.public {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-badge.private {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        input:hover, textarea:hover {
+            border-color: var(--border-hover);
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+            background: var(--bg-card);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.6;
+        }
+
+        /* Branding Grid */
+        .branding-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        /* Emoji Picker */
+        .emoji-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.375rem;
+        }
+
+        .emoji-btn {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 1.125rem;
+            transition: all 0.2s;
+        }
+
+        .emoji-btn:hover {
+            background: var(--bg-card-inner);
+            border-color: var(--border-hover);
+        }
+
+        .emoji-btn.selected {
+            border-color: var(--accent-primary);
+            background: var(--accent-glow);
+        }
+
+        /* Color Picker */
+        .color-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.375rem;
+        }
+
+        .color-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.selected {
+            border-color: white;
+            box-shadow: 0 0 0 2px var(--bg-primary), 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card-inner);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card-inner);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.875rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.375rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .stat-label {
+            font-size: 0.6875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Member Management */
+        .members-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.875rem;
+            background: var(--bg-card-inner);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+        }
+
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            color: white;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .member-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .member-name {
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .member-owner {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .member-role-select {
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.8125rem;
+            cursor: pointer;
+        }
+
+        .member-role-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .member-role-select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: var(--radius-full);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .role-badge.admin {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        .role-badge.mod {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent-primary);
+        }
+
+        .role-badge.viewer {
+            background: rgba(107, 114, 128, 0.15);
+            color: var(--text-dim);
+        }
+
+        .empty-members {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .branding-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .member-item {
+                flex-wrap: wrap;
+            }
+
+            .member-role-select {
+                margin-left: calc(40px + 0.875rem);
+                margin-top: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/channel/{{ channel.id }}" class="back-link">
+            ← Back to Channel
+        </a>
+
+        <div class="header">
+            <div class="header-avatar" style="background: {{ channel.branding.accent_color }}15; color: {{ channel.branding.accent_color }};">
+                {{ channel.branding.avatar_emoji }}
+            </div>
+            <div class="header-info">
+                <h1>{{ channel.name }}</h1>
+                <p>Channel Settings</p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h2>📊 Statistics</h2>
+            </div>
+            <div class="section-body">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ channel.subscribers|length }}</div>
+                        <div class="stat-label">Subscribers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ channel.posts|length }}</div>
+                        <div class="stat-label">Posts</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ channel.views|default(0) }}</div>
+                        <div class="stat-label">Views</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">
+                            {% set total_likes = 0 %}
+                            {% for post_id in channel.posts %}
+                                {% set post = channel_posts[post_id] if channel_posts else {} %}
+                                {% set total_likes = total_likes + (post.likes|length if post and post.likes else 0) %}
+                            {% endfor %}
+                            {{ total_likes }}
+                        </div>
+                        <div class="stat-label">Total Likes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visibility Settings -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h2>👁️ Visibility</h2>
+            </div>
+            <div class="section-body">
+                <form method="POST" id="visibilityForm">
+                    <input type="hidden" name="action" value="toggle_discoverable">
+                    <div class="toggle-row">
+                        <div class="toggle-info">
+                            <h3>Discoverable</h3>
+                            <p>Allow others to find your channel in search and discovery</p>
+                            <span class="status-badge {% if channel.discoverable %}public{% else %}private{% endif %}">
+                                {% if channel.discoverable %}
+                                    🌟 Public - Visible in search & discovery
+                                {% else %}
+                                    🔒 Private - Only accessible via direct link
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="toggle-switch {% if channel.discoverable %}active{% endif %}" 
+                             id="discoverableToggle"
+                             onclick="this.closest('form').submit();">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h2>📝 Description</h2>
+            </div>
+            <div class="section-body">
+                <form method="POST">
+                    <input type="hidden" name="action" value="update_description">
+                    <div class="form-group">
+                        <textarea name="description" placeholder="Describe your channel...">{{ channel.description }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Description</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Branding -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h2>🎨 Branding</h2>
+            </div>
+            <div class="section-body">
+                <form method="POST" id="brandingForm">
+                    <input type="hidden" name="action" value="update_branding">
+                    <input type="hidden" name="avatar_emoji" id="selectedEmoji" value="{{ channel.branding.avatar_emoji }}">
+                    <input type="hidden" name="accent_color" id="selectedColor" value="{{ channel.branding.accent_color }}">
+                    
+                    <div class="branding-grid">
+                        <div class="form-group">
+                            <label>Channel Icon</label>
+                            <div class="emoji-grid">
+                                {% for emoji in ['📢', '🎯', '💡', '🚀', '🎨', '📚', '🎮', '🎵', '💬', '⭐', '🔥', '💎', '🌟', '📣', '🎤', '📰'] %}
+                                <button type="button" 
+                                        class="emoji-btn {% if emoji == channel.branding.avatar_emoji %}selected{% endif %}"
+                                        data-emoji="{{ emoji }}"
+                                        onclick="selectEmoji(this, '{{ emoji }}')">
+                                    {{ emoji }}
+                                </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Accent Color</label>
+                            <div class="color-grid">
+                                {% for color in ['#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f59e0b', '#22c55e', '#06b6d4', '#3b82f6'] %}
+                                <button type="button"
+                                        class="color-btn {% if color == channel.branding.accent_color %}selected{% endif %}"
+                                        style="background: {{ color }};"
+                                        data-color="{{ color }}"
+                                        onclick="selectColor(this, '{{ color }}')">
+                                </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="btn-row">
+                        <button type="submit" class="btn btn-primary">Save Branding</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Share Link -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h2>🔗 Share</h2>
+            </div>
+            <div class="section-body">
+                <div class="form-group">
+                    <label>Direct Link</label>
+                    <input type="text" 
+                           value="{{ request.url_root }}channel/{{ channel.id }}" 
+                           readonly 
+                           id="shareLink"
+                           onclick="this.select();">
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="copyLink()">
+                    📋 Copy Link
+                </button>
+            </div>
+        </div>
+
+        <!-- Member Management -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h2>👥 Members ({{ members_with_roles|length }})</h2>
+            </div>
+            <div class="section-body">
+                {% if members_with_roles %}
+                <div class="members-list">
+                    {% for member in members_with_roles %}
+                    <div class="member-item">
+                        <div class="member-avatar">{{ member.username[0]|upper }}</div>
+                        <div class="member-info">
+                            <div class="member-name">@{{ member.username }}</div>
+                            {% if member.is_owner %}
+                            <span class="member-owner">Channel Owner</span>
+                            {% endif %}
+                        </div>
+                        {% if member.is_owner %}
+                        <span class="role-badge admin">👑 Owner</span>
+                        {% else %}
+                        <form method="POST" style="display: flex; align-items: center;">
+                            <input type="hidden" name="action" value="update_member_role">
+                            <input type="hidden" name="member_username" value="{{ member.username }}">
+                            <select name="new_role" class="member-role-select" onchange="this.form.submit()">
+                                <option value="admin" {% if member.role == 'admin' %}selected{% endif %}>👑 Admin</option>
+                                <option value="mod" {% if member.role == 'mod' %}selected{% endif %}>✏️ Moderator</option>
+                                <option value="viewer" {% if member.role == 'viewer' %}selected{% endif %}>👁️ Viewer</option>
+                            </select>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-members">
+                    <p>No members yet. Share your channel link to invite people!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectEmoji(btn, emoji) {
+            document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('selectedEmoji').value = emoji;
+        }
+
+        function selectColor(btn, color) {
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('selectedColor').value = color;
+        }
+
+        function copyLink() {
+            const linkInput = document.getElementById('shareLink');
+            linkInput.select();
+            document.execCommand('copy');
+            
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Copied!';
+            setTimeout(() => btn.textContent = originalText, 2000);
+        }
+    </script>
+</body>
+</html>

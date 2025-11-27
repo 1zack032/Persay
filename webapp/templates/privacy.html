@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Menza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #050508;
+            --bg-secondary: #0a0a0f;
+            --bg-card: #0f0f15;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-dim: #52525b;
+            --border: rgba(255, 255, 255, 0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.08), transparent);
+            pointer-events: none;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(5, 5, 8, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 8rem 2rem 4rem;
+        }
+
+        .header {
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header .meta {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 2.5rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--text-primary);
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        ul, ol {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight-box {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .data-table td {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-yes {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .badge-no {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .badge-limited {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .toc {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .toc h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .toc ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        .toc a {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .toc a:hover {
+            color: var(--accent-primary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-dim);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <nav>
+        <a href="/" class="logo">
+            <div class="logo-icon">🔐</div>
+            Menza
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>Privacy Policy</h1>
+            <p class="meta">Last updated: November 2025 • Effective: November 2025</p>
+        </div>
+
+        <div class="content">
+            <div class="toc">
+                <h4>Table of Contents</h4>
+                <ul>
+                    <li><a href="#overview">1. Overview</a></li>
+                    <li><a href="#data-collection">2. Data We Collect</a></li>
+                    <li><a href="#data-not-collected">3. Data We Don't Collect</a></li>
+                    <li><a href="#how-we-use">4. How We Use Your Data</a></li>
+                    <li><a href="#encryption">5. Encryption & Security</a></li>
+                    <li><a href="#retention">6. Data Retention</a></li>
+                    <li><a href="#your-rights">7. Your Rights</a></li>
+                    <li><a href="#ccpa">8. California Privacy Rights (CCPA)</a></li>
+                    <li><a href="#gdpr">9. European Privacy Rights (GDPR)</a></li>
+                    <li><a href="#children">10. Children's Privacy</a></li>
+                    <li><a href="#law-enforcement">11. Law Enforcement</a></li>
+                    <li><a href="#changes">12. Changes to This Policy</a></li>
+                    <li><a href="#contact">13. Contact Us</a></li>
+                </ul>
+            </div>
+
+            <h2 id="overview">1. Overview</h2>
+            <p>Menza ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our encrypted messaging service.</p>
+            
+            <p><em>Menza is an independent service and is not affiliated with any other messaging platform or technology company.</em></p>
+            
+            <div class="highlight-box">
+                <p><strong>🔐 Our Core Promise:</strong> Menza uses end-to-end encryption (AES-256). We cannot read your messages, and we never will. Your encryption keys stay on your device.</p>
+            </div>
+
+            <h2 id="data-collection">2. Data We Collect</h2>
+            <p>We follow the principle of <strong>data minimization</strong> — we only collect what is strictly necessary to provide our service.</p>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Data Type</th>
+                        <th>Collected</th>
+                        <th>Purpose</th>
+                        <th>Retention</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Username</td>
+                        <td><span class="badge badge-yes">Yes</span></td>
+                        <td>Account identification</td>
+                        <td>Until account deletion</td>
+                    </tr>
+                    <tr>
+                        <td>Password (hashed)</td>
+                        <td><span class="badge badge-yes">Yes</span></td>
+                        <td>Authentication</td>
+                        <td>Until account deletion</td>
+                    </tr>
+                    <tr>
+                        <td>Encrypted messages</td>
+                        <td><span class="badge badge-yes">Yes</span></td>
+                        <td>Message delivery</td>
+                        <td>Until you delete them</td>
+                    </tr>
+                    <tr>
+                        <td>IP address</td>
+                        <td><span class="badge badge-limited">Limited</span></td>
+                        <td>Security & abuse prevention</td>
+                        <td>7 days</td>
+                    </tr>
+                    <tr>
+                        <td>Message timestamps</td>
+                        <td><span class="badge badge-limited">Limited</span></td>
+                        <td>Message ordering</td>
+                        <td>With message</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 id="data-not-collected">3. Data We Don't Collect</h2>
+            <p>We are committed to privacy. The following data is <strong>never</strong> collected:</p>
+            <ul>
+                <li>❌ Unencrypted message content (we can't decrypt your messages)</li>
+                <li>❌ Your encryption keys (they never leave your device)</li>
+                <li>❌ Phone numbers or email addresses (optional)</li>
+                <li>❌ Contact lists or address books</li>
+                <li>❌ Location data</li>
+                <li>❌ Device identifiers or fingerprints</li>
+                <li>❌ Biometric data</li>
+                <li>❌ Third-party tracking or analytics</li>
+                <li>❌ Advertising identifiers</li>
+            </ul>
+
+            <h2 id="how-we-use">4. How We Use Your Data</h2>
+            <p>We use your data only for these purposes:</p>
+            <ul>
+                <li><strong>Service Delivery:</strong> To deliver your encrypted messages to recipients</li>
+                <li><strong>Authentication:</strong> To verify your identity when you sign in</li>
+                <li><strong>Security:</strong> To protect against abuse, fraud, and unauthorized access</li>
+                <li><strong>Legal Compliance:</strong> To comply with applicable laws when required</li>
+            </ul>
+
+            <div class="highlight-box">
+                <p><strong>We Never:</strong> Sell your data, share it with advertisers, use it for profiling, or create targeted advertising profiles.</p>
+            </div>
+
+            <h2 id="encryption">5. Encryption & Security</h2>
+            <h3>End-to-End Encryption</h3>
+            <p>All messages are encrypted on your device before being sent. Only you and your intended recipient can decrypt and read the messages. Our servers only see encrypted data.</p>
+            
+            <h3>Technical Details</h3>
+            <ul>
+                <li><strong>Encryption:</strong> AES-256-GCM (industry-standard symmetric encryption)</li>
+                <li><strong>Key Derivation:</strong> PBKDF2 with 480,000 iterations</li>
+                <li><strong>Transport:</strong> TLS 1.3 for all connections</li>
+                <li><strong>Keys:</strong> Generated and stored only on your device</li>
+            </ul>
+
+            <h2 id="retention">6. Data Retention</h2>
+            <ul>
+                <li><strong>Account data:</strong> Retained until you delete your account</li>
+                <li><strong>Encrypted messages:</strong> Retained until you delete them</li>
+                <li><strong>IP addresses:</strong> Automatically deleted after 7 days</li>
+                <li><strong>Security logs:</strong> Retained for 30 days (anonymized)</li>
+            </ul>
+
+            <h2 id="your-rights">7. Your Rights</h2>
+            <p>You have the right to:</p>
+            <ul>
+                <li><strong>Access:</strong> Request a copy of your data</li>
+                <li><strong>Delete:</strong> Delete your account and all associated data</li>
+                <li><strong>Export:</strong> Download your data in a portable format</li>
+                <li><strong>Correct:</strong> Update your account information</li>
+            </ul>
+            <p>To exercise these rights, contact us at privacy@persay.app or use the settings in your account.</p>
+
+            <h2 id="ccpa">8. California Privacy Rights (CCPA/CPRA)</h2>
+            <p>If you are a California resident, you have additional rights under the California Consumer Privacy Act:</p>
+            <ul>
+                <li><strong>Right to Know:</strong> What personal information we collect and how we use it</li>
+                <li><strong>Right to Delete:</strong> Request deletion of your personal information</li>
+                <li><strong>Right to Opt-Out:</strong> Opt out of the "sale" or "sharing" of personal information</li>
+                <li><strong>Right to Non-Discrimination:</strong> Equal service regardless of privacy choices</li>
+            </ul>
+            
+            <div class="highlight-box">
+                <p><strong>Notice:</strong> Menza does NOT sell or share your personal information with third parties for advertising or marketing purposes.</p>
+            </div>
+
+            <h2 id="gdpr">9. European Privacy Rights (GDPR)</h2>
+            <p>If you are in the European Economic Area (EEA) or UK, you have rights under the General Data Protection Regulation:</p>
+            
+            <h3>Legal Basis for Processing</h3>
+            <ul>
+                <li><strong>Contract:</strong> Processing necessary to provide the messaging service</li>
+                <li><strong>Legitimate Interest:</strong> Security and abuse prevention</li>
+                <li><strong>Consent:</strong> Optional features (when implemented)</li>
+            </ul>
+
+            <h3>Your GDPR Rights</h3>
+            <ul>
+                <li>Right of access (Art. 15)</li>
+                <li>Right to rectification (Art. 16)</li>
+                <li>Right to erasure (Art. 17)</li>
+                <li>Right to restriction of processing (Art. 18)</li>
+                <li>Right to data portability (Art. 20)</li>
+                <li>Right to object (Art. 21)</li>
+            </ul>
+
+            <h3>Data Transfers</h3>
+            <p>If we transfer data outside the EEA, we use appropriate safeguards such as Standard Contractual Clauses. Our end-to-end encryption provides additional protection as we cannot access message content regardless of where data is stored.</p>
+
+            <h2 id="children">10. Children's Privacy</h2>
+            <div class="highlight-box">
+                <p><strong>⚠️ Age Requirement:</strong> Menza is intended for users aged 18 and older. We do not knowingly collect information from anyone under 18 years of age.</p>
+            </div>
+            <p>If we discover that we have collected data from a user under 18, we will delete that information immediately. If you believe a minor has provided us with personal information, please contact us at privacy@persay.app.</p>
+
+            <h2 id="law-enforcement">11. Law Enforcement Requests</h2>
+            <p>We may be required to respond to valid legal requests from law enforcement. However, due to our end-to-end encryption:</p>
+            <ul>
+                <li><strong>What we CAN provide:</strong> Username, account creation date, last login date, IP addresses (limited retention)</li>
+                <li><strong>What we CANNOT provide:</strong> Message content, encryption keys, contact lists</li>
+            </ul>
+            <p>We will notify users of legal requests unless prohibited by law. We do not build backdoors into our encryption.</p>
+
+            <h2 id="changes">12. Changes to This Policy</h2>
+            <p>We may update this Privacy Policy from time to time. We will notify you of material changes by posting a notice in the app or via email (if provided). Your continued use of Menza after changes constitutes acceptance of the updated policy.</p>
+
+            <h2 id="contact">13. Contact Us</h2>
+            <p>For privacy-related questions or to exercise your rights:</p>
+            <ul>
+                <li><strong>Email:</strong> privacy@persay.app</li>
+                <li><strong>Data Protection Officer (EU):</strong> dpo@persay.app</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 Menza. All rights reserved. <a href="/terms">Terms of Service</a> • <a href="/privacy">Privacy Policy</a></p>
+    </footer>
+</body>
+</html>
+

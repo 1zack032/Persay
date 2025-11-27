@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channels - Menza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #030306;
+            --bg-secondary: #08080c;
+            --bg-card: #0c0c12;
+            --bg-card-inner: #101018;
+            --bg-card-hover: #14141e;
+            --bg-input: #0a0a10;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --text-dim: #6b7280;
+            --text-muted: #4b5563;
+            --border: rgba(255, 255, 255, 0.04);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-full: 9999px;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(3, 3, 6, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 2rem 2rem;
+        }
+
+        /* Header with Search */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        /* Search */
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            width: 280px;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--border-hover);
+            background: var(--bg-card-inner);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-top: 0.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            z-index: 50;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .search-results.show {
+            display: block;
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .search-result-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .search-result-info {
+            flex: 1;
+        }
+
+        .search-result-name {
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .search-result-meta {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .search-no-results {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 20px var(--accent-glow), 0 4px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-header h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: -0.01em;
+        }
+
+        .section-header a {
+            font-size: 0.875rem;
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        .section-header a:hover {
+            text-decoration: underline;
+        }
+
+        /* Trending Badge */
+        .trending-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.625rem;
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        /* Channel Grid */
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        /* Horizontal scroll for trending */
+        .trending-scroll {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            scrollbar-width: thin;
+        }
+
+        .trending-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .trending-scroll::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 3px;
+        }
+
+        .trending-scroll::-webkit-scrollbar-thumb {
+            background: var(--border-hover);
+            border-radius: 3px;
+        }
+
+        .trending-scroll .channel-card {
+            min-width: 280px;
+            flex-shrink: 0;
+        }
+
+        .channel-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+        }
+
+        .channel-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .channel-card.private::after {
+            content: '🔒';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .channel-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .channel-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.375rem;
+        }
+
+        .channel-info h3 {
+            font-size: 1.0625rem;
+            font-weight: 600;
+            margin-bottom: 0.125rem;
+            letter-spacing: -0.01em;
+        }
+
+        .channel-info p {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .channel-description {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.5;
+        }
+
+        .channel-stats {
+            display: flex;
+            gap: 1.25rem;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .channel-stats span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Channel Actions (View/Join) */
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .filter-tab {
+            padding: 0.625rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .filter-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-card-hover);
+        }
+
+        .filter-tab.active {
+            color: var(--text-primary);
+            background: var(--accent-primary);
+        }
+
+        /* Like Button */
+        .like-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.625rem;
+            background: var(--bg-card-hover);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: auto;
+        }
+
+        .like-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .like-btn.liked {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .like-btn.liked:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .like-icon {
+            font-size: 0.875rem;
+            transition: transform 0.2s;
+        }
+
+        .like-btn:hover .like-icon,
+        .like-btn.liked .like-icon {
+            transform: scale(1.1);
+        }
+
+        .like-count {
+            min-width: 1ch;
+        }
+
+        .channel-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .channel-action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.375rem;
+            padding: 0.625rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.15s;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .channel-action-btn.view-btn {
+            background: var(--bg-card-inner);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .channel-action-btn.view-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        .channel-action-btn.join-btn {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .channel-action-btn.join-btn:hover {
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        /* Role Badge */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: var(--radius-full);
+            font-size: 0.625rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .role-badge.admin {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .role-badge.mod {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent-primary);
+        }
+
+        .role-badge.viewer {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-dim);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .empty-state p {
+            font-size: 0.9375rem;
+        }
+
+        /* Owner Badge */
+        .owner-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: var(--radius-full);
+            font-size: 0.6875rem;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">
+            <div class="logo-icon">M</div>
+            Menza
+        </a>
+        <div class="nav-links">
+            <a href="/chat">Messages</a>
+            <a href="/channels" class="active">Channels</a>
+            <a href="/settings">Settings</a>
+            <a href="/logout">Sign Out</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>📺 Channels</h1>
+            <div class="header-actions">
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" 
+                           class="search-input" 
+                           placeholder="Search channels..." 
+                           id="channelSearch"
+                           autocomplete="off">
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+                <a href="/channel/create" class="btn btn-primary">
+                    <span>+</span> Create Channel
+                </a>
+            </div>
+        </div>
+
+        <!-- Trending Channels -->
+        {% if trending_channels %}
+        <div class="section">
+            <div class="section-header">
+                <h2>🔥 Trending</h2>
+            </div>
+            <div class="trending-scroll">
+                {% for channel in trending_channels %}
+                <a href="/channel/{{ channel.id }}" class="channel-card">
+                    <span class="trending-badge">🔥 Trending</span>
+                    <div class="channel-header" style="margin-top: 0.5rem;">
+                        <div class="channel-avatar" style="background: {{ channel.branding.accent_color }}15; color: {{ channel.branding.accent_color }};">
+                            {{ channel.branding.avatar_emoji }}
+                        </div>
+                        <div class="channel-info">
+                            <h3>{{ channel.name }}</h3>
+                            <p>by {{ channel.owner }}</p>
+                        </div>
+                    </div>
+                    <div class="channel-stats">
+                        <span>👥 {{ channel.subscribers|length }}</span>
+                        <span>📝 {{ channel.posts|length }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- My Channels -->
+        {% if my_channels %}
+        <div class="section">
+            <div class="section-header">
+                <h2>👑 Your Channels</h2>
+            </div>
+            <div class="channel-grid">
+                {% for channel in my_channels %}
+                <a href="/channel/{{ channel.id }}" class="channel-card {% if not channel.discoverable %}private{% endif %}">
+                    <div class="channel-header">
+                        <div class="channel-avatar" style="background: {{ channel.branding.accent_color }}15; color: {{ channel.branding.accent_color }};">
+                            {{ channel.branding.avatar_emoji }}
+                        </div>
+                        <div class="channel-info">
+                            <h3>{{ channel.name }}</h3>
+                            <p>
+                                <span class="owner-badge">👑 Owner</span>
+                                {% if not channel.discoverable %}
+                                <span style="margin-left: 0.5rem; color: var(--text-muted); font-size: 0.6875rem;">Private</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <p class="channel-description">{{ channel.description or 'No description' }}</p>
+                    <div class="channel-stats">
+                        <span>👥 {{ channel.subscribers|length }} subscribers</span>
+                        <span>📝 {{ channel.posts|length }} posts</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Subscribed Channels -->
+        {% if subscribed_channels %}
+        <div class="section">
+            <div class="section-header">
+                <h2>✨ Joined Channels</h2>
+            </div>
+            <div class="channel-grid">
+                {% for channel in subscribed_channels %}
+                <a href="/channel/{{ channel.id }}" class="channel-card">
+                    <div class="channel-header">
+                        <div class="channel-avatar" style="background: {{ channel.branding.accent_color }}15; color: {{ channel.branding.accent_color }};">
+                            {{ channel.branding.avatar_emoji }}
+                        </div>
+                        <div class="channel-info">
+                            <h3>{{ channel.name }}</h3>
+                            <p>
+                                by {{ channel.owner }}
+                                {% if channel.user_role == 'admin' %}
+                                <span class="role-badge admin">👑 Admin</span>
+                                {% elif channel.user_role == 'mod' %}
+                                <span class="role-badge mod">✏️ Mod</span>
+                                {% else %}
+                                <span class="role-badge viewer">👁️ Viewer</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <p class="channel-description">{{ channel.description or 'No description' }}</p>
+                    <div class="channel-stats">
+                        <span>👥 {{ channel.subscribers|length }} members</span>
+                        <span>📝 {{ channel.posts|length }} posts</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Discover Channels -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🌟 Discover</h2>
+            </div>
+            
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <a href="/channels?filter=trending" class="filter-tab {% if discover_filter == 'trending' or not discover_filter %}active{% endif %}">
+                    🔥 Trending
+                </a>
+                <a href="/channels?filter=most_liked" class="filter-tab {% if discover_filter == 'most_liked' %}active{% endif %}">
+                    ❤️ Most Liked
+                </a>
+                <a href="/channels?filter=most_viewed" class="filter-tab {% if discover_filter == 'most_viewed' %}active{% endif %}">
+                    👁️ Most Viewed
+                </a>
+                <a href="/channels?filter=new" class="filter-tab {% if discover_filter == 'new' %}active{% endif %}">
+                    ✨ New
+                </a>
+            </div>
+            
+            {% if discover_channels %}
+            <div class="channel-grid">
+                {% for channel in discover_channels %}
+                <div class="channel-card" id="channel-{{ channel.id }}">
+                    <div class="channel-header">
+                        <div class="channel-avatar" style="background: {{ channel.branding.accent_color }}15; color: {{ channel.branding.accent_color }};">
+                            {{ channel.branding.avatar_emoji }}
+                        </div>
+                        <div class="channel-info">
+                            <h3>{{ channel.name }}</h3>
+                            <p>by {{ channel.owner }}</p>
+                        </div>
+                        <!-- Like Button -->
+                        <button class="like-btn {% if channel.liked_by_user %}liked{% endif %}" 
+                                onclick="toggleLikeChannel('{{ channel.id }}')"
+                                title="{% if channel.liked_by_user %}Unlike{% else %}Like{% endif %} this channel">
+                            <span class="like-icon">{% if channel.liked_by_user %}❤️{% else %}🤍{% endif %}</span>
+                            <span class="like-count" id="like-count-{{ channel.id }}">{{ channel.like_count or 0 }}</span>
+                        </button>
+                    </div>
+                    <p class="channel-description">{{ channel.description or 'No description' }}</p>
+                    <div class="channel-stats">
+                        <span>👥 {{ channel.subscribers|length }} members</span>
+                        <span>📝 {{ channel.posts|length }} posts</span>
+                        <span>👁️ {{ channel.views or 0 }} views</span>
+                    </div>
+                    <div class="channel-actions">
+                        <a href="/channel/{{ channel.id }}" class="channel-action-btn view-btn">
+                            👁️ View
+                        </a>
+                        <form action="/channel/{{ channel.id }}/subscribe" method="POST" style="flex: 1; display: flex;">
+                            <button type="submit" class="channel-action-btn join-btn" style="width: 100%;">
+                                ✨ Join
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📺</div>
+                <h3>No channels to discover</h3>
+                <p>Be the first to create a channel and share your content!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Live search functionality
+        const searchInput = document.getElementById('channelSearch');
+        const searchResults = document.getElementById('searchResults');
+        let searchTimeout;
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            
+            clearTimeout(searchTimeout);
+            
+            if (query.length < 2) {
+                searchResults.classList.remove('show');
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                fetch(`/channels/search?q=${encodeURIComponent(query)}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.results.length === 0) {
+                        searchResults.innerHTML = `
+                            <div class="search-no-results">
+                                No channels found for "${data.query}"
+                            </div>
+                        `;
+                    } else {
+                        searchResults.innerHTML = data.results.map(channel => `
+                            <a href="/channel/${channel.id}" class="search-result-item">
+                                <div class="search-result-avatar" style="background: ${channel.branding.accent_color}15; color: ${channel.branding.accent_color};">
+                                    ${channel.branding.avatar_emoji}
+                                </div>
+                                <div class="search-result-info">
+                                    <div class="search-result-name">${channel.name}</div>
+                                    <div class="search-result-meta">by ${channel.owner} • ${channel.subscribers.length} subscribers</div>
+                                </div>
+                            </a>
+                        `).join('');
+                    }
+                    searchResults.classList.add('show');
+                });
+            }, 300);
+        });
+
+        // Close search when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                searchResults.classList.remove('show');
+            }
+        });
+
+        // Focus search with /
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement !== searchInput) {
+                e.preventDefault();
+                searchInput.focus();
+            }
+        });
+
+        // Like/Unlike channel functionality
+        async function toggleLikeChannel(channelId) {
+            const card = document.getElementById(`channel-${channelId}`);
+            const btn = card.querySelector('.like-btn');
+            const icon = btn.querySelector('.like-icon');
+            const countSpan = document.getElementById(`like-count-${channelId}`);
+            const isLiked = btn.classList.contains('liked');
+            
+            try {
+                const endpoint = isLiked ? `/channel/${channelId}/unlike` : `/channel/${channelId}/like`;
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Toggle liked state
+                    btn.classList.toggle('liked');
+                    icon.textContent = btn.classList.contains('liked') ? '❤️' : '🤍';
+                    countSpan.textContent = data.likes;
+                    btn.title = btn.classList.contains('liked') ? 'Unlike this channel' : 'Like this channel';
+                    
+                    // Animate the heart
+                    icon.style.transform = 'scale(1.3)';
+                    setTimeout(() => {
+                        icon.style.transform = '';
+                    }, 200);
+                }
+            } catch (error) {
+                console.error('Error toggling like:', error);
+            }
+        }
+    </script>
+</body>
+</html>

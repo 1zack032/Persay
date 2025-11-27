@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Channel - Menza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #030306;
+            --bg-secondary: #08080c;
+            --bg-card: #0c0c12;
+            --bg-card-inner: #101018;
+            --bg-card-hover: #14141e;
+            --bg-input: #0a0a10;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --text-dim: #6b7280;
+            --text-muted: #4b5563;
+            --border: rgba(255, 255, 255, 0.04);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.1);
+            --error: #ef4444;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 560px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            margin-bottom: 2rem;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .card-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .card-header p {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--error);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 0.9375rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        input:hover, textarea:hover {
+            border-color: var(--border-hover);
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+            background: var(--bg-card);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.6;
+        }
+
+        /* Branding Section */
+        .branding-section {
+            background: var(--bg-card-inner);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .branding-section h3 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Emoji Picker */
+        .emoji-picker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .emoji-option {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .emoji-option:hover {
+            background: var(--bg-card);
+            border-color: var(--border-hover);
+        }
+
+        .emoji-option.selected {
+            border-color: var(--accent-primary);
+            background: var(--accent-glow);
+        }
+
+        .emoji-option input {
+            display: none;
+        }
+
+        /* Color Picker */
+        .color-picker {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .color-option {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: white;
+            box-shadow: 0 0 0 2px var(--bg-primary), 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-option input {
+            display: none;
+        }
+
+        /* Toggle Switch */
+        .visibility-option {
+            margin-bottom: 1rem;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .toggle-label input {
+            display: none;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .toggle-label input:checked + .toggle-switch {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .toggle-label input:checked + .toggle-switch::after {
+            transform: translateX(22px);
+            background: white;
+        }
+
+        .toggle-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .toggle-title {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            color: var(--text-primary);
+        }
+
+        .toggle-desc {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .visibility-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            background: var(--accent-glow);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        .visibility-note.private-note {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: var(--border);
+        }
+
+        .note-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* Member Invite Section */
+        .section-desc {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .members-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card-inner);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+        }
+
+        .member-item .username {
+            flex: 1;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .member-item .member-role {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: var(--radius-full);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .member-role.admin {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .member-role.mod {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--accent-primary);
+        }
+
+        .member-role.viewer {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-dim);
+        }
+
+        .member-item .remove-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.25rem;
+            font-size: 1rem;
+            transition: color 0.15s;
+        }
+
+        .member-item .remove-btn:hover {
+            color: var(--error);
+        }
+
+        .add-member-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .member-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+        }
+
+        .member-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .role-select {
+            padding: 0.75rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.875rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .role-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .add-member-btn {
+            padding: 0.75rem 1.25rem;
+            background: var(--bg-card-inner);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .add-member-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-primary);
+        }
+
+        .roles-help {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg-card-inner);
+            border-radius: var(--radius-md);
+        }
+
+        .role-info {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .role-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .role-info strong {
+            font-size: 0.8125rem;
+            color: var(--text-primary);
+        }
+
+        .role-info p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Preview */
+        .preview {
+            background: var(--bg-card-inner);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .preview h3 {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .preview-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .preview-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .preview-info h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .preview-info p {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-top: 0.125rem;
+        }
+
+        /* Button */
+        .btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-family: inherit;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 30px var(--accent-glow), 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+        /* Top Navigation Bar */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: linear-gradient(180deg, rgba(3, 3, 6, 0.98), rgba(8, 8, 12, 0.95));
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .top-nav .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .top-nav .nav-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #7c3aed, #06b6d4);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+
+        .top-nav .nav-logo-text {
+            font-size: 1.125rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+        }
+
+        .nav-tab {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        .nav-tab.active {
+            color: var(--text-primary);
+            background: rgba(124, 58, 237, 0.15);
+        }
+
+        .nav-tab.logout:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <a href="/" class="nav-logo">
+            <div class="nav-logo-icon">M</div>
+            <span class="nav-logo-text">Menza</span>
+        </a>
+        <div class="nav-tabs">
+            <a href="/chat" class="nav-tab">Messages</a>
+            <a href="/channels" class="nav-tab active">Channels</a>
+            <a href="/settings" class="nav-tab">Settings</a>
+            <a href="/logout" class="nav-tab logout">Sign Out</a>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 80px;">
+
+        <div class="card">
+            <div class="card-header">
+                <h1>📺 Create Channel</h1>
+                <p>Share content with your subscribers</p>
+            </div>
+
+            {% if error %}
+            <div class="error">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST" id="createForm">
+                <div class="form-group">
+                    <label for="name">Channel Name *</label>
+                    <input type="text" id="name" name="name" placeholder="My Awesome Channel" required maxlength="50">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" placeholder="What's your channel about?" maxlength="500"></textarea>
+                </div>
+
+                <div class="branding-section">
+                    <h3>🎨 Branding</h3>
+                    
+                    <div class="form-group">
+                        <label>Channel Icon</label>
+                        <div class="emoji-picker" id="emojiPicker">
+                            {% for emoji in ['📢', '🎯', '💡', '🚀', '🎨', '📚', '🎮', '🎵', '💬', '⭐', '🔥', '💎', '🌟', '📣', '🎤', '📰'] %}
+                            <label class="emoji-option {% if loop.first %}selected{% endif %}">
+                                <input type="radio" name="avatar_emoji" value="{{ emoji }}" {% if loop.first %}checked{% endif %}>
+                                {{ emoji }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Accent Color</label>
+                        <div class="color-picker" id="colorPicker">
+                            {% for color in ['#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f59e0b', '#22c55e', '#06b6d4', '#3b82f6'] %}
+                            <label class="color-option {% if loop.first %}selected{% endif %}" style="background: {{ color }};">
+                                <input type="radio" name="accent_color" value="{{ color }}" {% if loop.first %}checked{% endif %}>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visibility Settings -->
+                <div class="branding-section">
+                    <h3>👁️ Visibility</h3>
+                    
+                    <div class="visibility-option">
+                        <label class="toggle-label">
+                            <input type="checkbox" name="discoverable" id="discoverableToggle" checked>
+                            <span class="toggle-switch"></span>
+                            <div class="toggle-info">
+                                <span class="toggle-title">Discoverable</span>
+                                <span class="toggle-desc">Allow others to find your channel in search and discovery</span>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div class="visibility-note" id="visibilityNote">
+                        <span class="note-icon">🌟</span>
+                        <span class="note-text">Your channel will appear in search results and the discovery section. High engagement channels get featured in trending.</span>
+                    </div>
+                </div>
+
+                <!-- Invite Members -->
+                <div class="branding-section">
+                    <h3>👥 Invite Members</h3>
+                    <p class="section-desc">Optionally invite users to your channel. You can always add more later.</p>
+                    
+                    <div class="members-list" id="membersList">
+                        <!-- Members will be added here dynamically -->
+                    </div>
+                    
+                    <div class="add-member-row">
+                        <input type="text" id="memberInput" placeholder="Enter username" class="member-input">
+                        <select id="roleSelect" class="role-select">
+                            <option value="viewer">👁️ Viewer</option>
+                            <option value="mod">✏️ Moderator</option>
+                            <option value="admin">👑 Admin</option>
+                        </select>
+                        <button type="button" id="addMemberBtn" class="add-member-btn">Add</button>
+                    </div>
+                    
+                    <div class="roles-help">
+                        <div class="role-info">
+                            <span class="role-icon">👑</span>
+                            <div>
+                                <strong>Admin</strong>
+                                <p>Full access: manage settings, members, posts, and permissions</p>
+                            </div>
+                        </div>
+                        <div class="role-info">
+                            <span class="role-icon">✏️</span>
+                            <div>
+                                <strong>Moderator</strong>
+                                <p>Can post content and moderate comments, but cannot change settings</p>
+                            </div>
+                        </div>
+                        <div class="role-info">
+                            <span class="role-icon">👁️</span>
+                            <div>
+                                <strong>Viewer</strong>
+                                <p>Read-only access to all channel content</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="invited_members" id="invitedMembersInput" value="[]">
+                </div>
+
+                <div class="preview">
+                    <h3>Preview</h3>
+                    <div class="preview-card">
+                        <div class="preview-avatar" id="previewAvatar" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">
+                            📢
+                        </div>
+                        <div class="preview-info">
+                            <h4 id="previewName">Your Channel</h4>
+                            <p id="previewDesc">Channel description...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Create Channel</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Live preview updates
+        const nameInput = document.getElementById('name');
+        const descInput = document.getElementById('description');
+        const previewName = document.getElementById('previewName');
+        const previewDesc = document.getElementById('previewDesc');
+        const previewAvatar = document.getElementById('previewAvatar');
+
+        nameInput.addEventListener('input', () => {
+            previewName.textContent = nameInput.value || 'Your Channel';
+        });
+
+        descInput.addEventListener('input', () => {
+            previewDesc.textContent = descInput.value || 'Channel description...';
+        });
+
+        // Emoji selection
+        document.querySelectorAll('.emoji-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.emoji-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                previewAvatar.textContent = option.textContent.trim();
+            });
+        });
+
+        // Color selection
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                const color = option.querySelector('input').value;
+                previewAvatar.style.background = color + '15';
+                previewAvatar.style.color = color;
+            });
+        });
+
+        // Visibility toggle
+        const discoverableToggle = document.getElementById('discoverableToggle');
+        const visibilityNote = document.getElementById('visibilityNote');
+
+        function updateVisibilityNote() {
+            if (discoverableToggle.checked) {
+                visibilityNote.className = 'visibility-note';
+                visibilityNote.innerHTML = `
+                    <span class="note-icon">🌟</span>
+                    <span class="note-text">Your channel will appear in search results and the discovery section. High engagement channels get featured in trending.</span>
+                `;
+            } else {
+                visibilityNote.className = 'visibility-note private-note';
+                visibilityNote.innerHTML = `
+                    <span class="note-icon">🔒</span>
+                    <span class="note-text">Your channel is private. Only people with a direct link can find and subscribe to it. It won't appear in search or discovery.</span>
+                `;
+            }
+        }
+
+        discoverableToggle.addEventListener('change', updateVisibilityNote);
+
+        // Member invite management
+        const membersList = document.getElementById('membersList');
+        const memberInput = document.getElementById('memberInput');
+        const roleSelect = document.getElementById('roleSelect');
+        const addMemberBtn = document.getElementById('addMemberBtn');
+        const invitedMembersInput = document.getElementById('invitedMembersInput');
+        
+        let invitedMembers = [];
+
+        function getRoleLabel(role) {
+            const labels = {
+                'admin': '👑 Admin',
+                'mod': '✏️ Moderator',
+                'viewer': '👁️ Viewer'
+            };
+            return labels[role] || role;
+        }
+
+        function renderMembersList() {
+            membersList.innerHTML = invitedMembers.map((member, index) => `
+                <div class="member-item">
+                    <span class="username">@${member.username}</span>
+                    <span class="member-role ${member.role}">${getRoleLabel(member.role)}</span>
+                    <button type="button" class="remove-btn" data-index="${index}">✕</button>
+                </div>
+            `).join('');
+
+            // Add remove handlers
+            membersList.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    invitedMembers.splice(index, 1);
+                    renderMembersList();
+                });
+            });
+
+            // Update hidden input
+            invitedMembersInput.value = JSON.stringify(invitedMembers);
+        }
+
+        addMemberBtn.addEventListener('click', () => {
+            const username = memberInput.value.trim().replace('@', '');
+            const role = roleSelect.value;
+
+            if (!username) {
+                memberInput.focus();
+                return;
+            }
+
+            // Check for duplicates
+            if (invitedMembers.some(m => m.username.toLowerCase() === username.toLowerCase())) {
+                alert('This user is already in the list');
+                return;
+            }
+
+            invitedMembers.push({ username, role });
+            renderMembersList();
+            memberInput.value = '';
+            memberInput.focus();
+        });
+
+        // Allow Enter key to add member
+        memberInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addMemberBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
