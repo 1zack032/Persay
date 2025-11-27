@@ -5,15 +5,13 @@
 Flask==3.0.0
 Flask-SocketIO==5.3.6
 
-# WebSocket Support
+# WebSocket Support (pure Python - no compilation needed)
 python-socketio==5.10.0
 python-engineio==4.8.1
-eventlet==0.33.3
-greenlet==3.0.1
+simple-websocket==1.0.0
 
 # Production Server
 gunicorn==21.2.0
 
 # Utilities
 python-dotenv==1.0.0
-simple-websocket==1.0.0
