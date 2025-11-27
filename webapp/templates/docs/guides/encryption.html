@@ -1,0 +1,69 @@
+{% extends "docs/base.html" %}
+
+{% block title %}Understanding Encryption{% endblock %}
+
+{% block content %}
+<div class="docs-header">
+    <div class="docs-breadcrumb">
+        <a href="/docs">Docs</a>
+        <span>/</span>
+        <span>Encryption Guide</span>
+    </div>
+    <h1>Understanding Encryption</h1>
+    <p>Learn how end-to-end encryption protects your messages.</p>
+</div>
+
+<article class="docs-article">
+    <h2>What is End-to-End Encryption?</h2>
+    <p>
+        End-to-end encryption (E2EE) ensures that only you and the person you're communicating 
+        with can read your messages. Not even Menza can access the content.
+    </p>
+
+    <h2>How Menza Encrypts Your Messages</h2>
+    <ol>
+        <li><strong>You type a message</strong> on your device</li>
+        <li><strong>Your device encrypts it</strong> using AES-256 before sending</li>
+        <li><strong>The encrypted message travels</strong> through our servers</li>
+        <li><strong>Only the recipient's device</strong> can decrypt and read it</li>
+    </ol>
+
+    <div class="info-box">
+        <div class="info-box-title">🔐 AES-256</div>
+        <p>
+            AES-256 is an industry-standard encryption algorithm used by governments and 
+            financial institutions worldwide. It would take billions of years to crack.
+        </p>
+    </div>
+
+    <h2>What's Protected</h2>
+    <ul>
+        <li>✅ Message content</li>
+        <li>✅ Photos and videos</li>
+        <li>✅ Shared files</li>
+        <li>✅ Shared notes</li>
+    </ul>
+
+    <h2>Metadata</h2>
+    <p>
+        While message content is encrypted, some metadata is necessary for delivering messages:
+    </p>
+    <ul>
+        <li>Who you're messaging (to route messages)</li>
+        <li>When messages are sent (timestamps)</li>
+        <li>Message size (for delivery)</li>
+    </ul>
+
+    <div class="docs-nav-buttons">
+        <a href="/docs/guides/getting-started" class="docs-nav-btn">
+            <span>← Previous</span>
+            <strong>Getting Started</strong>
+        </a>
+        <a href="/docs/guides/channels" class="docs-nav-btn next">
+            <span>Next →</span>
+            <strong>Channels Guide</strong>
+        </a>
+    </div>
+</article>
+{% endblock %}
+

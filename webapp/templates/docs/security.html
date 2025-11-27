@@ -1,0 +1,102 @@
+{% extends "docs/base.html" %}
+
+{% block title %}Security{% endblock %}
+
+{% block content %}
+<div class="docs-header">
+    <div class="docs-breadcrumb">
+        <a href="/docs">Docs</a>
+        <span>/</span>
+        <span>Security</span>
+    </div>
+    <h1>Security</h1>
+    <p>How we keep your messages and data secure.</p>
+</div>
+
+<article class="docs-article">
+    <h2>End-to-End Encryption</h2>
+    <p>
+        All messages on Menza are protected with <strong>AES-256 end-to-end encryption</strong>. 
+        This means only you and your intended recipients can read your messages—not us, 
+        not hackers, not anyone else.
+    </p>
+
+    <div class="info-box">
+        <div class="info-box-title">🔐 How It Works</div>
+        <p>
+            When you send a message, it's encrypted on your device before being sent. 
+            Only the recipient's device has the key to decrypt it. Even if someone 
+            intercepts the message in transit, they can't read it.
+        </p>
+    </div>
+
+    <h2>Encryption Standards</h2>
+    <ul>
+        <li><strong>AES-256:</strong> Industry-standard symmetric encryption for messages</li>
+        <li><strong>PBKDF2:</strong> Secure key derivation with salt</li>
+        <li><strong>TLS 1.3:</strong> Encrypted transport layer for all connections</li>
+        <li><strong>HTTPS:</strong> All web traffic is encrypted</li>
+    </ul>
+
+    <h2>What We Cannot Access</h2>
+    <p>Due to end-to-end encryption, we cannot read or access:</p>
+    <ul>
+        <li>❌ Message content</li>
+        <li>❌ Shared files and media</li>
+        <li>❌ Shared notes content</li>
+        <li>❌ Your secret phrases</li>
+    </ul>
+
+    <h2>Account Security</h2>
+    <h3>Password Protection</h3>
+    <ul>
+        <li>Passwords are hashed using secure algorithms</li>
+        <li>We never store plain-text passwords</li>
+        <li>Failed login attempts are rate-limited</li>
+    </ul>
+
+    <h3>Session Security</h3>
+    <ul>
+        <li>Secure session tokens</li>
+        <li>Automatic session expiration</li>
+        <li>Ability to sign out all devices</li>
+    </ul>
+
+    <h2>Infrastructure Security</h2>
+    <ul>
+        <li><strong>Secure servers:</strong> Hosted in SOC 2 compliant data centers</li>
+        <li><strong>DDoS protection:</strong> Protection against distributed attacks</li>
+        <li><strong>Regular updates:</strong> Systems are patched and updated regularly</li>
+        <li><strong>Access control:</strong> Strict employee access policies</li>
+    </ul>
+
+    <h2>Security Best Practices</h2>
+    <p>To maximize your security on Menza:</p>
+    <ol>
+        <li>Use a strong, unique password</li>
+        <li>Don't share your login credentials</li>
+        <li>Keep your device and browser updated</li>
+        <li>Use auto-delete for sensitive messages</li>
+        <li>Sign out when using shared devices</li>
+    </ol>
+
+    <h2>Reporting Security Issues</h2>
+    <p>
+        Found a security vulnerability? Please report it responsibly to 
+        <a href="mailto:security@menza.app">security@menza.app</a>. 
+        We take all reports seriously and will respond promptly.
+    </p>
+
+    <div class="docs-nav-buttons">
+        <a href="/docs/terms" class="docs-nav-btn">
+            <span>← Previous</span>
+            <strong>Terms of Service</strong>
+        </a>
+        <a href="/docs/guides/getting-started" class="docs-nav-btn next">
+            <span>Next →</span>
+            <strong>Getting Started</strong>
+        </a>
+    </div>
+</article>
+{% endblock %}
+

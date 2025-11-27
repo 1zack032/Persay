@@ -2,11 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Channels - Menza</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Menza">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/static/icons/icon-192.svg">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.svg">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -14,30 +24,27 @@
             --bg-primary: #030306;
             --bg-secondary: #08080c;
             --bg-card: #0c0c12;
-            --bg-card-inner: #101018;
             --bg-card-hover: #14141e;
             --bg-input: #0a0a10;
-            --accent-primary: #6366f1;
-            --accent-secondary: #8b5cf6;
-            --accent-glow: rgba(99, 102, 241, 0.15);
+            --accent-primary: #7c3aed;
+            --accent-secondary: #a855f7;
+            --accent-tertiary: #06b6d4;
             --text-primary: #ffffff;
             --text-secondary: #9ca3af;
-            --text-dim: #6b7280;
-            --text-muted: #4b5563;
-            --border: rgba(255, 255, 255, 0.04);
-            --border-subtle: rgba(255, 255, 255, 0.06);
-            --border-hover: rgba(255, 255, 255, 0.1);
+            --text-muted: #6b7280;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.12);
             --success: #10b981;
             --warning: #f59e0b;
-            --radius-sm: 8px;
-            --radius-md: 12px;
+            --error: #ef4444;
+            --radius-sm: 6px;
+            --radius-md: 10px;
             --radius-lg: 16px;
-            --radius-xl: 20px;
             --radius-full: 9999px;
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
@@ -45,106 +52,328 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Navigation */
-        nav {
+        /* Top Navigation */
+        .top-nav {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            padding: 1rem 2rem;
+            height: 56px;
+            padding: 0 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 100;
-            background: rgba(3, 3, 6, 0.85);
+            z-index: 1000;
+            background: linear-gradient(180deg, rgba(2, 2, 5, 0.98), rgba(6, 6, 10, 0.95));
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.1);
         }
 
-        .logo {
+        .nav-logo {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            font-size: 1.25rem;
-            font-weight: 700;
             text-decoration: none;
             color: var(--text-primary);
-            letter-spacing: -0.02em;
         }
 
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border-radius: var(--radius-sm);
+        .nav-logo-text {
+            font-size: 1.375rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #ffffff 0%, #e879f9 50%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-tabs {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
+            gap: 0.25rem;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .nav-links a {
+        .nav-tab {
+            padding: 0.5rem 1rem;
             color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.9375rem;
+            font-size: 0.875rem;
             font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius-md);
             transition: all 0.2s;
         }
 
-        .nav-links a:hover,
-        .nav-links a.active {
+        .nav-tab:hover {
             color: var(--text-primary);
             background: var(--bg-card);
         }
 
-        /* Main Content */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 6rem 2rem 2rem;
+        .nav-tab.active {
+            color: var(--text-primary);
+            background: var(--accent-primary);
         }
 
-        /* Header with Search */
-        .page-header {
+        /* Main Layout */
+        .app-container {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2.5rem;
-            gap: 1rem;
-            flex-wrap: wrap;
+            height: 100vh;
+            padding-top: 56px;
         }
 
-        .page-header h1 {
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Sidebar Buttons */
+        .sidebar-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(168, 85, 247, 0.04));
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: var(--radius-md);
+            color: #c4b5fd;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            width: 100%;
+        }
+
+        .sidebar-btn:hover {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(168, 85, 247, 0.08));
+            border-color: rgba(124, 58, 237, 0.35);
+            color: #e9d5ff;
+        }
+
+        .sidebar-btn.active {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(168, 85, 247, 0.12));
+            border-color: rgba(124, 58, 237, 0.4);
+            color: #f3e8ff;
+        }
+
+        .sidebar-btn svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        /* Main Tabs Row */
+        .main-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            padding: 1rem;
+        }
+
+        /* Action Row */
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            padding: 0 1rem;
+        }
+
+        /* Discover Row */
+        .discover-row {
+            padding: 0.75rem 1rem;
+        }
+
+        .discover-row .sidebar-btn {
+            justify-content: space-between;
+        }
+
+        /* Write Panel Dropdown */
+        .write-panel-container {
+            padding: 0 1rem;
+            position: relative;
+            z-index: 100;
+        }
+
+        .dropdown-panel {
+            display: none;
+            margin-top: 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            z-index: 100;
+        }
+
+        .dropdown-panel.show {
+            display: block;
+            animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.875rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.15s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            font-family: inherit;
+            font-size: 0.9375rem;
+            text-align: left;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .item-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            background: rgba(124, 58, 237, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-secondary);
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-title {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+        }
+
+        .item-desc {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-top: 0.125rem;
+        }
+
+        /* Sidebar Content */
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .section-label {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Channel List Items in Sidebar */
+        .channel-list-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .channel-list-item:hover {
+            background: var(--bg-card);
+        }
+
+        .channel-list-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .channel-list-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .channel-list-name {
+            font-weight: 500;
+            font-size: 0.9375rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .channel-list-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .content-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .content-header h1 {
             font-size: 1.75rem;
             font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .header-actions {
             display: flex;
-            gap: 1rem;
             align-items: center;
+            gap: 0.75rem;
         }
 
-        /* Search */
+        .content-header h1 svg {
+            width: 28px;
+            height: 28px;
+            color: var(--accent-secondary);
+        }
+
+        /* Search Bar */
         .search-container {
             position: relative;
+            max-width: 400px;
         }
 
         .search-input {
-            width: 280px;
+            width: 100%;
             padding: 0.75rem 1rem 0.75rem 2.75rem;
-            background: var(--bg-card);
+            background: var(--bg-input);
             border: 1px solid var(--border);
-            border-radius: var(--radius-full);
+            border-radius: var(--radius-md);
             color: var(--text-primary);
             font-family: inherit;
             font-size: 0.9375rem;
@@ -153,12 +382,8 @@
         }
 
         .search-input:focus {
-            border-color: var(--border-hover);
-            background: var(--bg-card-inner);
-        }
-
-        .search-input::placeholder {
-            color: var(--text-muted);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
         }
 
         .search-icon {
@@ -167,7 +392,6 @@
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
-            font-size: 0.875rem;
         }
 
         .search-results {
@@ -177,333 +401,138 @@
             right: 0;
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
+            border-radius: var(--radius-md);
             margin-top: 0.5rem;
-            max-height: 400px;
+            max-height: 300px;
             overflow-y: auto;
             display: none;
-            z-index: 50;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            z-index: 100;
         }
 
         .search-results.show {
             display: block;
         }
 
-        .search-result-item {
+        /* Filter Tabs */
+        .filter-tabs {
             display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.875rem 1rem;
-            text-decoration: none;
-            color: inherit;
-            transition: background 0.2s;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
         }
 
-        .search-result-item:hover {
-            background: var(--bg-card-hover);
-        }
-
-        .search-result-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-        }
-
-        .search-result-info {
-            flex: 1;
-        }
-
-        .search-result-name {
-            font-weight: 600;
-            font-size: 0.9375rem;
-        }
-
-        .search-result-meta {
-            font-size: 0.8125rem;
-            color: var(--text-muted);
-        }
-
-        .search-no-results {
-            padding: 2rem;
-            text-align: center;
-            color: var(--text-muted);
-        }
-
-        .btn {
+        .filter-tab {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius-md);
-            font-family: inherit;
-            font-size: 0.9375rem;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            color: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 0 20px var(--accent-glow), 0 4px 16px rgba(0, 0, 0, 0.4);
-        }
-
-        /* Sections */
-        .section {
-            margin-bottom: 3rem;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.25rem;
-        }
-
-        .section-header h2 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            letter-spacing: -0.01em;
-        }
-
-        .section-header a {
-            font-size: 0.875rem;
-            color: var(--accent-primary);
-            text-decoration: none;
-        }
-
-        .section-header a:hover {
-            text-decoration: underline;
-        }
-
-        /* Trending Badge */
-        .trending-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.625rem;
-            background: rgba(245, 158, 11, 0.1);
+            padding: 0.625rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: var(--radius-full);
-            font-size: 0.75rem;
-            color: var(--warning);
-            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .filter-tab:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .filter-tab.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        .filter-tab svg {
+            width: 14px;
+            height: 14px;
         }
 
         /* Channel Grid */
         .channel-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1rem;
         }
 
-        /* Horizontal scroll for trending */
-        .trending-scroll {
-            display: flex;
-            gap: 1rem;
-            overflow-x: auto;
-            padding-bottom: 0.5rem;
-            scrollbar-width: thin;
-        }
-
-        .trending-scroll::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .trending-scroll::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-            border-radius: 3px;
-        }
-
-        .trending-scroll::-webkit-scrollbar-thumb {
-            background: var(--border-hover);
-            border-radius: 3px;
-        }
-
-        .trending-scroll .channel-card {
-            min-width: 280px;
-            flex-shrink: 0;
-        }
-
+        /* Channel Card */
         .channel-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            transition: all 0.2s;
+            padding: 1.25rem;
             text-decoration: none;
             color: inherit;
-            display: block;
-            position: relative;
+            transition: all 0.2s;
         }
 
         .channel-card:hover {
             border-color: var(--border-hover);
             transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .channel-card.private::after {
-            content: '🔒';
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .channel-header {
+        .channel-card-header {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 1rem;
             margin-bottom: 1rem;
         }
 
-        .channel-avatar {
+        .channel-card-avatar {
             width: 48px;
             height: 48px;
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.375rem;
+            font-size: 1.5rem;
+            flex-shrink: 0;
         }
 
-        .channel-info h3 {
-            font-size: 1.0625rem;
+        .channel-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .channel-card-name {
             font-weight: 600;
-            margin-bottom: 0.125rem;
-            letter-spacing: -0.01em;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
         }
 
-        .channel-info p {
+        .channel-card-owner {
             font-size: 0.8125rem;
             color: var(--text-muted);
         }
 
-        .channel-description {
-            font-size: 0.9375rem;
+        .channel-card-description {
+            font-size: 0.875rem;
             color: var(--text-secondary);
             margin-bottom: 1rem;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            line-height: 1.5;
         }
 
-        .channel-stats {
+        .channel-card-stats {
             display: flex;
-            gap: 1.25rem;
+            gap: 1rem;
             font-size: 0.8125rem;
             color: var(--text-muted);
         }
 
-        .channel-stats span {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        /* Channel Actions (View/Join) */
-        /* Filter Tabs */
-        .filter-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            padding: 0.5rem;
-            background: var(--bg-card);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border);
-            overflow-x: auto;
-        }
-
-        .filter-tab {
-            padding: 0.625rem 1rem;
-            border-radius: var(--radius-md);
-            font-size: 0.8125rem;
-            font-weight: 600;
-            text-decoration: none;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-            white-space: nowrap;
+        .channel-card-stats span {
             display: flex;
             align-items: center;
             gap: 0.375rem;
         }
 
-        .filter-tab:hover {
-            color: var(--text-primary);
-            background: var(--bg-card-hover);
-        }
-
-        .filter-tab.active {
-            color: var(--text-primary);
-            background: var(--accent-primary);
-        }
-
-        /* Like Button */
-        .like-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-            padding: 0.375rem 0.625rem;
-            background: var(--bg-card-hover);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-full);
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-left: auto;
-        }
-
-        .like-btn:hover {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #ef4444;
-        }
-
-        .like-btn.liked {
-            background: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #ef4444;
-        }
-
-        .like-btn.liked:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-
-        .like-icon {
-            font-size: 0.875rem;
-            transition: transform 0.2s;
-        }
-
-        .like-btn:hover .like-icon,
-        .like-btn.liked .like-icon {
-            transform: scale(1.1);
-        }
-
-        .like-count {
-            min-width: 1ch;
-        }
-
-        .channel-actions {
+        .channel-card-actions {
             display: flex;
             gap: 0.5rem;
             margin-top: 1rem;
@@ -511,428 +540,674 @@
             border-top: 1px solid var(--border);
         }
 
-        .channel-action-btn {
-            flex: 1;
-            display: flex;
+        .btn {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.375rem;
+            gap: 0.5rem;
             padding: 0.625rem 1rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(168, 85, 247, 0.08));
+            border: 1px solid rgba(124, 58, 237, 0.3);
             border-radius: var(--radius-md);
-            font-size: 0.8125rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.15s;
-            cursor: pointer;
-            border: none;
+            color: #e9d5ff;
             font-family: inherit;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
         }
 
-        .channel-action-btn.view-btn {
-            background: var(--bg-card-inner);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
+        .btn:hover {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.22), rgba(168, 85, 247, 0.12));
+            border-color: rgba(124, 58, 237, 0.45);
         }
 
-        .channel-action-btn.view-btn:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--border-hover);
-            color: var(--text-primary);
-        }
-
-        .channel-action-btn.join-btn {
+        .btn-primary {
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
             color: white;
         }
 
-        .channel-action-btn.join-btn:hover {
-            box-shadow: 0 0 15px var(--accent-glow);
+        .btn-primary:hover {
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
         }
 
-        /* Role Badge */
-        .role-badge {
+        .like-btn {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .like-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+
+        .like-btn.liked {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-header h2 svg {
+            width: 18px;
+            height: 18px;
+            color: var(--accent-secondary);
+        }
+
+        /* Trending Badge */
+        .trending-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.25rem;
-            padding: 0.2rem 0.5rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
             border-radius: var(--radius-full);
-            font-size: 0.625rem;
+            font-size: 0.6875rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .role-badge.admin {
-            background: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
-        }
-
-        .role-badge.mod {
-            background: rgba(99, 102, 241, 0.1);
-            color: var(--accent-primary);
-        }
-
-        .role-badge.viewer {
-            background: rgba(107, 114, 128, 0.1);
-            color: var(--text-dim);
         }
 
         /* Empty State */
         .empty-state {
             text-align: center;
             padding: 3rem;
-            color: var(--text-secondary);
+            color: var(--text-muted);
         }
 
-        .empty-state-icon {
-            font-size: 3rem;
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
             margin-bottom: 1rem;
             opacity: 0.5;
         }
 
-        .empty-state h3 {
-            font-size: 1.125rem;
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 480px;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 1rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
             color: var(--text-primary);
         }
 
-        .empty-state p {
-            font-size: 0.9375rem;
+        .modal-body {
+            padding: 1.25rem;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
-        /* Owner Badge */
-        .owner-badge {
-            display: inline-flex;
-            align-items: center;
+        .modal-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            outline: none;
+            margin-bottom: 1rem;
+        }
+
+        .modal-input:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .user-select-list {
+            display: flex;
+            flex-direction: column;
             gap: 0.25rem;
-            padding: 0.25rem 0.5rem;
-            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .user-select-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .user-select-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .user-select-avatar {
+            width: 36px;
+            height: 36px;
             border-radius: var(--radius-full);
-            font-size: 0.6875rem;
-            color: var(--success);
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .user-select-name {
+            font-weight: 500;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .page-header {
+            .app-container {
                 flex-direction: column;
-                align-items: flex-start;
             }
 
-            .header-actions {
+            .sidebar {
                 width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
             }
 
-            .search-input {
-                width: 100%;
+            .sidebar-content {
+                display: none;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .channel-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <nav>
-        <a href="/" class="logo">
-            <div class="logo-icon">M</div>
-            Menza
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <a href="/" class="nav-logo">
+            <span class="nav-logo-text">Menza</span>
         </a>
-        <div class="nav-links">
-            <a href="/chat">Messages</a>
-            <a href="/channels" class="active">Channels</a>
-            <a href="/settings">Settings</a>
-            <a href="/logout">Sign Out</a>
+        <div class="nav-tabs">
+            <a href="/chat" class="nav-tab">Messages</a>
+            <a href="/channels" class="nav-tab active">Channels</a>
+            <a href="/settings" class="nav-tab">Settings</a>
+            <a href="/logout" class="nav-tab">Sign Out</a>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="page-header">
-            <h1>📺 Channels</h1>
-            <div class="header-actions">
+    <div class="app-container">
+        <!-- Sidebar (same as chat) -->
+        <aside class="sidebar">
+            <!-- Main Tabs -->
+            <div class="main-tabs">
+                <a href="/chat" class="sidebar-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Chats
+                </a>
+                <button class="sidebar-btn active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                    My Channels
+                </button>
+            </div>
+
+            <!-- Action Row -->
+            <div class="action-row">
+                <button class="sidebar-btn" data-panel="search" onclick="openSearchModal()" title="Search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    Search
+                </button>
+                <button class="sidebar-btn" data-panel="write" onclick="toggleWritePanel(event)" title="Compose">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="14 2 18 6 7 17 3 17 3 13 14 2"/>
+                        <line x1="3" y1="22" x2="21" y2="22"/>
+                    </svg>
+                    Write
+                </button>
+            </div>
+
+            <!-- Write Panel -->
+            <div class="write-panel-container">
+                <div class="dropdown-panel" id="writePanel">
+                    <a href="/chat" class="dropdown-item" onclick="localStorage.setItem('openNewMessage', 'true')">
+                        <div class="item-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-title">New Message</div>
+                            <div class="item-desc">Start a private conversation</div>
+                        </div>
+                    </a>
+                    <a href="/chat" class="dropdown-item" onclick="localStorage.setItem('openNewGroup', 'true')">
+                        <div class="item-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-title">New Group</div>
+                            <div class="item-desc">Create a group chat</div>
+                        </div>
+                    </a>
+                    <a href="/channel/create" class="dropdown-item">
+                        <div class="item-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-title">New Channel</div>
+                            <div class="item-desc">Broadcast to subscribers</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Discover Row -->
+            <div class="discover-row">
+                <button class="sidebar-btn active" onclick="scrollToDiscover()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                    </svg>
+                    Discover Channels
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Sidebar Content - My Channels List -->
+            <div class="sidebar-content">
+                <div class="section-label">Your Channels</div>
+                {% if my_channels %}
+                    {% for channel in my_channels %}
+                    <a href="/channel/{{ channel.id }}" class="channel-list-item">
+                        <div class="channel-list-avatar" style="background: {{ channel.branding.accent_color }}20; color: {{ channel.branding.accent_color }};">
+                            {{ channel.branding.avatar_emoji }}
+                        </div>
+                        <div class="channel-list-info">
+                            <div class="channel-list-name">{{ channel.name }}</div>
+                            <div class="channel-list-meta">{{ channel.subscribers|length }} members</div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% endif %}
+
+                {% if subscribed %}
+                <div class="section-label" style="margin-top: 1.5rem;">Subscribed</div>
+                    {% for channel in subscribed %}
+                    <a href="/channel/{{ channel.id }}" class="channel-list-item">
+                        <div class="channel-list-avatar" style="background: {{ channel.branding.accent_color }}20; color: {{ channel.branding.accent_color }};">
+                            {{ channel.branding.avatar_emoji }}
+                        </div>
+                        <div class="channel-list-info">
+                            <div class="channel-list-name">{{ channel.name }}</div>
+                            <div class="channel-list-meta">{{ channel.subscribers|length }} members</div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% endif %}
+
+                {% if not my_channels and not subscribed %}
+                <div class="empty-state" style="padding: 2rem 1rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                    <p>No channels yet</p>
+                    <p style="font-size: 0.75rem; margin-top: 0.5rem;">Create or join a channel</p>
+                </div>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                    </svg>
+                    Discover Channels
+                </h1>
                 <div class="search-container">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" 
-                           class="search-input" 
-                           placeholder="Search channels..." 
-                           id="channelSearch"
-                           autocomplete="off">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <input type="text" class="search-input" placeholder="Search channels..." id="channelSearch">
                     <div class="search-results" id="searchResults"></div>
                 </div>
-                <a href="/channel/create" class="btn btn-primary">
-                    <span>+</span> Create Channel
-                </a>
             </div>
-        </div>
 
-        <!-- Trending Channels -->
-        {% if trending_channels %}
-        <div class="section">
-            <div class="section-header">
-                <h2>🔥 Trending</h2>
-            </div>
-            <div class="trending-scroll">
-                {% for channel in trending_channels %}
-                <a href="/channel/{{ channel.id }}" class="channel-card">
-                    <span class="trending-badge">🔥 Trending</span>
-                    <div class="channel-header" style="margin-top: 0.5rem;">
-                        <div class="channel-avatar" style="background: {{ channel.branding.accent_color }}15; color: {{ channel.branding.accent_color }};">
-                            {{ channel.branding.avatar_emoji }}
-                        </div>
-                        <div class="channel-info">
-                            <h3>{{ channel.name }}</h3>
-                            <p>by {{ channel.owner }}</p>
-                        </div>
-                    </div>
-                    <div class="channel-stats">
-                        <span>👥 {{ channel.subscribers|length }}</span>
-                        <span>📝 {{ channel.posts|length }}</span>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- My Channels -->
-        {% if my_channels %}
-        <div class="section">
-            <div class="section-header">
-                <h2>👑 Your Channels</h2>
-            </div>
-            <div class="channel-grid">
-                {% for channel in my_channels %}
-                <a href="/channel/{{ channel.id }}" class="channel-card {% if not channel.discoverable %}private{% endif %}">
-                    <div class="channel-header">
-                        <div class="channel-avatar" style="background: {{ channel.branding.accent_color }}15; color: {{ channel.branding.accent_color }};">
-                            {{ channel.branding.avatar_emoji }}
-                        </div>
-                        <div class="channel-info">
-                            <h3>{{ channel.name }}</h3>
-                            <p>
-                                <span class="owner-badge">👑 Owner</span>
-                                {% if not channel.discoverable %}
-                                <span style="margin-left: 0.5rem; color: var(--text-muted); font-size: 0.6875rem;">Private</span>
-                                {% endif %}
-                            </p>
-                        </div>
-                    </div>
-                    <p class="channel-description">{{ channel.description or 'No description' }}</p>
-                    <div class="channel-stats">
-                        <span>👥 {{ channel.subscribers|length }} subscribers</span>
-                        <span>📝 {{ channel.posts|length }} posts</span>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Subscribed Channels -->
-        {% if subscribed_channels %}
-        <div class="section">
-            <div class="section-header">
-                <h2>✨ Joined Channels</h2>
-            </div>
-            <div class="channel-grid">
-                {% for channel in subscribed_channels %}
-                <a href="/channel/{{ channel.id }}" class="channel-card">
-                    <div class="channel-header">
-                        <div class="channel-avatar" style="background: {{ channel.branding.accent_color }}15; color: {{ channel.branding.accent_color }};">
-                            {{ channel.branding.avatar_emoji }}
-                        </div>
-                        <div class="channel-info">
-                            <h3>{{ channel.name }}</h3>
-                            <p>
-                                by {{ channel.owner }}
-                                {% if channel.user_role == 'admin' %}
-                                <span class="role-badge admin">👑 Admin</span>
-                                {% elif channel.user_role == 'mod' %}
-                                <span class="role-badge mod">✏️ Mod</span>
-                                {% else %}
-                                <span class="role-badge viewer">👁️ Viewer</span>
-                                {% endif %}
-                            </p>
-                        </div>
-                    </div>
-                    <p class="channel-description">{{ channel.description or 'No description' }}</p>
-                    <div class="channel-stats">
-                        <span>👥 {{ channel.subscribers|length }} members</span>
-                        <span>📝 {{ channel.posts|length }} posts</span>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Discover Channels -->
-        <div class="section">
-            <div class="section-header">
-                <h2>🌟 Discover</h2>
-            </div>
-            
             <!-- Filter Tabs -->
             <div class="filter-tabs">
                 <a href="/channels?filter=trending" class="filter-tab {% if discover_filter == 'trending' or not discover_filter %}active{% endif %}">
-                    🔥 Trending
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    Trending
                 </a>
                 <a href="/channels?filter=most_liked" class="filter-tab {% if discover_filter == 'most_liked' %}active{% endif %}">
-                    ❤️ Most Liked
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    Most Liked
                 </a>
                 <a href="/channels?filter=most_viewed" class="filter-tab {% if discover_filter == 'most_viewed' %}active{% endif %}">
-                    👁️ Most Viewed
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Most Viewed
                 </a>
                 <a href="/channels?filter=new" class="filter-tab {% if discover_filter == 'new' %}active{% endif %}">
-                    ✨ New
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    New
                 </a>
             </div>
-            
-            {% if discover_channels %}
-            <div class="channel-grid">
-                {% for channel in discover_channels %}
-                <div class="channel-card" id="channel-{{ channel.id }}">
-                    <div class="channel-header">
-                        <div class="channel-avatar" style="background: {{ channel.branding.accent_color }}15; color: {{ channel.branding.accent_color }};">
-                            {{ channel.branding.avatar_emoji }}
+
+            <!-- Discover Channels Grid -->
+            <div id="discoverSection">
+                {% if discover_channels %}
+                <div class="channel-grid">
+                    {% for channel in discover_channels %}
+                    <div class="channel-card">
+                        {% if loop.index <= 3 and discover_filter == 'trending' %}
+                        <span class="trending-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            Trending
+                        </span>
+                        {% endif %}
+                        <div class="channel-card-header">
+                            <div class="channel-card-avatar" style="background: {{ channel.branding.accent_color }}20; color: {{ channel.branding.accent_color }};">
+                                {{ channel.branding.avatar_emoji }}
+                            </div>
+                            <div class="channel-card-info">
+                                <div class="channel-card-name">{{ channel.name }}</div>
+                                <div class="channel-card-owner">by {{ channel.owner }}</div>
+                            </div>
                         </div>
-                        <div class="channel-info">
-                            <h3>{{ channel.name }}</h3>
-                            <p>by {{ channel.owner }}</p>
+                        <p class="channel-card-description">{{ channel.description or 'No description' }}</p>
+                        <div class="channel-card-stats">
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                                {{ channel.subscribers|length }}
+                            </span>
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                {{ channel.likes or 0 }}
+                            </span>
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                {{ channel.views or 0 }}
+                            </span>
                         </div>
-                        <!-- Like Button -->
-                        <button class="like-btn {% if channel.liked_by_user %}liked{% endif %}" 
-                                onclick="toggleLikeChannel('{{ channel.id }}')"
-                                title="{% if channel.liked_by_user %}Unlike{% else %}Like{% endif %} this channel">
-                            <span class="like-icon">{% if channel.liked_by_user %}❤️{% else %}🤍{% endif %}</span>
-                            <span class="like-count" id="like-count-{{ channel.id }}">{{ channel.like_count or 0 }}</span>
-                        </button>
-                    </div>
-                    <p class="channel-description">{{ channel.description or 'No description' }}</p>
-                    <div class="channel-stats">
-                        <span>👥 {{ channel.subscribers|length }} members</span>
-                        <span>📝 {{ channel.posts|length }} posts</span>
-                        <span>👁️ {{ channel.views or 0 }} views</span>
-                    </div>
-                    <div class="channel-actions">
-                        <a href="/channel/{{ channel.id }}" class="channel-action-btn view-btn">
-                            👁️ View
-                        </a>
-                        <form action="/channel/{{ channel.id }}/subscribe" method="POST" style="flex: 1; display: flex;">
-                            <button type="submit" class="channel-action-btn join-btn" style="width: 100%;">
-                                ✨ Join
+                        <div class="channel-card-actions">
+                            <button class="like-btn {% if channel.liked_by_user %}liked{% endif %}" onclick="toggleLikeChannel('{{ channel.id }}', this)">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="{% if channel.liked_by_user %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                {{ channel.likes or 0 }}
                             </button>
-                        </form>
+                            <a href="/channel/{{ channel.id }}" class="btn" style="flex: 1;">View</a>
+                            <form action="/channel/{{ channel.id }}/subscribe" method="POST" style="flex: 1;">
+                                <button type="submit" class="btn btn-primary" style="width: 100%;">Join</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                    </svg>
+                    <h3>No channels to discover</h3>
+                    <p>Be the first to create a channel!</p>
+                    <a href="/channel/create" class="btn btn-primary" style="margin-top: 1rem;">Create Channel</a>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Search Modal -->
+    <div class="modal-overlay" id="searchModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 8px;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    Search
+                </h3>
+                <button class="modal-close" onclick="closeSearchModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="modal-input" placeholder="Search users, channels..." id="globalSearchInput" oninput="handleSearch(this.value)">
+                <div class="user-select-list" id="searchResultsList">
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 0.5rem;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <p>Start typing to search...</p>
                     </div>
                 </div>
-                {% endfor %}
             </div>
-            {% else %}
-            <div class="empty-state">
-                <div class="empty-state-icon">📺</div>
-                <h3>No channels to discover</h3>
-                <p>Be the first to create a channel and share your content!</p>
-            </div>
-            {% endif %}
         </div>
     </div>
 
     <script>
-        // Live search functionality
-        const searchInput = document.getElementById('channelSearch');
-        const searchResults = document.getElementById('searchResults');
-        let searchTimeout;
+        // Toggle Write Panel
+        function toggleWritePanel(event) {
+            if (event) event.stopPropagation();
+            const panel = document.getElementById('writePanel');
+            panel.classList.toggle('show');
+        }
 
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.trim();
-            
-            clearTimeout(searchTimeout);
-            
-            if (query.length < 2) {
-                searchResults.classList.remove('show');
+        // Close panel when clicking outside
+        document.addEventListener('click', function(e) {
+            const panel = document.getElementById('writePanel');
+            const btn = document.querySelector('[data-panel="write"]');
+            if (panel && panel.classList.contains('show')) {
+                if (!panel.contains(e.target) && !btn.contains(e.target)) {
+                    panel.classList.remove('show');
+                }
+            }
+        });
+
+        // Search Modal
+        function openSearchModal() {
+            document.getElementById('searchModal').classList.add('show');
+            setTimeout(() => document.getElementById('globalSearchInput').focus(), 100);
+        }
+
+        function closeSearchModal() {
+            document.getElementById('searchModal').classList.remove('show');
+        }
+
+        // Handle search
+        function handleSearch(query) {
+            const container = document.getElementById('searchResultsList');
+            if (!query.trim()) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 0.5rem;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <p>Start typing to search...</p>
+                    </div>`;
                 return;
             }
-            
-            searchTimeout = setTimeout(() => {
-                fetch(`/channels/search?q=${encodeURIComponent(query)}`, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.results.length === 0) {
-                        searchResults.innerHTML = `
-                            <div class="search-no-results">
-                                No channels found for "${data.query}"
-                            </div>
-                        `;
-                    } else {
-                        searchResults.innerHTML = data.results.map(channel => `
-                            <a href="/channel/${channel.id}" class="search-result-item">
-                                <div class="search-result-avatar" style="background: ${channel.branding.accent_color}15; color: ${channel.branding.accent_color};">
-                                    ${channel.branding.avatar_emoji}
-                                </div>
-                                <div class="search-result-info">
-                                    <div class="search-result-name">${channel.name}</div>
-                                    <div class="search-result-meta">by ${channel.owner} • ${channel.subscribers.length} subscribers</div>
-                                </div>
-                            </a>
-                        `).join('');
-                    }
-                    searchResults.classList.add('show');
-                });
-            }, 300);
-        });
 
-        // Close search when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.search-container')) {
-                searchResults.classList.remove('show');
-            }
-        });
-
-        // Focus search with /
-        document.addEventListener('keydown', (e) => {
-            if (e.key === '/' && document.activeElement !== searchInput) {
-                e.preventDefault();
-                searchInput.focus();
-            }
-        });
-
-        // Like/Unlike channel functionality
-        async function toggleLikeChannel(channelId) {
-            const card = document.getElementById(`channel-${channelId}`);
-            const btn = card.querySelector('.like-btn');
-            const icon = btn.querySelector('.like-icon');
-            const countSpan = document.getElementById(`like-count-${channelId}`);
-            const isLiked = btn.classList.contains('liked');
-            
-            try {
-                const endpoint = isLiked ? `/channel/${channelId}/unlike` : `/channel/${channelId}/like`;
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+            // Search for users and channels
+            Promise.all([
+                fetch(`/api/users/search?q=${encodeURIComponent(query)}`).then(r => r.json()),
+                fetch(`/api/channels/search?q=${encodeURIComponent(query)}`).then(r => r.json())
+            ]).then(([userData, channelData]) => {
+                let html = '';
                 
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Toggle liked state
-                    btn.classList.toggle('liked');
-                    icon.textContent = btn.classList.contains('liked') ? '❤️' : '🤍';
-                    countSpan.textContent = data.likes;
-                    btn.title = btn.classList.contains('liked') ? 'Unlike this channel' : 'Like this channel';
-                    
-                    // Animate the heart
-                    icon.style.transform = 'scale(1.3)';
-                    setTimeout(() => {
-                        icon.style.transform = '';
-                    }, 200);
+                if (userData.users && userData.users.length > 0) {
+                    html += '<div style="font-size: 0.75rem; color: var(--text-muted); padding: 0.5rem 0.75rem; text-transform: uppercase;">Users</div>';
+                    userData.users.forEach(user => {
+                        html += `
+                            <a href="/chat" onclick="localStorage.setItem('selectUser', '${user.username}')" class="user-select-item" style="text-decoration: none; color: inherit;">
+                                <div class="user-select-avatar">${user.username[0].toUpperCase()}</div>
+                                <div class="user-select-name">${user.username}</div>
+                            </a>`;
+                    });
                 }
-            } catch (error) {
-                console.error('Error toggling like:', error);
-            }
+
+                if (channelData.channels && channelData.channels.length > 0) {
+                    html += '<div style="font-size: 0.75rem; color: var(--text-muted); padding: 0.5rem 0.75rem; text-transform: uppercase; margin-top: 0.5rem;">Channels</div>';
+                    channelData.channels.forEach(channel => {
+                        html += `
+                            <a href="/channel/${channel.id}" class="user-select-item" style="text-decoration: none; color: inherit;">
+                                <div class="user-select-avatar" style="background: ${channel.branding?.accent_color || '#6366f1'}20; color: ${channel.branding?.accent_color || '#6366f1'}; border-radius: 8px;">${channel.branding?.avatar_emoji || '📺'}</div>
+                                <div class="user-select-name">${channel.name}</div>
+                            </a>`;
+                    });
+                }
+
+                if (!html) {
+                    html = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No results found</div>';
+                }
+
+                container.innerHTML = html;
+            });
         }
+
+        // Scroll to discover section
+        function scrollToDiscover() {
+            document.getElementById('discoverSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Like channel
+        function toggleLikeChannel(channelId, btn) {
+            fetch(`/channel/${channelId}/like`, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        btn.classList.toggle('liked', data.liked);
+                        btn.querySelector('svg').setAttribute('fill', data.liked ? 'currentColor' : 'none');
+                        const countSpan = btn.childNodes[btn.childNodes.length - 1];
+                        countSpan.textContent = ' ' + data.likes;
+                    }
+                });
+        }
+
+        // Channel search in main content
+        const channelSearchInput = document.getElementById('channelSearch');
+        const searchResultsDiv = document.getElementById('searchResults');
+
+        if (channelSearchInput) {
+            channelSearchInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                if (query.length < 2) {
+                    searchResultsDiv.classList.remove('show');
+                    return;
+                }
+
+                fetch(`/api/channels/search?q=${encodeURIComponent(query)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.channels && data.channels.length > 0) {
+                            let html = '';
+                            data.channels.forEach(channel => {
+                                html += `
+                                    <a href="/channel/${channel.id}" class="user-select-item" style="text-decoration: none; color: inherit;">
+                                        <div style="width: 32px; height: 32px; border-radius: 8px; background: ${channel.branding?.accent_color || '#6366f1'}20; color: ${channel.branding?.accent_color || '#6366f1'}; display: flex; align-items: center; justify-content: center;">${channel.branding?.avatar_emoji || '📺'}</div>
+                                        <div>
+                                            <div style="font-weight: 500;">${channel.name}</div>
+                                            <div style="font-size: 0.75rem; color: var(--text-muted);">${channel.subscribers?.length || 0} members</div>
+                                        </div>
+                                    </a>`;
+                            });
+                            searchResultsDiv.innerHTML = html;
+                            searchResultsDiv.classList.add('show');
+                        } else {
+                            searchResultsDiv.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-muted);">No channels found</div>';
+                            searchResultsDiv.classList.add('show');
+                        }
+                    });
+            });
+
+            // Close search results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!channelSearchInput.contains(e.target) && !searchResultsDiv.contains(e.target)) {
+                    searchResultsDiv.classList.remove('show');
+                }
+            });
+        }
+
+        // Close modal on escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSearchModal();
+                document.getElementById('writePanel')?.classList.remove('show');
+            }
+        });
     </script>
 </body>
 </html>

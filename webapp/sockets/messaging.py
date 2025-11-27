@@ -498,4 +498,186 @@ def register_messaging_events(socketio):
                 'cancelled_by': username
             }, room=room_id)
             print(f"↩️ {username} cancelled delete request for note {note_id}")
+    
+    # ==========================================
+    # GROUP CHAT EVENTS
+    # ==========================================
+    
+    @socketio.on('create_group')
+    def handle_create_group(data):
+        """Create a new group chat"""
+        if 'username' not in session:
+            return
+        
+        username = session['username']
+        group_name = data.get('name', '').strip()
+        members = data.get('members', [])
+        invite_code = data.get('invite_code')
+        
+        if not group_name:
+            emit('group_error', {'error': 'Group name is required'})
+            return
+        
+        # Create the group
+        group = store.create_group(group_name, username, members, invite_code)
+        
+        # Notify the creator
+        emit('group_created', {'group': group})
+        
+        # Notify all members
+        for member in group['members']:
+            if member != username:
+                # Send to all sessions of this member
+                for sid, user in store.online_users.items():
+                    if user == member:
+                        emit('group_invite', {'group': group}, room=sid)
+        
+        print(f"👥 {username} created group '{group_name}' with {len(members)} members")
+    
+    @socketio.on('join_group')
+    def handle_join_group(data):
+        """Join a group chat room to receive messages"""
+        if 'username' not in session:
+            return
+        
+        username = session['username']
+        group_id = data.get('group_id')
+        
+        group = store.get_group(group_id)
+        if not group or username not in group['members']:
+            emit('group_error', {'error': 'Not authorized to join this group'})
+            return
+        
+        room_id = f"group_{group_id}"
+        join_room(room_id)
+        
+        # Send group history
+        emit('group_history', {
+            'group_id': group_id,
+            'messages': store.get_group_messages(group_id),
+            'group': group
+        })
+        
+        print(f"👥 {username} joined group '{group['name']}'")
+    
+    @socketio.on('group_message')
+    def handle_group_message(data):
+        """Send a message to a group"""
+        if 'username' not in session:
+            return
+        
+        username = session['username']
+        group_id = data.get('group_id')
+        content = data.get('content')
+        encrypted = data.get('encrypted', True)
+        
+        group = store.get_group(group_id)
+        if not group or username not in group['members']:
+            emit('group_error', {'error': 'Not authorized'})
+            return
+        
+        # Add message to store
+        message = store.add_group_message(group_id, username, content, encrypted)
+        
+        # Broadcast to group room
+        room_id = f"group_{group_id}"
+        emit('new_group_message', {
+            'group_id': group_id,
+            'message': message
+        }, room=room_id)
+        
+        print(f"💬 Group message in '{group['name']}' from {username}")
+    
+    @socketio.on('get_user_groups')
+    def handle_get_user_groups():
+        """Get all groups for the current user"""
+        if 'username' not in session:
+            return
+        
+        username = session['username']
+        groups = store.get_user_groups(username)
+        emit('user_groups', {'groups': groups})
+    
+    # ==========================================
+    # GROUP SHARED NOTES EVENTS
+    # ==========================================
+    
+    @socketio.on('get_group_notes')
+    def handle_get_group_notes(data):
+        """Get shared notes for a group"""
+        if 'username' not in session:
+            return
+        
+        username = session['username']
+        group_id = data.get('group_id')
+        
+        group = store.get_group(group_id)
+        if not group or username not in group['members']:
+            emit('group_error', {'error': 'Not authorized'})
+            return
+        
+        room_id = f"group_{group_id}"
+        notes = store.get_shared_notes_for_room(room_id)
+        
+        notes_metadata = []
+        for note in notes:
+            metadata = store.get_note_metadata(note['id'], username)
+            if metadata:
+                notes_metadata.append(metadata)
+        
+        emit('group_notes_list', {
+            'group_id': group_id,
+            'notes': notes_metadata
+        })
+    
+    @socketio.on('create_group_note')
+    def handle_create_group_note(data):
+        """Create a shared note in a group"""
+        if 'username' not in session:
+            return
+        
+        username = session['username']
+        group_id = data.get('group_id')
+        title = data.get('title', '').strip()
+        content = data.get('content', '').strip()
+        phrase = data.get('phrase', '').strip()
+        
+        if not all([group_id, title, content, phrase]):
+            emit('note_error', {'error': 'Missing required fields'})
+            return
+        
+        group = store.get_group(group_id)
+        if not group or username not in group['members']:
+            emit('group_error', {'error': 'Not authorized'})
+            return
+        
+        room_id = f"group_{group_id}"
+        note = store.create_shared_note(room_id, title, content, username, phrase)
+        
+        # Add other group members as pending
+        for member in group['members']:
+            if member != username:
+                store.add_pending_member(note['id'], member)
+        
+        # Notify all group members
+        emit('shared_note_created', {
+            'note': store.get_note_metadata(note['id'], username),
+            'group_id': group_id
+        }, room=room_id)
+        
+        # Prompt other members to set their phrase
+        for member in group['members']:
+            if member != username:
+                for sid, user in store.online_users.items():
+                    if user == member:
+                        emit('prompt_set_phrase', {
+                            'note_id': note['id'],
+                            'note_title': title,
+                            'created_by': username,
+                            'group_id': group_id,
+                            'group_name': group['name']
+                        }, room=sid)
+        
+        group_name = group['name']
+        print(f"📝 {username} created group note '{title}' in '{group_name}'")
 

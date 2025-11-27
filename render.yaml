@@ -1,0 +1,18 @@
+# Render.com deployment configuration
+# This file auto-configures your app on Render
+
+services:
+  - type: web
+    name: menza
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT run:app
+    envVars:
+      - key: FLASK_DEBUG
+        value: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.11.6
+

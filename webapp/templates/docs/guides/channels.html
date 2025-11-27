@@ -1,0 +1,75 @@
+{% extends "docs/base.html" %}
+
+{% block title %}Using Channels{% endblock %}
+
+{% block content %}
+<div class="docs-header">
+    <div class="docs-breadcrumb">
+        <a href="/docs">Docs</a>
+        <span>/</span>
+        <span>Channels Guide</span>
+    </div>
+    <h1>Using Channels</h1>
+    <p>Create and manage broadcast channels for your audience.</p>
+</div>
+
+<article class="docs-article">
+    <h2>What Are Channels?</h2>
+    <p>
+        Channels are one-to-many communication tools. Create a channel to broadcast 
+        messages to subscribers. Perfect for announcements, content creators, or communities.
+    </p>
+
+    <h2>Creating a Channel</h2>
+    <ol>
+        <li>Click the compose button (✏️)</li>
+        <li>Select "New Channel"</li>
+        <li>Choose a name and description</li>
+        <li>Pick an emoji avatar and accent color</li>
+        <li>Set visibility (Discoverable or Private)</li>
+        <li>Invite members with roles (Admin, Mod, Viewer)</li>
+    </ol>
+
+    <h2>Channel Roles</h2>
+    <ul>
+        <li><strong>Admin:</strong> Full control - manage members, settings, and posts</li>
+        <li><strong>Moderator:</strong> Can post and comment, but can't change settings</li>
+        <li><strong>Viewer:</strong> Read-only access to channel content</li>
+    </ul>
+
+    <h2>Discoverable vs Private</h2>
+    <ul>
+        <li><strong>Discoverable:</strong> Appears in search and discovery feed</li>
+        <li><strong>Private:</strong> Only accessible via invite link</li>
+    </ul>
+
+    <div class="info-box">
+        <div class="info-box-title">📈 Trending Algorithm</div>
+        <p>
+            Discoverable channels are ranked by engagement: likes, views, subscribers, 
+            and activity. Most popular channels appear first in discovery.
+        </p>
+    </div>
+
+    <h2>Channel Features</h2>
+    <ul>
+        <li>Rich text formatting (bold, italic, code)</li>
+        <li>Emoji reactions</li>
+        <li>Comments on posts</li>
+        <li>Like channels to support creators</li>
+        <li>Custom branding (emoji + colors)</li>
+    </ul>
+
+    <div class="docs-nav-buttons">
+        <a href="/docs/guides/encryption" class="docs-nav-btn">
+            <span>← Previous</span>
+            <strong>Encryption Guide</strong>
+        </a>
+        <a href="/docs" class="docs-nav-btn next">
+            <span>Back to →</span>
+            <strong>Documentation</strong>
+        </a>
+    </div>
+</article>
+{% endblock %}
+

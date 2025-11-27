@@ -1,26 +1,22 @@
-# Persay Encryption App - Dependencies
+# Menza - Secure Messaging App
+# Production Dependencies
 
-# The main cryptography library (industry standard)
-# This is what banks, governments, and tech companies use
+# Web Framework
+Flask==3.0.0
+Flask-SocketIO==5.3.6
+
+# WebSocket Support
+python-socketio==5.10.0
+python-engineio==4.8.1
+eventlet==0.34.2
+gevent==23.9.1
+gevent-websocket==0.10.1
+
+# Security
 cryptography==41.0.7
 
-# For building a nice command-line interface
-click==8.1.7
+# Production Server
+gunicorn==21.2.0
 
-# ===== WEB APP DEPENDENCIES =====
-
-# Flask - Simple web framework
-Flask==3.0.0
-
-# Real-time communication (WebSockets)
-flask-socketio==5.3.6
-
-# For handling async operations
-eventlet==0.34.2
-
-# For secure password hashing
-bcrypt==4.1.2
-
-# Environment variables
+# Utilities
 python-dotenv==1.0.0
-

@@ -1,0 +1,77 @@
+{% extends "docs/base.html" %}
+
+{% block title %}Getting Started{% endblock %}
+
+{% block content %}
+<div class="docs-header">
+    <div class="docs-breadcrumb">
+        <a href="/docs">Docs</a>
+        <span>/</span>
+        <a href="/docs">Guides</a>
+        <span>/</span>
+        <span>Getting Started</span>
+    </div>
+    <h1>Getting Started</h1>
+    <p>Quick start guide to begin using Menza securely.</p>
+</div>
+
+<article class="docs-article">
+    <h2>Welcome to Menza</h2>
+    <p>
+        Menza is a secure messaging platform with end-to-end encryption. 
+        Follow this guide to get started in minutes.
+    </p>
+
+    <h2>Step 1: Create Your Account</h2>
+    <ol>
+        <li>Go to <a href="/register">menza.app/register</a></li>
+        <li>Enter your username and email</li>
+        <li>Create a strong password</li>
+        <li>Verify your age (18+) and accept the terms</li>
+        <li>Click "Create Account"</li>
+    </ol>
+
+    <h2>Step 2: Start Messaging</h2>
+    <ol>
+        <li>Click the compose button (✏️) in the sidebar</li>
+        <li>Select "New Message"</li>
+        <li>Choose a contact or search for a username</li>
+        <li>Start typing your secure message</li>
+    </ol>
+
+    <div class="info-box">
+        <div class="info-box-title">🔒 Automatic Encryption</div>
+        <p>
+            All your messages are automatically encrypted. You don't need to do anything 
+            special—just type and send!
+        </p>
+    </div>
+
+    <h2>Step 3: Explore Features</h2>
+    <ul>
+        <li><strong>Channels:</strong> Create broadcast channels for your audience</li>
+        <li><strong>Shared Notes:</strong> Secure notes protected with personal phrases</li>
+        <li><strong>Auto-Delete:</strong> Set messages to auto-delete after a time period</li>
+        <li><strong>Calculator:</strong> Built-in calculator in the message box</li>
+    </ul>
+
+    <h2>Next Steps</h2>
+    <ul>
+        <li><a href="/docs/guides/encryption">Learn about encryption</a></li>
+        <li><a href="/docs/guides/channels">Create your first channel</a></li>
+        <li><a href="/docs/privacy">Review our privacy policy</a></li>
+    </ul>
+
+    <div class="docs-nav-buttons">
+        <a href="/docs/security" class="docs-nav-btn">
+            <span>← Previous</span>
+            <strong>Security</strong>
+        </a>
+        <a href="/docs/guides/encryption" class="docs-nav-btn next">
+            <span>Next →</span>
+            <strong>Encryption Guide</strong>
+        </a>
+    </div>
+</article>
+{% endblock %}
+

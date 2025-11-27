@@ -7,12 +7,14 @@ Each module handles events for a specific feature area.
 
 from .messaging import register_messaging_events
 from .channels import register_channel_events
+from .calls import register_call_events
 
 
 def register_socket_events(socketio):
     """Register all WebSocket event handlers"""
     register_messaging_events(socketio)
     register_channel_events(socketio)
+    register_call_events(socketio)
 
 
 __all__ = ['register_socket_events']

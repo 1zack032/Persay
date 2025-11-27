@@ -24,7 +24,7 @@ class Config:
     
     # Security
     MIN_USERNAME_LENGTH = 3
-    MIN_PASSWORD_LENGTH = 6
+    MIN_PASSWORD_LENGTH = 8
     MIN_AGE = 18
     
     # Channels

@@ -1,0 +1,100 @@
+{% extends "docs/base.html" %}
+
+{% block title %}Privacy Policy{% endblock %}
+
+{% block content %}
+<div class="docs-header">
+    <div class="docs-breadcrumb">
+        <a href="/docs">Docs</a>
+        <span>/</span>
+        <span>Privacy Policy</span>
+    </div>
+    <h1>Privacy Policy</h1>
+    <p>How we collect, use, and protect your personal information at Menza.</p>
+    <div class="docs-meta">
+        <span>Last updated: November 2025</span>
+        <span>•</span>
+        <span>10 min read</span>
+    </div>
+</div>
+
+<article class="docs-article">
+    <h2>Introduction</h2>
+    <p>
+        At Menza, we believe privacy is a fundamental right. This Privacy Policy explains how we collect, 
+        use, disclose, and safeguard your information when you use our secure messaging platform.
+    </p>
+
+    <div class="info-box">
+        <div class="info-box-title">🔒 Privacy by Design</div>
+        <p>
+            Menza is built with privacy at its core. We use end-to-end encryption (AES-256) to ensure 
+            that only you and your intended recipients can read your messages.
+        </p>
+    </div>
+
+    <h2>Quick Summary</h2>
+    <p>Here's a quick overview of our privacy practices:</p>
+    <ul>
+        <li><strong>End-to-End Encryption:</strong> Your messages are encrypted and only readable by you and your recipients.</li>
+        <li><strong>Minimal Data Collection:</strong> We only collect data necessary to provide our service.</li>
+        <li><strong>No Message Logging:</strong> We cannot read or access the content of your encrypted messages.</li>
+        <li><strong>Your Control:</strong> You can delete your data at any time.</li>
+        <li><strong>No Selling:</strong> We never sell your personal information to third parties.</li>
+    </ul>
+
+    <h2>Privacy Topics</h2>
+    <p>Click on any topic below to learn more:</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+        <a href="/docs/privacy/data-collection" style="display: block; padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); text-decoration: none; transition: all 0.2s;">
+            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📊</div>
+            <strong style="color: var(--text-primary);">Data Collection</strong>
+            <p style="font-size: 0.8125rem; margin-top: 0.375rem;">What information we collect</p>
+        </a>
+        <a href="/docs/privacy/data-usage" style="display: block; padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); text-decoration: none; transition: all 0.2s;">
+            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⚙️</div>
+            <strong style="color: var(--text-primary);">Data Usage</strong>
+            <p style="font-size: 0.8125rem; margin-top: 0.375rem;">How we use your data</p>
+        </a>
+        <a href="/docs/privacy/your-rights" style="display: block; padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); text-decoration: none; transition: all 0.2s;">
+            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">✋</div>
+            <strong style="color: var(--text-primary);">Your Rights</strong>
+            <p style="font-size: 0.8125rem; margin-top: 0.375rem;">GDPR, CCPA & your rights</p>
+        </a>
+        <a href="/docs/privacy/cookies" style="display: block; padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); text-decoration: none; transition: all 0.2s;">
+            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🍪</div>
+            <strong style="color: var(--text-primary);">Cookies</strong>
+            <p style="font-size: 0.8125rem; margin-top: 0.375rem;">Cookie & tracking policy</p>
+        </a>
+        <a href="/docs/privacy/retention" style="display: block; padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); text-decoration: none; transition: all 0.2s;">
+            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🗄️</div>
+            <strong style="color: var(--text-primary);">Data Retention</strong>
+            <p style="font-size: 0.8125rem; margin-top: 0.375rem;">How long we keep data</p>
+        </a>
+        <a href="/docs/privacy/third-parties" style="display: block; padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); text-decoration: none; transition: all 0.2s;">
+            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🤝</div>
+            <strong style="color: var(--text-primary);">Third Parties</strong>
+            <p style="font-size: 0.8125rem; margin-top: 0.375rem;">Data sharing practices</p>
+        </a>
+    </div>
+
+    <h2>Contact Us</h2>
+    <p>
+        If you have any questions about this Privacy Policy, please contact us at 
+        <a href="mailto:privacy@menza.app">privacy@menza.app</a>.
+    </p>
+
+    <div class="docs-nav-buttons">
+        <a href="/docs" class="docs-nav-btn">
+            <span>← Previous</span>
+            <strong>Documentation</strong>
+        </a>
+        <a href="/docs/privacy/data-collection" class="docs-nav-btn next">
+            <span>Next →</span>
+            <strong>Data Collection</strong>
+        </a>
+    </div>
+</article>
+{% endblock %}
+

@@ -1,0 +1,80 @@
+{% extends "docs/base.html" %}
+
+{% block title %}Data Retention{% endblock %}
+
+{% block content %}
+<div class="docs-header">
+    <div class="docs-breadcrumb">
+        <a href="/docs">Docs</a>
+        <span>/</span>
+        <a href="/docs/privacy">Privacy</a>
+        <span>/</span>
+        <span>Data Retention</span>
+    </div>
+    <h1>Data Retention</h1>
+    <p>How long we keep your data and our deletion policies.</p>
+</div>
+
+<article class="docs-article">
+    <h2>Retention Periods</h2>
+    <p>We retain different types of data for different periods based on necessity:</p>
+
+    <h3>Account Data</h3>
+    <ul>
+        <li><strong>Active accounts:</strong> Retained while your account is active</li>
+        <li><strong>Deleted accounts:</strong> Permanently deleted within 30 days of account deletion</li>
+        <li><strong>Inactive accounts:</strong> May be deleted after 2 years of inactivity</li>
+    </ul>
+
+    <h3>Message Data</h3>
+    <ul>
+        <li><strong>Encrypted messages:</strong> Stored until you delete them</li>
+        <li><strong>Auto-delete messages:</strong> Automatically removed based on your settings</li>
+        <li><strong>Deleted messages:</strong> Permanently removed immediately</li>
+    </ul>
+
+    <div class="info-box">
+        <div class="info-box-title">🗑️ Message Control</div>
+        <p>
+            You have full control over your messages. Use the auto-delete feature to automatically 
+            remove messages after 1 day, 1 week, 1 month, or 1 year.
+        </p>
+    </div>
+
+    <h3>Technical Logs</h3>
+    <ul>
+        <li><strong>Security logs:</strong> 90 days</li>
+        <li><strong>Error logs:</strong> 30 days</li>
+        <li><strong>IP addresses:</strong> 14 days (for security purposes)</li>
+    </ul>
+
+    <h2>Deleting Your Data</h2>
+    <p>You can delete your data at any time:</p>
+    <ol>
+        <li><strong>Individual messages:</strong> Tap and hold → Delete</li>
+        <li><strong>Chat history:</strong> Settings → Clear Chat → Clear All</li>
+        <li><strong>Your account:</strong> Settings → Account → Delete Account</li>
+    </ol>
+
+    <h2>After Account Deletion</h2>
+    <p>When you delete your account:</p>
+    <ul>
+        <li>Your profile is immediately removed</li>
+        <li>Your messages are deleted from our servers</li>
+        <li>Some anonymized analytics data may be retained</li>
+        <li>Backup copies are purged within 30 days</li>
+    </ul>
+
+    <div class="docs-nav-buttons">
+        <a href="/docs/privacy/cookies" class="docs-nav-btn">
+            <span>← Previous</span>
+            <strong>Cookies</strong>
+        </a>
+        <a href="/docs/privacy/third-parties" class="docs-nav-btn next">
+            <span>Next →</span>
+            <strong>Third Parties</strong>
+        </a>
+    </div>
+</article>
+{% endblock %}
+

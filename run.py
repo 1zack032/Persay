@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-🚀 Persay Server Runner
+🚀 Menza Server Runner
 
-Simple script to start the Persay server.
-Run from project root: python run.py
+Start the Menza secure messaging server.
+- Development: python run.py
+- Production: gunicorn --worker-class eventlet -w 1 run:app
 """
 
 import sys
@@ -14,19 +15,26 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from webapp.app import app, socketio
 
+# Export for gunicorn
+application = app
+
 
 if __name__ == '__main__':
+    # Get port from environment (for cloud platforms) or default to 5000
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_DEBUG', 'true').lower() == 'true'
+    
     print()
     print("🔐 " + "=" * 50)
-    print("🚀 Starting Persay Encrypted Messaging Server")
-    print("📍 Open http://localhost:5000 in your browser")
+    print("🚀 Starting Menza Encrypted Messaging Server")
+    print(f"📍 Open http://localhost:{port} in your browser")
     print("🔐 " + "=" * 50)
     print()
     
     socketio.run(
         app,
-        debug=True,
+        debug=debug,
         host='0.0.0.0',
-        port=5000
+        port=port
     )
 

@@ -38,6 +38,10 @@ class DataStore:
         # note_id -> {id, room_id, title, content, created_by, created_at, member_phrases: {username: hashed_phrase}}
         self.shared_notes: Dict[str, dict] = {}
         
+        # Groups (group chats)
+        self.groups: Dict[str, dict] = {}
+        # group_id -> {id, name, members: [], owner, created_at, invite_code}
+        
         # Channels
         self.channels: Dict[str, dict] = {}
         self.channel_posts: Dict[str, dict] = {}
@@ -61,21 +65,121 @@ class DataStore:
     # ==========================================
     
     def create_user(self, username: str, password: str) -> dict:
-        """Create a new user"""
+        """Create a new user with extended profile fields"""
         user = {
             'username': username,
             'password': password,  # TODO: Hash in production!
             'public_key': None,
             'created': self.now(),
             'age_verified': True,
-            'terms_accepted': self.now()
+            'terms_accepted': self.now(),
+            # Profile fields
+            'display_name': None,
+            'email': None,
+            'email_verified': False,
+            'phone': None,
+            'phone_verified': False,
+            'profile_image': None,
+            'reset_method': 'email',  # 'email' or 'phone'
+            # Privacy settings
+            'show_online_status': True,
+            'show_read_receipts': True,
         }
         self.users[username] = user
         return user
     
     def get_user(self, username: str) -> Optional[dict]:
         """Get user by username"""
-        return self.users.get(username)
+        user = self.users.get(username)
+        if user:
+            # Ensure all profile fields exist (for backward compatibility)
+            defaults = {
+                'display_name': None,
+                'email': None,
+                'email_verified': False,
+                'phone': None,
+                'phone_verified': False,
+                'profile_image': None,
+                'reset_method': 'email',
+                'show_online_status': True,
+                'show_read_receipts': True,
+            }
+            for key, value in defaults.items():
+                if key not in user:
+                    user[key] = value
+        return user
+    
+    def update_user_profile(self, username: str, data: dict) -> bool:
+        """Update user profile fields"""
+        if username not in self.users:
+            return False
+        
+        user = self.users[username]
+        
+        # Allowed fields to update
+        allowed_fields = [
+            'display_name', 'email', 'phone', 'profile_image',
+            'reset_method', 'show_online_status', 'show_read_receipts',
+            'contact_sync_enabled', 'allow_contact_discovery',
+            'find_by_username', 'find_by_phone', 'find_by_email',
+            'synced_contacts', 'last_contact_sync',
+            'seed_hash', 'password'  # For account recovery
+        ]
+        
+        for field in allowed_fields:
+            if field in data:
+                user[field] = data[field]
+                
+                # Reset verification when email/phone changes
+                if field == 'email' and data[field] != user.get('email'):
+                    user['email_verified'] = False
+                if field == 'phone' and data[field] != user.get('phone'):
+                    user['phone_verified'] = False
+        
+        return True
+    
+    def find_user_by_contact(self, contact_type: str, value: str) -> Optional[str]:
+        """Find a user by phone or email if they allow discovery"""
+        if not value:
+            return None
+        
+        # Normalize phone number (remove non-digits)
+        if contact_type == 'phone':
+            value = ''.join(filter(str.isdigit, value))
+        else:
+            value = value.lower().strip()
+        
+        for username, user in self.users.items():
+            # Check if user allows this type of discovery
+            if contact_type == 'phone':
+                if not user.get('find_by_phone', False):
+                    continue
+                user_phone = ''.join(filter(str.isdigit, user.get('phone', '')))
+                if user_phone and value in user_phone:
+                    return username
+            elif contact_type == 'email':
+                if not user.get('find_by_email', False):
+                    continue
+                user_email = user.get('email', '').lower().strip()
+                if user_email and value == user_email:
+                    return username
+        
+        return None
+    
+    def change_user_password(self, username: str, current_password: str, new_password: str) -> bool:
+        """Change user password after verifying current password"""
+        if username not in self.users:
+            return False
+        
+        user = self.users[username]
+        
+        # Verify current password
+        if user.get('password') != current_password:
+            return False
+        
+        # Update password
+        user['password'] = new_password
+        return True
     
     def user_exists(self, username: str) -> bool:
         """Check if user exists"""
@@ -456,6 +560,105 @@ class DataStore:
         return False
     
     # ==========================================
+    # GROUP (GROUP CHAT) METHODS
+    # ==========================================
+    
+    def create_group(self, name: str, owner: str, members: List[str], invite_code: str = None) -> dict:
+        """Create a new group chat"""
+        group_id = self.generate_id()
+        
+        # Ensure owner is in members list
+        all_members = list(set([owner] + members))
+        
+        group = {
+            'id': group_id,
+            'name': name,
+            'owner': owner,
+            'members': all_members,
+            'created_at': self.now(),
+            'invite_code': invite_code or secrets.token_urlsafe(8),
+            'avatar_emoji': '👥',
+            'last_message': None,
+            'last_message_time': None
+        }
+        
+        self.groups[group_id] = group
+        return group
+    
+    def get_group(self, group_id: str) -> Optional[dict]:
+        """Get a group by ID"""
+        return self.groups.get(group_id)
+    
+    def get_user_groups(self, username: str) -> List[dict]:
+        """Get all groups a user is a member of"""
+        user_groups = []
+        for group in self.groups.values():
+            if username in group['members']:
+                user_groups.append(group)
+        # Sort by last message time (most recent first)
+        user_groups.sort(key=lambda g: g.get('last_message_time') or g['created_at'], reverse=True)
+        return user_groups
+    
+    def add_group_member(self, group_id: str, username: str) -> bool:
+        """Add a member to a group"""
+        if group_id not in self.groups:
+            return False
+        group = self.groups[group_id]
+        if username not in group['members']:
+            group['members'].append(username)
+        return True
+    
+    def remove_group_member(self, group_id: str, username: str) -> bool:
+        """Remove a member from a group"""
+        if group_id not in self.groups:
+            return False
+        group = self.groups[group_id]
+        if username in group['members'] and username != group['owner']:
+            group['members'].remove(username)
+            return True
+        return False
+    
+    def get_group_by_invite_code(self, invite_code: str) -> Optional[dict]:
+        """Find a group by its invite code"""
+        for group in self.groups.values():
+            if group.get('invite_code') == invite_code:
+                return group
+        return None
+    
+    def update_group_last_message(self, group_id: str, message: str):
+        """Update the last message preview for a group"""
+        if group_id in self.groups:
+            self.groups[group_id]['last_message'] = message[:50]  # Truncate preview
+            self.groups[group_id]['last_message_time'] = self.now()
+    
+    def get_group_messages(self, group_id: str) -> List[dict]:
+        """Get all messages for a group"""
+        room_id = f"group_{group_id}"
+        return self.messages.get(room_id, [])
+    
+    def add_group_message(self, group_id: str, sender: str, content: str, encrypted: bool = True) -> dict:
+        """Add a message to a group"""
+        room_id = f"group_{group_id}"
+        
+        if room_id not in self.messages:
+            self.messages[room_id] = []
+        
+        message = {
+            'id': self.generate_id(),
+            'sender': sender,
+            'content': content,
+            'encrypted': encrypted,
+            'timestamp': self.now()
+        }
+        
+        self.messages[room_id].append(message)
+        
+        # Update group's last message
+        self.update_group_last_message(group_id, f"{sender}: {content}" if not encrypted else f"{sender}: [Encrypted]")
+        
+        return message
+    
+    # ==========================================
     # CHANNEL METHODS
     # ==========================================
     
@@ -464,11 +667,33 @@ class DataStore:
     ROLE_MODERATOR = 'mod'     # Can post, comment, but can't manage permissions
     ROLE_VIEWER = 'viewer'     # Read-only access
     
+    # Predefined interest categories for channel discovery
+    INTEREST_CATEGORIES = {
+        'trading': {'emoji': '📈', 'keywords': ['trading', 'stocks', 'forex', 'options', 'day trading', 'swing']},
+        'crypto': {'emoji': '₿', 'keywords': ['crypto', 'bitcoin', 'ethereum', 'blockchain', 'defi', 'nft', 'web3']},
+        'news': {'emoji': '📰', 'keywords': ['news', 'breaking', 'updates', 'daily', 'headlines', 'current events']},
+        'communities': {'emoji': '👥', 'keywords': ['community', 'group', 'club', 'network', 'social', 'meetup']},
+        'tech': {'emoji': '💻', 'keywords': ['tech', 'technology', 'software', 'coding', 'programming', 'ai', 'startup']},
+        'gaming': {'emoji': '🎮', 'keywords': ['gaming', 'games', 'esports', 'stream', 'playstation', 'xbox', 'pc']},
+        'music': {'emoji': '🎵', 'keywords': ['music', 'artist', 'producer', 'beats', 'hip hop', 'edm', 'rock']},
+        'sports': {'emoji': '⚽', 'keywords': ['sports', 'football', 'basketball', 'soccer', 'nfl', 'nba', 'fitness']},
+        'lifestyle': {'emoji': '✨', 'keywords': ['lifestyle', 'fashion', 'travel', 'food', 'health', 'wellness']},
+        'education': {'emoji': '📚', 'keywords': ['education', 'learning', 'tutorial', 'course', 'study', 'school']},
+        'entertainment': {'emoji': '🎬', 'keywords': ['entertainment', 'movies', 'tv', 'shows', 'celebrity', 'media']},
+        'business': {'emoji': '💼', 'keywords': ['business', 'entrepreneur', 'startup', 'marketing', 'sales', 'finance']},
+        'art': {'emoji': '🎨', 'keywords': ['art', 'design', 'creative', 'illustration', 'photography', 'visual']},
+        'science': {'emoji': '🔬', 'keywords': ['science', 'research', 'space', 'physics', 'biology', 'chemistry']},
+    }
+
     def create_channel(self, name: str, description: str, owner: str,
                        accent_color: str, avatar_emoji: str,
-                       discoverable: bool = True) -> dict:
+                       discoverable: bool = True, tags: list = None) -> dict:
         """Create a new channel"""
         channel_id = self.generate_id()
+        
+        # Auto-detect categories from name and description
+        detected_categories = self._detect_channel_categories(name, description)
+        
         channel = {
             'id': channel_id,
             'name': name,
@@ -489,13 +714,171 @@ class DataStore:
             'view_history': [],  # List of {timestamp, username} for tracking daily/weekly
             'likes': [],  # List of usernames who liked
             'like_history': [],  # List of {timestamp, username} for tracking daily/weekly
+            'tags': tags or [],  # User-defined tags
+            'categories': detected_categories,  # Auto-detected categories
         }
         self.channels[channel_id] = channel
         return channel
     
+    def _detect_channel_categories(self, name: str, description: str) -> list:
+        """Auto-detect categories based on channel name and description"""
+        text = f"{name} {description}".lower()
+        detected = []
+        
+        for category, data in self.INTEREST_CATEGORIES.items():
+            for keyword in data['keywords']:
+                if keyword.lower() in text:
+                    if category not in detected:
+                        detected.append(category)
+                    break
+        
+        return detected
+    
+    def update_channel_tags(self, channel_id: str, tags: list) -> bool:
+        """Update channel tags"""
+        if channel_id in self.channels:
+            self.channels[channel_id]['tags'] = tags
+            # Re-detect categories
+            channel = self.channels[channel_id]
+            channel['categories'] = self._detect_channel_categories(
+                channel['name'], 
+                channel['description']
+            )
+            return True
+        return False
+    
+    def search_channels_by_interest(self, query: str, limit: int = 20) -> dict:
+        """
+        Search channels by interest/category or name.
+        Returns both exact matches and category suggestions.
+        """
+        query_lower = query.lower().strip()
+        results = {
+            'exact_matches': [],
+            'category_matches': [],
+            'suggestions': [],
+            'related_categories': []
+        }
+        
+        if not query_lower:
+            return results
+        
+        # Find matching categories
+        matching_categories = []
+        for category, data in self.INTEREST_CATEGORIES.items():
+            if query_lower in category.lower():
+                matching_categories.append(category)
+            else:
+                for keyword in data['keywords']:
+                    if query_lower in keyword.lower() or keyword.lower() in query_lower:
+                        if category not in matching_categories:
+                            matching_categories.append(category)
+                        break
+        
+        results['related_categories'] = [
+            {'name': cat, 'emoji': self.INTEREST_CATEGORIES[cat]['emoji']}
+            for cat in matching_categories
+        ]
+        
+        # Search discoverable channels
+        for channel in self.channels.values():
+            if not channel.get('discoverable', False):
+                continue
+            
+            channel_data = channel.copy()
+            channel_data['like_count'] = len(channel.get('likes', []))
+            
+            name_lower = channel['name'].lower()
+            desc_lower = (channel.get('description') or '').lower()
+            tags = [t.lower() for t in channel.get('tags', [])]
+            categories = channel.get('categories', [])
+            
+            # Exact name match
+            if query_lower in name_lower:
+                results['exact_matches'].append(channel_data)
+            # Category match
+            elif any(cat in matching_categories for cat in categories):
+                results['category_matches'].append(channel_data)
+            # Tag match
+            elif any(query_lower in tag for tag in tags):
+                results['category_matches'].append(channel_data)
+            # Description match
+            elif query_lower in desc_lower:
+                results['suggestions'].append(channel_data)
+        
+        # Sort by engagement
+        for key in ['exact_matches', 'category_matches', 'suggestions']:
+            results[key] = sorted(
+                results[key], 
+                key=lambda x: x.get('like_count', 0) + len(x.get('subscribers', [])),
+                reverse=True
+            )[:limit]
+        
+        return results
+    
+    def get_channels_by_category(self, category: str, limit: int = 20) -> list:
+        """Get all discoverable channels in a specific category"""
+        channels = []
+        
+        for channel in self.channels.values():
+            if not channel.get('discoverable', False):
+                continue
+            
+            if category in channel.get('categories', []):
+                channel_data = channel.copy()
+                channel_data['like_count'] = len(channel.get('likes', []))
+                channels.append(channel_data)
+        
+        # Sort by engagement
+        channels = sorted(
+            channels,
+            key=lambda x: x.get('like_count', 0) + len(x.get('subscribers', [])),
+            reverse=True
+        )
+        
+        return channels[:limit]
+    
+    def get_all_categories(self) -> list:
+        """Get all interest categories with channel counts"""
+        categories = []
+        
+        for category, data in self.INTEREST_CATEGORIES.items():
+            count = sum(
+                1 for ch in self.channels.values()
+                if ch.get('discoverable', False) and category in ch.get('categories', [])
+            )
+            categories.append({
+                'name': category,
+                'emoji': data['emoji'],
+                'channel_count': count
+            })
+        
+        return sorted(categories, key=lambda x: x['channel_count'], reverse=True)
+    
     def get_channel(self, channel_id: str) -> Optional[dict]:
         """Get channel by ID"""
         return self.channels.get(channel_id)
+    
+    def get_user_channel_role(self, channel_id: str, username: str) -> str:
+        """Get user's role in a channel. Returns 'admin', 'mod', 'viewer', or None"""
+        channel = self.channels.get(channel_id)
+        if not channel:
+            return None
+        
+        # Owner is always admin
+        if channel.get('owner') == username:
+            return 'admin'
+        
+        # Check members dict
+        members = channel.get('members', {})
+        if username in members:
+            return members[username]
+        
+        # If subscribed but no specific role, they're a viewer
+        if username in channel.get('subscribers', []):
+            return 'viewer'
+        
+        return None
     
     def channel_exists(self, channel_id: str) -> bool:
         """Check if channel exists"""
@@ -882,28 +1265,6 @@ class DataStore:
         
         return discoverable[:limit]
     
-    def get_trending_channels(self, limit: int = 10) -> List[dict]:
-        """
-        Get trending channels (discoverable, high engagement).
-        Shows top channels regardless of user subscription status.
-        """
-        discoverable = []
-        
-        for channel in self.channels.values():
-            if not channel.get('discoverable', True):
-                continue
-            
-            channel_with_score = channel.copy()
-            channel_with_score['_score'] = self.get_channel_engagement_score(channel)
-            discoverable.append(channel_with_score)
-        
-        discoverable.sort(key=lambda x: x['_score'], reverse=True)
-        
-        for ch in discoverable:
-            ch.pop('_score', None)
-        
-        return discoverable[:limit]
-    
     def search_channels(self, query: str, discoverable_only: bool = True, 
                         limit: int = 20) -> List[dict]:
         """
@@ -1069,5 +1430,8 @@ store = DataStore()
 # Remove these in production!
 store.create_user('test1', '1234567890')
 store.create_user('test2', '1234567890')
-print("✅ Test users created: test1, test2 (password: 1234567890)")
+store.create_user('test3', '1234567890')
+store.create_user('test4', '1234567890')
+store.create_user('test5', '1234567890')
+print("✅ Test users created: test1, test2, test3, test4, test5 (password: 1234567890)")
 

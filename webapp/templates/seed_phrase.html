@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save Your Recovery Phrase - Menza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #030306;
+            --bg-secondary: #08080c;
+            --bg-card: #0c0c12;
+            --bg-card-inner: #101018;
+            --bg-input: #0a0a10;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --text-dim: #6b7280;
+            --text-muted: #4b5563;
+            --border: rgba(255, 255, 255, 0.04);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.1);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245, 158, 11, 0.1);
+            --success: #10b981;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245, 158, 11, 0.08), transparent),
+                radial-gradient(ellipse 50% 50% at 0% 50%, rgba(139, 92, 246, 0.05), transparent);
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .warning-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--warning-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .warning-icon svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--warning);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.5;
+        }
+
+        .warning-box {
+            background: var(--warning-bg);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .warning-box p {
+            color: var(--warning);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .warning-box svg {
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+
+        .seed-phrase-box {
+            background: var(--bg-card-inner);
+            border: 2px dashed var(--border-hover);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .seed-words {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .seed-word {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.625rem 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .seed-word .num {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            min-width: 1.25rem;
+        }
+
+        .seed-word .word {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            margin-bottom: 1.5rem;
+        }
+
+        .copy-btn:hover {
+            background: var(--bg-card-inner);
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        .copy-btn.copied {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .checkbox-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 0.125rem;
+            accent-color: var(--accent-primary);
+            cursor: pointer;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.875rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 480px) {
+            .seed-words {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="warning-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <h1>Save Your Recovery Phrase</h1>
+                <p class="subtitle">This is the only way to recover your account if you forget your password.</p>
+            </div>
+            
+            <div class="warning-box">
+                <p>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Write down these 12 words in order and store them somewhere safe. Never share them with anyone. This phrase will NOT be shown again.
+                </p>
+            </div>
+            
+            <div class="seed-phrase-box">
+                <div class="seed-words" id="seedWords">
+                    {% for word in seed_phrase.split() %}
+                    <div class="seed-word">
+                        <span class="num">{{ loop.index }}</span>
+                        <span class="word">{{ word }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <button class="copy-btn" onclick="copyPhrase()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                </svg>
+                <span id="copyText">Copy to Clipboard</span>
+            </button>
+            
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="confirmCheckbox" onchange="toggleContinue()">
+                    I have written down my recovery phrase and stored it in a safe place
+                </label>
+            </div>
+            
+            <a href="/chat" id="continueBtn">
+                <button class="btn btn-primary" disabled id="continueBtnInner">
+                    Continue to Menza
+                </button>
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        const seedPhrase = "{{ seed_phrase }}";
+        
+        function copyPhrase() {
+            navigator.clipboard.writeText(seedPhrase).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const text = document.getElementById('copyText');
+                btn.classList.add('copied');
+                text.textContent = 'Copied!';
+                
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    text.textContent = 'Copy to Clipboard';
+                }, 2000);
+            });
+        }
+        
+        function toggleContinue() {
+            const checkbox = document.getElementById('confirmCheckbox');
+            const btn = document.getElementById('continueBtnInner');
+            btn.disabled = !checkbox.checked;
+        }
+    </script>
+</body>
+</html>
+

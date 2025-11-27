@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Documentation{% endblock %} - Menza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/static/icons/icon-192.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #0f0f18;
+            --bg-card: #141420;
+            --bg-card-hover: #1a1a28;
+            --accent-primary: #06d6a0;
+            --accent-secondary: #7c3aed;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #6b7280;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .nav-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links a {
+            padding: 0.5rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .nav-cta {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(168, 85, 247, 0.05));
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: var(--radius-md);
+            color: #a855f7;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(168, 85, 247, 0.1));
+            border-color: rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-outline {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(168, 85, 247, 0.04));
+            border-color: rgba(124, 58, 237, 0.15);
+            color: #c4b5fd;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(168, 85, 247, 0.12));
+            border-color: rgba(124, 58, 237, 0.35);
+            color: #e9d5ff;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.28), rgba(168, 85, 247, 0.18));
+            border-color: rgba(124, 58, 237, 0.45);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+        }
+
+        /* Main Layout */
+        .docs-layout {
+            display: flex;
+            padding-top: 64px;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem 0;
+        }
+
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-title {
+            padding: 0 1.5rem;
+            font-size: 0.6875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .sidebar-links {
+            list-style: none;
+        }
+
+        .sidebar-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.625rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-links a:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .sidebar-links a.active {
+            color: var(--accent-primary);
+            background: rgba(6, 214, 160, 0.08);
+            border-left-color: var(--accent-primary);
+        }
+
+        .sidebar-links .icon {
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Content */
+        .docs-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 3rem 4rem;
+            max-width: calc(100% - 280px);
+        }
+
+        .docs-header {
+            margin-bottom: 2.5rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .docs-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .docs-breadcrumb a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .docs-breadcrumb a:hover {
+            color: var(--accent-primary);
+        }
+
+        .docs-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+        }
+
+        .docs-header p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+        }
+
+        .docs-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        /* Article Content */
+        .docs-article {
+            max-width: 800px;
+        }
+
+        .docs-article h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 2.5rem 0 1rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .docs-article h2:first-child {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
+        .docs-article h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 1.75rem 0 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .docs-article p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .docs-article ul, .docs-article ol {
+            margin: 1rem 0 1.5rem 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .docs-article li {
+            margin-bottom: 0.5rem;
+        }
+
+        .docs-article a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        .docs-article a:hover {
+            text-decoration: underline;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(6, 214, 160, 0.08);
+            border: 1px solid rgba(6, 214, 160, 0.2);
+            border-left: 4px solid var(--accent-primary);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .info-box.warning {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: rgba(245, 158, 11, 0.2);
+            border-left-color: #f59e0b;
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.375rem;
+            color: var(--text-primary);
+        }
+
+        .info-box p {
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
+        /* Navigation Buttons */
+        .docs-nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .docs-nav-btn {
+            display: flex;
+            flex-direction: column;
+            padding: 1rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            transition: all 0.2s;
+            min-width: 200px;
+        }
+
+        .docs-nav-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+        }
+
+        .docs-nav-btn.next {
+            text-align: right;
+            margin-left: auto;
+        }
+
+        .docs-nav-btn span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .docs-nav-btn strong {
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar { display: none; }
+            .docs-content { margin-left: 0; max-width: 100%; padding: 2rem; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .docs-header h1 { font-size: 1.75rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="nav-logo">
+            <div class="nav-logo-icon">M</div>
+            Menza
+        </a>
+        <div class="nav-links">
+            <a href="/docs" {% if active_section == 'docs' %}class="active"{% endif %}>Documentation</a>
+            <a href="/docs/privacy" {% if active_section == 'privacy' %}class="active"{% endif %}>Privacy</a>
+            <a href="/docs/terms" {% if active_section == 'terms' %}class="active"{% endif %}>Terms</a>
+            <a href="/docs/security" {% if active_section == 'security' %}class="active"{% endif %}>Security</a>
+        </div>
+        <div class="nav-cta">
+            <a href="/login" class="btn btn-outline">Sign In</a>
+            <a href="/register" class="btn btn-primary">Get Started</a>
+        </div>
+    </nav>
+
+    <div class="docs-layout">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Overview</div>
+                <ul class="sidebar-links">
+                    <li><a href="/docs" {% if current_page == 'docs-home' %}class="active"{% endif %}><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span> Documentation</a></li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Privacy Policy</div>
+                <ul class="sidebar-links">
+                    <li><a href="/docs/privacy" {% if current_page == 'privacy-overview' %}class="active"{% endif %}><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> Overview</a></li>
+                    <li><a href="/docs/privacy/data-collection" {% if current_page == 'data-collection' %}class="active"{% endif %}><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> Data Collection</a></li>
+                    <li><a href="/docs/privacy/data-usage" {% if current_page == 'data-usage' %}class="active"{% endif %}><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Data Usage</a></li>
+                    <li><a href="/docs/privacy/your-rights" {% if current_page == 'your-rights' %}class="active"{% endif %}><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Your Rights</a></li>
+                    <li><a href="/docs/privacy/cookies" {% if current_page == 'cookies' %}class="active"{% endif %}><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/><circle cx="8" cy="9" r="1"/><circle cx="16" cy="9" r="1"/><circle cx="9" cy="15" r="1"/><circle cx="15" cy="15" r="1"/></svg></span> Cookies</a></li>
+                    <li><a href="/docs/privacy/retention" {% if current_page == 'retention' %}class="active"{% endif %}><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> Data Retention</a></li>
+                    <li><a href="/docs/privacy/third-parties" {% if current_page == 'third-parties' %}class="active"{% endif %}><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Third Parties</a></li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Legal</div>
+                <ul class="sidebar-links">
+                    <li><a href="/docs/terms" {% if current_page == 'terms' %}class="active"{% endif %}><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> Terms of Service</a></li>
+                    <li><a href="/docs/security" {% if current_page == 'security' %}class="active"{% endif %}><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> Security</a></li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Guides</div>
+                <ul class="sidebar-links">
+                    <li><a href="/docs/guides/getting-started" {% if current_page == 'getting-started' %}class="active"{% endif %}><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span> Getting Started</a></li>
+                    <li><a href="/docs/guides/encryption" {% if current_page == 'encryption' %}class="active"{% endif %}><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> Encryption</a></li>
+                    <li><a href="/docs/guides/channels" {% if current_page == 'channels' %}class="active"{% endif %}><span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span> Channels</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="docs-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>
+

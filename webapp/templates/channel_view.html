@@ -112,32 +112,33 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            padding: 0.625rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(168, 85, 247, 0.05));
+            border: 1px solid rgba(124, 58, 237, 0.2);
             border-radius: var(--radius-md);
-            color: var(--text-secondary);
+            color: #a855f7;
             text-decoration: none;
             font-size: 0.8125rem;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.2s;
         }
 
         .action-btn:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--border-hover);
-            color: var(--text-primary);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(168, 85, 247, 0.1));
+            border-color: rgba(124, 58, 237, 0.3);
         }
 
         .action-btn.primary {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border: none;
-            color: white;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(168, 85, 247, 0.12));
+            border-color: rgba(124, 58, 237, 0.35);
+            color: #e9d5ff;
         }
 
         .action-btn.primary:hover {
-            box-shadow: 0 0 20px var(--accent-glow);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.28), rgba(168, 85, 247, 0.18));
+            border-color: rgba(124, 58, 237, 0.45);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
         }
 
         /* Section Label */
@@ -219,7 +220,8 @@
 
         /* Sidebar Footer */
         .sidebar-footer {
-            padding: 0.75rem;
+            margin-top: auto;
+            padding: 1rem;
             border-top: 1px solid var(--border);
         }
 
@@ -228,17 +230,21 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            padding: 0.75rem;
-            color: var(--text-secondary);
-            text-decoration: none;
+            padding: 0.875rem 1rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(168, 85, 247, 0.04));
+            border: 1px solid rgba(124, 58, 237, 0.2);
             border-radius: var(--radius-md);
-            transition: all 0.15s;
+            color: #c4b5fd;
+            text-decoration: none;
+            transition: all 0.2s;
             font-size: 0.875rem;
+            font-weight: 500;
         }
 
         .footer-link:hover {
-            background: var(--bg-card);
-            color: var(--text-primary);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(168, 85, 247, 0.08));
+            border-color: rgba(124, 58, 237, 0.35);
+            color: #e9d5ff;
         }
 
         /* Main Content Area */
@@ -247,6 +253,7 @@
             display: flex;
             flex-direction: column;
             min-width: 0;
+            padding-bottom: 100px; /* Space for fixed input area */
         }
 
         /* Channel Header */
@@ -315,16 +322,16 @@
         }
 
         .header-btn {
-            padding: 0.625rem 1rem;
+            padding: 0.75rem 1rem;
             border-radius: var(--radius-md);
             font-family: inherit;
             font-size: 0.8125rem;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.15s;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
-            color: var(--text-secondary);
+            transition: all 0.2s;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(168, 85, 247, 0.05));
+            color: #a855f7;
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -332,19 +339,20 @@
         }
 
         .header-btn:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--border-hover);
-            color: var(--text-primary);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(168, 85, 247, 0.1));
+            border-color: rgba(124, 58, 237, 0.3);
         }
 
         .header-btn.primary {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border: none;
-            color: white;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(168, 85, 247, 0.12));
+            border-color: rgba(124, 58, 237, 0.35);
+            color: #e9d5ff;
         }
 
         .header-btn.subscribed {
-            background: var(--accent-glow);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.06));
+            border-color: rgba(16, 185, 129, 0.25);
+            color: #34d399;
             border-color: var(--accent-primary);
             color: var(--accent-primary);
         }
@@ -473,10 +481,10 @@
             align-items: center;
             gap: 0.375rem;
             padding: 0.5rem 0.875rem;
-            background: var(--bg-card-inner);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-full);
-            color: var(--text-secondary);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(168, 85, 247, 0.04));
+            border: 1px solid rgba(124, 58, 237, 0.15);
+            border-radius: var(--radius-md);
+            color: #c4b5fd;
             font-family: inherit;
             font-size: 0.8125rem;
             cursor: pointer;
@@ -484,8 +492,8 @@
         }
 
         .action-btn-post:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--border-hover);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(168, 85, 247, 0.08));
+            border-color: rgba(124, 58, 237, 0.25);
         }
 
         .action-btn-post.liked {
@@ -682,87 +690,109 @@
             color: var(--text-primary);
         }
 
-        /* Calculator Preview */
+        /* Calculator Preview - iOS Style Suggestion Bar */
         .calc-preview {
             display: none;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            margin-bottom: 0.75rem;
-            overflow: hidden;
-            animation: slideUp 0.2s ease;
+            animation: slideUp 0.15s ease;
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .calc-preview.show { display: block; }
 
-        .calc-header {
+        .calc-suggestions {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.625rem 1rem;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(99, 102, 241, 0.1));
-            border-bottom: 1px solid var(--border);
-        }
-
-        .calc-title {
-            display: flex;
-            align-items: center;
             gap: 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--success);
+            padding: 0.5rem;
+            background: rgba(200, 200, 200, 0.12);
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
         }
+        
+        .calc-suggestions::-webkit-scrollbar { display: none; }
 
-        .calc-insert-btn {
-            padding: 0.5rem 1rem;
-            background: var(--success);
+        .calc-chip {
+            flex-shrink: 0;
+            padding: 0.625rem 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: #1a1a1a;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .calc-chip:hover { background: #ffffff; transform: scale(1.02); }
+        .calc-chip:active { transform: scale(0.98); background: #f0f0f0; }
+        .calc-chip.expression { color: #666; }
+        .calc-chip.full { background: rgba(255, 255, 255, 0.98); font-weight: 500; }
+        .calc-chip.result {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            font-weight: 600;
+        }
+        .calc-chip.result:hover { box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3); }
+
+        @media (prefers-color-scheme: dark) {
+            .calc-suggestions { background: rgba(60, 60, 60, 0.5); }
+            .calc-chip { background: rgba(80, 80, 80, 0.9); color: #ffffff; }
+            .calc-chip:hover { background: rgba(90, 90, 90, 0.95); }
+            .calc-chip.expression { color: #aaa; }
+        }
+        
+        .calc-total-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.625rem 1rem;
+            background: linear-gradient(135deg, #10b981, #059669);
             border: none;
             border-radius: var(--radius-sm);
             color: white;
-            font-family: inherit;
-            font-size: 0.75rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+            font-size: 0.9375rem;
             font-weight: 600;
             cursor: pointer;
+            white-space: nowrap;
         }
+        .calc-total-chip:hover { box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4); }
+        .calc-total-label { font-size: 0.75rem; opacity: 0.9; }
 
-        .calc-results { padding: 0.75rem 1rem; }
+        /* Hide old elements */
+        .calc-header, .calc-results, .calc-total, .calc-insert-btn { display: none !important; }
 
-        .calc-line {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.375rem 0;
-            font-size: 0.875rem;
-            font-family: 'Monaco', 'Consolas', monospace;
-        }
-
-        .calc-expression { color: var(--text-secondary); }
-        .calc-equals { color: var(--text-muted); margin: 0 0.5rem; }
-        .calc-result { color: var(--success); font-weight: 600; }
-
-        .calc-total {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 1rem;
-            background: var(--bg-card-inner);
-            border-top: 1px solid var(--border);
-            font-family: 'Monaco', 'Consolas', monospace;
-        }
-
-        .calc-total-label { font-size: 0.875rem; font-weight: 700; color: var(--accent-primary); }
-        .calc-total-value { font-size: 1rem; font-weight: 700; color: var(--accent-primary); }
-
-        /* Input Area (Post Composer) */
+        /* Input Area (Post Composer) - Full Width at Bottom */
         .input-area {
-            padding: 1rem 1.25rem;
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 2rem;
+            background: linear-gradient(180deg, rgba(3, 3, 6, 0.95), rgba(8, 8, 12, 0.98));
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(124, 58, 237, 0.15);
+            z-index: 100;
+        }
+        
+        .input-area form {
+            max-width: 100%;
+            margin: 0 auto;
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+        }
+        
+        .input-area .composer-header {
+            display: none;
         }
 
         .composer-header {
@@ -790,21 +820,25 @@
         }
 
         .post-input-container {
+            flex: 1;
             background: var(--bg-input);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-lg);
-            padding: 0.25rem;
+            border: 2px solid rgba(124, 58, 237, 0.3);
+            border-radius: 28px;
+            padding: 0.5rem 1rem;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .post-input-container:focus-within {
             border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px var(--accent-glow);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2), 0 0 0 3px rgba(124, 58, 237, 0.1);
         }
 
         .post-input {
-            width: 100%;
-            padding: 0.625rem 0.875rem;
+            flex: 1;
+            padding: 0.75rem 0.5rem;
             background: transparent;
             border: none;
             color: var(--text-primary);
@@ -812,8 +846,8 @@
             font-size: 0.9375rem;
             resize: none;
             outline: none;
-            min-height: 60px;
-            max-height: 150px;
+            min-height: 24px;
+            max-height: 120px;
         }
 
         .post-input::placeholder {
@@ -823,51 +857,66 @@
         .composer-toolbar {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0.5rem 0;
+            gap: 0.5rem;
         }
 
         .formatting-buttons {
             display: flex;
-            gap: 0.375rem;
+            gap: 0.25rem;
+            flex-shrink: 0;
         }
 
         .format-btn {
-            width: 34px;
-            height: 34px;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
+            background: transparent;
+            border: 1px solid rgba(124, 58, 237, 0.2);
             border-radius: var(--radius-sm);
-            color: var(--text-secondary);
+            color: var(--text-muted);
             cursor: pointer;
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             font-weight: 600;
             transition: all 0.2s;
         }
 
         .format-btn:hover {
-            background: var(--bg-card-hover);
-            color: var(--text-primary);
+            background: rgba(124, 58, 237, 0.1);
+            border-color: rgba(124, 58, 237, 0.3);
+            color: var(--accent-secondary);
         }
 
         .post-btn {
-            padding: 0.625rem 1.5rem;
+            width: 48px;
+            height: 48px;
+            padding: 0;
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             border: none;
             border-radius: var(--radius-md);
             color: white;
-            font-family: inherit;
-            font-size: 0.875rem;
-            font-weight: 600;
+            font-size: 0;
             cursor: pointer;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .post-btn::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='22' y1='2' x2='11' y2='13'%3E%3C/line%3E%3Cpolygon points='22 2 15 22 11 13 2 9 22 2'%3E%3C/polygon%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
         }
 
         .post-btn:hover {
-            box-shadow: 0 0 20px var(--accent-glow);
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
         }
 
         /* Members Panel */
@@ -1086,7 +1135,7 @@
 
         <div class="sidebar-footer">
             <a href="/chat" class="footer-link">
-                💬 Back to Messages
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Back to Messages
             </a>
         </div>
     </div>
@@ -1123,16 +1172,16 @@
                     <button type="submit" class="header-btn subscribed">✓ Joined</button>
                 </form>
                 {% endif %}
-                <button class="header-btn" onclick="toggleMembers()">👥 Members</button>
+                <button class="header-btn" onclick="toggleMembers()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Members</button>
                 {% if can_manage %}
-                <a href="/channel/{{ channel.id }}/settings" class="header-btn">⚙️ Settings</a>
+                <a href="/channel/{{ channel.id }}/settings" class="header-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
                 {% endif %}
             </div>
         </div>
 
         <!-- Members Panel (Toggle) -->
         <div class="members-panel" id="membersPanel">
-            <h3>👥 Members ({{ members_with_roles|length }})</h3>
+            <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 8px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Members ({{ members_with_roles|length }})</h3>
             <div class="members-list">
                 {% for member in members_with_roles %}
                 <div class="member-item">
@@ -1237,51 +1286,40 @@
             {% endif %}
         </div>
 
-        <!-- Post Composer (Admins & Moderators Only) -->
-        {% if can_post %}
-        <div class="input-area">
-            <!-- Calculator Preview -->
-            <div class="calc-preview" id="calcPreview">
-                <div class="calc-header">
-                    <div class="calc-title">🧮 Calculator</div>
-                    <button class="calc-insert-btn" type="button" onclick="insertCalculatedText()">Insert Results</button>
-                </div>
-                <div class="calc-results" id="calcResults"></div>
-                <div class="calc-total" id="calcTotal" style="display: none;">
-                    <span class="calc-total-label">Total</span>
-                    <span class="calc-total-value" id="calcTotalValue">0</span>
-                </div>
+    </div>
+    </div> <!-- Close app-container -->
+    
+    <!-- Post Composer (Admins & Moderators Only) - Fixed at Bottom -->
+    {% if can_post %}
+    <div class="input-area">
+        <!-- Calculator Preview - iOS Style -->
+        <div class="calc-preview" id="calcPreview" style="position: absolute; bottom: 100%; left: 0; right: 0; margin-bottom: 0.5rem;">
+            <div class="calc-suggestions" id="calcSuggestions">
+                <!-- iOS-style suggestion chips will appear here -->
             </div>
+        </div>
 
-            <form action="/channel/{{ channel.id }}/post" method="POST">
-                <div class="composer-header">
-                    <div class="composer-avatar">{{ channel.branding.avatar_emoji }}</div>
-                    <span class="composer-label">Create a new post</span>
+        <form action="/channel/{{ channel.id }}/post" method="POST">
+            <div class="post-input-container">
+                <div class="formatting-buttons">
+                    <button type="button" class="format-btn" onclick="insertFormat('**', '**')" title="Bold">B</button>
+                    <button type="button" class="format-btn" onclick="insertFormat('*', '*')" title="Italic" style="font-style: italic;">I</button>
+                    <button type="button" class="format-btn" onclick="insertFormat('`', '`')" title="Code">&lt;&gt;</button>
+                    <button type="button" class="format-btn" onclick="insertFormat('==', '==')" title="Highlight">🖍️</button>
+                    <button type="button" class="format-btn" onclick="toggleLinkPost()" title="Link">🔗</button>
                 </div>
-                <div class="post-input-container">
-                    <textarea name="content" class="post-input" placeholder="Share something with your subscribers..." required id="postContent" oninput="detectCalculations(this.value)"></textarea>
-                </div>
+                <textarea name="content" class="post-input" placeholder="Type a message..." required id="postContent" oninput="detectCalculations(this.value)" rows="1"></textarea>
                 <select name="linked_post" style="display: none;" id="linkedPostSelect">
                     <option value="">No linked post</option>
                     {% for post in posts %}
                     <option value="{{ post.id }}">{{ post.content[:50] }}...</option>
                     {% endfor %}
                 </select>
-                <div class="composer-toolbar">
-                    <div class="formatting-buttons">
-                        <button type="button" class="format-btn" onclick="insertFormat('**', '**')" title="Bold">B</button>
-                        <button type="button" class="format-btn" onclick="insertFormat('*', '*')" title="Italic" style="font-style: italic;">I</button>
-                        <button type="button" class="format-btn" onclick="insertFormat('`', '`')" title="Code">&lt;&gt;</button>
-                        <button type="button" class="format-btn" onclick="insertFormat('==', '==')" title="Highlight">🖍️</button>
-                        <button type="button" class="format-btn" onclick="toggleLinkPost()" title="Link to previous post">🔗</button>
-                    </div>
-                    <button type="submit" class="post-btn">Post</button>
-                </div>
-            </form>
-        </div>
-        {% endif %}
+            </div>
+            <button type="submit" class="post-btn">Post</button>
+        </form>
     </div>
-    </div> <!-- Close app-container -->
+    {% endif %}
 
     <script>
         const socket = io();
@@ -1441,11 +1479,9 @@
         
         function detectCalculations(text) {
             const preview = document.getElementById('calcPreview');
-            const resultsContainer = document.getElementById('calcResults');
-            const totalContainer = document.getElementById('calcTotal');
-            const totalValue = document.getElementById('calcTotalValue');
+            const suggestionsContainer = document.getElementById('calcSuggestions');
             
-            if (!preview) return;
+            if (!preview || !suggestionsContainer) return;
             
             // Pattern to match math expressions: number operator number
             const mathPattern = /(\d+(?:\.\d+)?)\s*([x×*+\-\/÷])\s*(\d+(?:\.\d+)?)/gi;
@@ -1468,7 +1504,7 @@
                         case '×':
                         case '*':
                             result = num1 * num2;
-                            displayOperator = 'x';
+                            displayOperator = '×';
                             break;
                         case '+':
                             result = num1 + num2;
@@ -1487,40 +1523,65 @@
                     
                     calculations.push({
                         expression: `${num1}${displayOperator}${num2}`,
+                        original: match[0],
                         result: result
                     });
                 }
             });
             
             if (calculations.length > 0) {
-                let html = calculations.map(calc => `
-                    <div class="calc-line">
-                        <span class="calc-expression">${calc.expression}</span>
-                        <span>
-                            <span class="calc-equals">=</span>
-                            <span class="calc-result">${formatNumber(calc.result)}</span>
-                        </span>
-                    </div>
-                `).join('');
+                // Build iOS-style suggestion chips
+                let html = '';
                 
-                resultsContainer.innerHTML = html;
-                
-                if (calculations.length > 1) {
-                    const total = calculations.reduce((sum, calc) => sum + calc.result, 0);
-                    totalValue.textContent = formatNumber(total);
-                    totalContainer.style.display = 'flex';
-                    lastTotal = total;
+                if (calculations.length === 1) {
+                    // Single calculation - show 3 options like iOS
+                    const calc = calculations[0];
+                    const resultStr = formatNumber(calc.result);
+                    
+                    html = `
+                        <button type="button" class="calc-chip expression" onclick="insertCalcText('"${calc.expression}="')">"${calc.expression}="</button>
+                        <button type="button" class="calc-chip full" onclick="insertCalcText('${calc.expression}=${resultStr}')">${calc.expression}=${resultStr}</button>
+                        <button type="button" class="calc-chip result" onclick="insertCalcText('${resultStr}')">${resultStr}</button>
+                    `;
                 } else {
-                    totalContainer.style.display = 'none';
-                    lastTotal = calculations[0].result;
+                    // Multiple calculations - show each result + total
+                    calculations.forEach(calc => {
+                        const resultStr = formatNumber(calc.result);
+                        html += `<button type="button" class="calc-chip full" onclick="insertCalcText('${calc.expression}=${resultStr}')">${calc.expression}=${resultStr}</button>`;
+                    });
+                    
+                    // Add total chip
+                    const total = calculations.reduce((sum, calc) => sum + calc.result, 0);
+                    const totalStr = formatNumber(total);
+                    html += `<button type="button" class="calc-total-chip" onclick="insertCalcText('Total: ${totalStr}')"><span class="calc-total-label">Total</span> ${totalStr}</button>`;
+                    lastTotal = total;
                 }
                 
+                suggestionsContainer.innerHTML = html;
                 lastCalculations = calculations;
                 preview.classList.add('show');
             } else {
                 lastCalculations = [];
                 lastTotal = 0;
                 preview.classList.remove('show');
+            }
+        }
+        
+        function insertCalcText(text) {
+            const input = document.getElementById('postContent');
+            if (input) {
+                // Replace the current expression with the selected text
+                const currentText = input.value;
+                const mathPattern = /(\d+(?:\.\d+)?)\s*([x×*+\-\/÷])\s*(\d+(?:\.\d+)?)/gi;
+                
+                // Find and replace the last expression
+                const newText = currentText.replace(mathPattern, text);
+                input.value = newText;
+                input.focus();
+                
+                // Hide calculator
+                document.getElementById('calcPreview').classList.remove('show');
+                lastCalculations = [];
             }
         }
         

@@ -254,27 +254,31 @@
 
         .btn {
             width: 100%;
-            padding: 0.875rem;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.25rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(168, 85, 247, 0.08));
+            border: 1px solid rgba(124, 58, 237, 0.3);
             border-radius: var(--radius-md);
-            color: white;
+            color: #e9d5ff;
             font-family: inherit;
             font-size: 0.9375rem;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 0 30px var(--accent-glow), 0 4px 16px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.22), rgba(168, 85, 247, 0.12));
+            border-color: rgba(124, 58, 237, 0.45);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
         }
 
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
             box-shadow: none;
         }
 
@@ -351,12 +355,36 @@
                 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Create a strong password" required autocomplete="new-password" minlength="6">
+                    <input type="password" id="password" name="password" placeholder="Create a strong password" required autocomplete="new-password" minlength="8">
                 </div>
                 
                 <div class="form-group">
                     <label for="confirm_password">Confirm Password</label>
                     <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required autocomplete="new-password">
+                </div>
+                
+                <div class="optional-section" style="border-top: 1px solid var(--border); padding-top: 1.25rem; margin-top: 1.25rem;">
+                    <div class="legal-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        Optional Recovery Methods
+                    </div>
+                    <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5;">
+                        Add email or phone for additional account recovery options. If you don't add these, you'll receive a 12-word recovery phrase that you must save securely.
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="email">Email (Optional)</label>
+                        <input type="email" id="email" name="email" placeholder="your@email.com" autocomplete="email">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="phone">Phone (Optional)</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567" autocomplete="tel">
+                    </div>
                 </div>
                 
                 <div class="legal-section">

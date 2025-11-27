@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Menza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/static/icons/icon-192.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #0f0f18;
+            --bg-card: #141420;
+            --bg-card-hover: #1a1a28;
+            --bg-input: #0d0d14;
+            --accent-primary: #7c3aed;
+            --accent-secondary: #a855f7;
+            --accent-tertiary: #06b6d4;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #6b7280;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-full: 50%;
+        }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: linear-gradient(180deg, rgba(2, 2, 5, 0.98), rgba(6, 6, 10, 0.95));
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.1);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .nav-logo-icon {
+            display: none;
+        }
+
+        .nav-logo-text {
+            font-size: 1.375rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #ffffff 0%, #e879f9 50%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .nav-tab {
+            padding: 0.5rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .nav-tab.active {
+            color: var(--text-primary);
+            background: var(--accent-primary);
+        }
+
+        /* Main Container */
+        .main-container {
+            margin-top: 56px;
+            min-height: calc(100vh - 56px);
+            display: flex;
+        }
+
+        /* Settings Sidebar */
+        .settings-sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 0;
+            flex-shrink: 0;
+        }
+
+        .settings-nav {
+            list-style: none;
+        }
+
+        .settings-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+        }
+
+        .settings-nav-item:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .settings-nav-item.active {
+            color: var(--accent-secondary);
+            background: rgba(168, 85, 247, 0.08);
+            border-left-color: var(--accent-secondary);
+        }
+
+        .settings-nav-item .icon {
+            font-size: 1.125rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Content Area */
+        .settings-content {
+            flex: 1;
+            padding: 2rem 3rem;
+            max-width: 800px;
+        }
+
+        .settings-header {
+            margin-bottom: 2rem;
+        }
+
+        .settings-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .settings-header p {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+
+        /* Settings Section */
+        .settings-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Profile Picture */
+        .profile-picture-section {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid var(--accent-primary);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-avatar-upload {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.375rem;
+            text-align: center;
+            font-size: 0.75rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .profile-avatar:hover .profile-avatar-upload {
+            opacity: 1;
+        }
+
+        .profile-picture-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.375rem;
+        }
+
+        .profile-picture-info p {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .upload-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-card-hover);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .upload-btn:hover {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        /* Form Fields */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-label .optional {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.375rem;
+        }
+
+        /* Password Reset Options */
+        .reset-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .reset-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reset-option:hover {
+            border-color: var(--accent-primary);
+            background: rgba(124, 58, 237, 0.05);
+        }
+
+        .reset-option.selected {
+            border-color: var(--accent-primary);
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        .reset-option-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .reset-option-info h4 {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .reset-option-info p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .reset-option input[type="radio"] {
+            margin-left: auto;
+            accent-color: var(--accent-primary);
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Buttons */
+        /* Unified Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(168, 85, 247, 0.05));
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: var(--radius-md);
+            color: #a855f7;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(168, 85, 247, 0.1));
+            border-color: rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(168, 85, 247, 0.12));
+            border-color: rgba(124, 58, 237, 0.35);
+            color: #e9d5ff;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.28), rgba(168, 85, 247, 0.18));
+            border-color: rgba(124, 58, 237, 0.45);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(168, 85, 247, 0.04));
+            border-color: rgba(124, 58, 237, 0.15);
+            color: #c4b5fd;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(168, 85, 247, 0.08));
+            border-color: rgba(124, 58, 237, 0.25);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.04));
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.08));
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        .toast.error {
+            border-color: var(--error);
+        }
+
+        /* Hidden file input */
+        .hidden-input {
+            display: none;
+        }
+
+        /* Password visibility toggle */
+        .password-input-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .password-toggle:hover {
+            color: var(--text-primary);
+        }
+
+        /* Verification badge */
+        .verification-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            margin-left: 0.5rem;
+        }
+
+        .verification-badge.verified {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .verification-badge.unverified {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        @media (max-width: 768px) {
+            .settings-sidebar {
+                display: none;
+            }
+            
+            .settings-content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <a href="/" class="nav-logo">
+            <span class="nav-logo-text">MENZA</span>
+        </a>
+        <div class="nav-tabs">
+            <a href="/chat" class="nav-tab">Messages</a>
+            <a href="/channels" class="nav-tab">Channels</a>
+            <a href="/settings" class="nav-tab active">Settings</a>
+            <a href="/logout" class="nav-tab">Sign Out</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Settings Sidebar -->
+        <aside class="settings-sidebar">
+            <nav class="settings-nav">
+                <a class="settings-nav-item active" data-tab="profile">
+                    <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                    Profile
+                </a>
+                <a class="settings-nav-item" data-tab="security">
+                    <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                    Security
+                </a>
+                <a class="settings-nav-item" data-tab="privacy">
+                    <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+                    Privacy
+                </a>
+                <a class="settings-nav-item" data-tab="notifications">
+                    <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+                    Notifications
+                </a>
+                <a href="/docs/privacy" class="settings-nav-item">
+                    <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+                    Privacy Policy
+                </a>
+                <a href="/docs/terms" class="settings-nav-item">
+                    <span class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+                    Terms of Service
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Settings Content -->
+        <main class="settings-content">
+            <!-- Profile Tab -->
+            <div id="profile-tab" class="settings-tab active">
+                <div class="settings-header">
+                    <h1><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 10px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile Settings</h1>
+                    <p>Manage your profile information and how others see you on Menza.</p>
+                </div>
+
+                <form id="profileForm" onsubmit="saveProfile(event)">
+                    <div class="settings-section">
+                        <div class="section-title">📷 Profile Picture</div>
+                        
+                        <div class="profile-picture-section">
+                            <div class="profile-avatar" id="profileAvatar">
+                                {% if user.profile_image %}
+                                <img src="{{ user.profile_image }}" alt="Profile">
+                                {% else %}
+                                {{ username[0].upper() }}
+                                {% endif %}
+                                <div class="profile-avatar-upload" onclick="document.getElementById('avatarInput').click()">
+                                    📷 Change
+                                </div>
+                            </div>
+                            <div class="profile-picture-info">
+                                <h3>Profile Photo</h3>
+                                <p>JPG, PNG or GIF. Max size 2MB.</p>
+                                <button type="button" class="upload-btn" onclick="document.getElementById('avatarInput').click()">
+                                    Upload Image
+                                </button>
+                                <input type="file" id="avatarInput" class="hidden-input" accept="image/*" onchange="previewAvatar(this)">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-input" value="{{ username }}" disabled>
+                            <p class="form-hint">Username cannot be changed after account creation.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Display Name</label>
+                            <input type="text" class="form-input" id="displayName" name="display_name" 
+                                   value="{{ user.display_name or '' }}" placeholder="Enter your display name">
+                            <p class="form-hint">This is how your name will appear to others.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Email Address
+                                <span class="optional">(optional)</span>
+                                {% if user.email %}
+                                <span class="verification-badge {% if user.email_verified %}verified{% else %}unverified{% endif %}">
+                                    {% if user.email_verified %}✓ Verified{% else %}⚠ Unverified{% endif %}
+                                </span>
+                                {% endif %}
+                            </label>
+                            <input type="email" class="form-input" id="email" name="email" 
+                                   value="{{ user.email or '' }}" placeholder="your@email.com">
+                            <p class="form-hint">Used for account recovery and important notifications.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Phone Number
+                                <span class="optional">(optional)</span>
+                                {% if user.phone %}
+                                <span class="verification-badge {% if user.phone_verified %}verified{% else %}unverified{% endif %}">
+                                    {% if user.phone_verified %}✓ Verified{% else %}⚠ Unverified{% endif %}
+                                </span>
+                                {% endif %}
+                            </label>
+                            <input type="tel" class="form-input" id="phone" name="phone" 
+                                   value="{{ user.phone or '' }}" placeholder="+1 (555) 000-0000">
+                            <p class="form-hint">Used for two-factor authentication and account recovery.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Security Tab -->
+            <div id="security-tab" class="settings-tab" style="display: none;">
+                <div class="settings-header">
+                    <h1><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 10px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Security Settings</h1>
+                    <p>Manage your password and account security options.</p>
+                </div>
+
+                <div class="settings-section">
+                    <div class="section-title">🔑 Change Password</div>
+                    
+                    <form id="passwordForm" onsubmit="changePassword(event)">
+                        <div class="form-group">
+                            <label class="form-label">Current Password</label>
+                            <div class="password-input-wrapper">
+                                <input type="password" class="form-input" id="currentPassword" name="current_password" 
+                                       placeholder="Enter current password" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('currentPassword')">👁️</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">New Password</label>
+                            <div class="password-input-wrapper">
+                                <input type="password" class="form-input" id="newPassword" name="new_password" 
+                                       placeholder="Enter new password" required minlength="8">
+                                <button type="button" class="password-toggle" onclick="togglePassword('newPassword')">👁️</button>
+                            </div>
+                            <p class="form-hint">Minimum 8 characters.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Confirm New Password</label>
+                            <div class="password-input-wrapper">
+                                <input type="password" class="form-input" id="confirmPassword" name="confirm_password" 
+                                       placeholder="Confirm new password" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">👁️</button>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Update Password</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="settings-section">
+                    <div class="section-title">📧 Password Recovery Options</div>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+                        Choose how you want to receive password reset codes.
+                    </p>
+                    
+                    <div class="reset-options">
+                        <label class="reset-option" id="resetEmailOption">
+                            <div class="reset-option-icon">📧</div>
+                            <div class="reset-option-info">
+                                <h4>Email</h4>
+                                <p>Receive reset code via email</p>
+                            </div>
+                            <input type="radio" name="reset_method" value="email" 
+                                   {% if user.reset_method == 'email' or not user.reset_method %}checked{% endif %}
+                                   onchange="updateResetMethod('email')">
+                        </label>
+                        
+                        <label class="reset-option" id="resetPhoneOption">
+                            <div class="reset-option-icon">📱</div>
+                            <div class="reset-option-info">
+                                <h4>Phone (SMS)</h4>
+                                <p>Receive reset code via text message</p>
+                            </div>
+                            <input type="radio" name="reset_method" value="phone"
+                                   {% if user.reset_method == 'phone' %}checked{% endif %}
+                                   onchange="updateResetMethod('phone')">
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="section-title" style="color: var(--error);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Danger Zone</div>
+                    
+                    <div class="form-group">
+                        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+                            Permanently delete your account and all associated data. This action cannot be undone.
+                        </p>
+                        <button type="button" class="btn btn-danger" onclick="confirmDeleteAccount()">
+                            Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy Tab -->
+            <div id="privacy-tab" class="settings-tab" style="display: none;">
+                <div class="settings-header">
+                    <h1><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 10px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Privacy Settings</h1>
+                    <p>Control who can see your information and how your data is used.</p>
+                </div>
+
+                <div class="settings-section">
+                    <div class="section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Profile Visibility</div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" id="showOnlineStatus" style="accent-color: var(--accent-primary); width: 18px; height: 18px;"
+                                   {% if user.show_online_status %}checked{% endif %}
+                                   onchange="togglePrivacySetting('show_online_status', this.checked)">
+                            <span>Show online status</span>
+                        </label>
+                        <p class="form-hint">Let others see when you're online.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" id="showReadReceipts" style="accent-color: var(--accent-primary); width: 18px; height: 18px;"
+                                   {% if user.show_read_receipts %}checked{% endif %}
+                                   onchange="togglePrivacySetting('show_read_receipts', this.checked)">
+                            <span>Show read receipts</span>
+                        </label>
+                        <p class="form-hint">Let others know when you've read their messages.</p>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>Contact Sync</div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" id="contactSyncEnabled" style="accent-color: var(--accent-primary); width: 18px; height: 18px;"
+                                   {% if user.contact_sync_enabled %}checked{% endif %}
+                                   onchange="toggleContactSync(this.checked)">
+                            <span>Sync contacts</span>
+                        </label>
+                        <p class="form-hint">Sync your contacts to find friends who use Menza. Your contacts are encrypted and only used to find matches.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" id="allowContactDiscovery" style="accent-color: var(--accent-primary); width: 18px; height: 18px;"
+                                   {% if user.allow_contact_discovery %}checked{% endif %}
+                                   onchange="togglePrivacySetting('allow_contact_discovery', this.checked)">
+                            <span>Allow others to find me</span>
+                        </label>
+                        <p class="form-hint">Let others who have your phone number or email find you on Menza.</p>
+                    </div>
+
+                    <div class="form-group" id="syncContactsAction" style="margin-top: 1rem;">
+                        <button type="button" class="btn btn-secondary" onclick="syncContactsNow()" id="syncContactsBtn">
+                            <span id="syncBtnText">🔄 Sync Contacts Now</span>
+                        </button>
+                        <p class="form-hint" id="lastSyncInfo" style="margin-top: 0.5rem;">
+                            {% if user.last_contact_sync %}
+                            Last synced: {{ user.last_contact_sync }}
+                            {% else %}
+                            Never synced
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Discoverability</div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" id="findByUsername" style="accent-color: var(--accent-primary); width: 18px; height: 18px;"
+                                   {% if user.find_by_username is not defined or user.find_by_username %}checked{% endif %}
+                                   onchange="togglePrivacySetting('find_by_username', this.checked)">
+                            <span>Find me by username</span>
+                        </label>
+                        <p class="form-hint">Allow others to find you by searching your username.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" id="findByPhone" style="accent-color: var(--accent-primary); width: 18px; height: 18px;"
+                                   {% if user.find_by_phone %}checked{% endif %}
+                                   onchange="togglePrivacySetting('find_by_phone', this.checked)">
+                            <span>Find me by phone number</span>
+                        </label>
+                        <p class="form-hint">Allow others who have your phone number to find you.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" id="findByEmail" style="accent-color: var(--accent-primary); width: 18px; height: 18px;"
+                                   {% if user.find_by_email %}checked{% endif %}
+                                   onchange="togglePrivacySetting('find_by_email', this.checked)">
+                            <span>Find me by email</span>
+                        </label>
+                        <p class="form-hint">Allow others who have your email address to find you.</p>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Your Data</div>
+                    
+                    <div class="form-group">
+                        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+                            Download a copy of all your data stored on Menza.
+                        </p>
+                        <button type="button" class="btn btn-secondary" onclick="requestDataExport()">
+                            Request Data Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Tab -->
+            <div id="notifications-tab" class="settings-tab" style="display: none;">
+                <div class="settings-header">
+                    <h1><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 10px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notification Settings</h1>
+                    <p>Customize how and when you receive notifications.</p>
+                </div>
+
+                <div class="settings-section">
+                    <div class="section-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Push Notifications</div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" id="pushMessages" style="accent-color: var(--accent-primary); width: 18px; height: 18px;" checked>
+                            <span>New messages</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" id="pushChannels" style="accent-color: var(--accent-primary); width: 18px; height: 18px;" checked>
+                            <span>Channel updates</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                            <input type="checkbox" id="pushSecurity" style="accent-color: var(--accent-primary); width: 18px; height: 18px;" checked>
+                            <span>Security alerts</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✓</span>
+        <span class="toast-message" id="toastMessage">Changes saved!</span>
+    </div>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.settings-nav-item[data-tab]').forEach(item => {
+            item.addEventListener('click', () => {
+                const tab = item.dataset.tab;
+                
+                // Update nav
+                document.querySelectorAll('.settings-nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Update content
+                document.querySelectorAll('.settings-tab').forEach(t => t.style.display = 'none');
+                document.getElementById(`${tab}-tab`).style.display = 'block';
+            });
+        });
+
+        // Avatar preview
+        function previewAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatar = document.getElementById('profileAvatar');
+                    avatar.innerHTML = `
+                        <img src="${e.target.result}" alt="Profile">
+                        <div class="profile-avatar-upload" onclick="document.getElementById('avatarInput').click()">
+                            📷 Change
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Save profile
+        async function saveProfile(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(document.getElementById('profileForm'));
+            const avatarInput = document.getElementById('avatarInput');
+            if (avatarInput.files[0]) {
+                formData.append('avatar', avatarInput.files[0]);
+            }
+            
+            try {
+                const response = await fetch('/settings/profile', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showToast('Profile updated successfully!', 'success');
+                } else {
+                    showToast(data.error || 'Failed to update profile', 'error');
+                }
+            } catch (error) {
+                showToast('An error occurred', 'error');
+            }
+        }
+
+        // Change password
+        async function changePassword(event) {
+            event.preventDefault();
+            
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/settings/password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        current_password: document.getElementById('currentPassword').value,
+                        new_password: newPassword
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showToast('Password updated successfully!', 'success');
+                    document.getElementById('passwordForm').reset();
+                } else {
+                    showToast(data.error || 'Failed to update password', 'error');
+                }
+            } catch (error) {
+                showToast('An error occurred', 'error');
+            }
+        }
+
+        // Toggle password visibility
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        // Update reset method
+        async function updateResetMethod(method) {
+            try {
+                const response = await fetch('/settings/reset-method', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ method })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showToast(`Password reset method set to ${method}`, 'success');
+                }
+            } catch (error) {
+                showToast('An error occurred', 'error');
+            }
+        }
+
+        // Delete account
+        function confirmDeleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                if (confirm('This will permanently delete all your messages, channels, and data. Type "DELETE" to confirm.')) {
+                    // In real implementation, would require typing DELETE
+                    showToast('Account deletion feature coming soon', 'error');
+                }
+            }
+        }
+
+        // Request data export
+        function requestDataExport() {
+            showToast('Data export request submitted. You will receive an email when ready.', 'success');
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('profileForm').reset();
+            showToast('Changes discarded', 'success');
+        }
+
+        // Toggle privacy setting
+        function togglePrivacySetting(settingName, value) {
+            const formData = new FormData();
+            formData.append('setting_name', settingName);
+            formData.append('value', value);
+            
+            fetch('/api/settings/toggle', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Setting updated', 'success');
+                } else {
+                    showToast(data.message || 'Failed to update setting', 'error');
+                }
+            })
+            .catch(err => {
+                showToast('Failed to update setting', 'error');
+            });
+        }
+
+        // Toggle contact sync
+        function toggleContactSync(enabled) {
+            togglePrivacySetting('contact_sync_enabled', enabled);
+            
+            // Update UI
+            const syncBtn = document.getElementById('syncContactsBtn');
+            if (syncBtn) {
+                syncBtn.disabled = !enabled;
+                syncBtn.style.opacity = enabled ? '1' : '0.5';
+            }
+            
+            if (enabled) {
+                showToast('Contact sync enabled. Tap "Sync Contacts Now" to sync.', 'success');
+            } else {
+                showToast('Contact sync disabled', 'success');
+            }
+        }
+
+        // Sync contacts now
+        async function syncContactsNow() {
+            const syncBtn = document.getElementById('syncContactsBtn');
+            const syncBtnText = document.getElementById('syncBtnText');
+            const lastSyncInfo = document.getElementById('lastSyncInfo');
+            
+            // Check if Contact API is available (only on mobile/supported browsers)
+            if ('contacts' in navigator && 'ContactsManager' in window) {
+                try {
+                    syncBtnText.textContent = '⏳ Syncing...';
+                    syncBtn.disabled = true;
+                    
+                    // Request contacts from device
+                    const props = ['name', 'tel', 'email'];
+                    const opts = { multiple: true };
+                    const contacts = await navigator.contacts.select(props, opts);
+                    
+                    // Send to server for processing
+                    const response = await fetch('/api/settings/sync-contacts', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contacts: contacts.map(c => ({
+                                name: c.name ? c.name[0] : 'Unknown',
+                                phone: c.tel ? c.tel[0] : null,
+                                email: c.email ? c.email[0] : null
+                            }))
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        syncBtnText.textContent = '✓ Synced!';
+                        lastSyncInfo.textContent = 'Last synced: Just now';
+                        showToast(`Synced ${data.synced_count || contacts.length} contacts. Found ${data.matches_found || 0} Menza users!`, 'success');
+                        
+                        setTimeout(() => {
+                            syncBtnText.textContent = '🔄 Sync Contacts Now';
+                            syncBtn.disabled = false;
+                        }, 2000);
+                    } else {
+                        throw new Error(data.message || 'Sync failed');
+                    }
+                } catch (err) {
+                    syncBtnText.textContent = '🔄 Sync Contacts Now';
+                    syncBtn.disabled = false;
+                    
+                    if (err.name === 'NotAllowedError') {
+                        showToast('Contact access denied. Please allow access in your browser settings.', 'error');
+                    } else {
+                        showToast(err.message || 'Failed to sync contacts', 'error');
+                    }
+                }
+            } else {
+                // Fallback for browsers that don't support Contact Picker API
+                showContactSyncModal();
+            }
+        }
+
+        // Fallback contact sync modal
+        function showContactSyncModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.id = 'contactSyncModal';
+            modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:1100;';
+            modal.innerHTML = `
+                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;max-width:400px;padding:2rem;text-align:center;">
+                    <h3 style="margin-bottom:1rem;">📱 Sync Contacts</h3>
+                    <p style="color:var(--text-secondary);margin-bottom:1.5rem;font-size:0.875rem;">
+                        To sync your contacts on this device, please use the Menza mobile app, or manually add contacts below.
+                    </p>
+                    <div style="margin-bottom:1rem;">
+                        <input type="text" id="manualContactInput" placeholder="Enter phone number or email" 
+                               style="width:100%;padding:0.75rem 1rem;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:0.875rem;">
+                    </div>
+                    <div style="display:flex;gap:0.5rem;">
+                        <button onclick="addManualContact()" style="flex:1;padding:0.75rem;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;">
+                            Find User
+                        </button>
+                        <button onclick="closeContactSyncModal()" style="flex:1;padding:0.75rem;background:var(--bg-card-hover);border:1px solid var(--border);border-radius:8px;color:var(--text-secondary);cursor:pointer;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function closeContactSyncModal() {
+            const modal = document.getElementById('contactSyncModal');
+            if (modal) modal.remove();
+        }
+
+        function addManualContact() {
+            const input = document.getElementById('manualContactInput');
+            const value = input.value.trim();
+            
+            if (!value) {
+                showToast('Please enter a phone number or email', 'error');
+                return;
+            }
+            
+            fetch('/api/settings/find-contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: value })
+            })
+            .then(res => res.json())
+            .then(data => {
+                closeContactSyncModal();
+                if (data.found) {
+                    showToast(`Found ${data.username} on Menza!`, 'success');
+                } else {
+                    showToast('No Menza user found with that contact info', 'error');
+                }
+            })
+            .catch(err => {
+                showToast('Search failed', 'error');
+            });
+        }
+
+        // Show toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toast.classList.remove('success', 'error');
+            toast.classList.add(type);
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+

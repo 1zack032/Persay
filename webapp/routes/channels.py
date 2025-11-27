@@ -62,31 +62,126 @@ def channels_page():
 
 @channels_bp.route('/channels/search')
 def search_channels():
-    """Search for channels"""
+    """Search for channels by name, interest, or category"""
     if 'username' not in session:
         return redirect(url_for('auth.login'))
     
     query = request.args.get('q', '').strip()
+    category = request.args.get('category', '').strip()
     username = session['username']
     
-    if len(query) < 2:
-        results = []
+    # If searching by category
+    if category:
+        results = store.get_channels_by_category(category, limit=20)
+        for ch in results:
+            ch['liked_by_user'] = store.has_liked_channel(ch['id'], username)
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'results': results,
+                'category': category,
+                'count': len(results)
+            })
+        
+        return render_template('channels_search.html',
+                             username=username,
+                             query=query,
+                             category=category,
+                             results=results,
+                             categories=store.get_all_categories())
+    
+    # Interest-based search
+    if len(query) < 1:
+        search_results = {'exact_matches': [], 'category_matches': [], 'suggestions': [], 'related_categories': []}
     else:
-        results = store.search_channels(query, discoverable_only=True, limit=20)
+        search_results = store.search_channels_by_interest(query, limit=20)
+        
+        # Add like status
+        for key in ['exact_matches', 'category_matches', 'suggestions']:
+            for ch in search_results[key]:
+                ch['liked_by_user'] = store.has_liked_channel(ch['id'], username)
     
     # If AJAX request, return JSON
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({
-            'results': results,
+            'exact_matches': search_results['exact_matches'],
+            'category_matches': search_results['category_matches'],
+            'suggestions': search_results['suggestions'],
+            'related_categories': search_results['related_categories'],
             'query': query,
-            'count': len(results)
+            'total_count': len(search_results['exact_matches']) + len(search_results['category_matches']) + len(search_results['suggestions'])
         })
     
     # Otherwise render full page
+    all_results = search_results['exact_matches'] + search_results['category_matches'] + search_results['suggestions']
     return render_template('channels_search.html',
                          username=username,
                          query=query,
-                         results=results)
+                         results=all_results,
+                         related_categories=search_results['related_categories'],
+                         categories=store.get_all_categories())
+
+
+@channels_bp.route('/channels/categories')
+def get_categories():
+    """Get all interest categories"""
+    if 'username' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    categories = store.get_all_categories()
+    return jsonify({'categories': categories})
+
+
+@channels_bp.route('/api/channels/search')
+def api_search_channels():
+    """API endpoint to search channels with subscription status"""
+    if 'username' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    query = request.args.get('q', '').strip().lower()
+    username = session['username']
+    include_subscription = request.args.get('include_subscription', 'false') == 'true'
+    
+    if not query:
+        return jsonify({'channels': []})
+    
+    # Search all channels
+    all_channels = store.get_all_channels()
+    subscribed_ids = set(ch['id'] for ch in store.get_subscribed_channels(username))
+    owned_ids = set(ch['id'] for ch in store.get_user_channels(username))
+    
+    matched_channels = []
+    for channel in all_channels:
+        name_match = query in channel.get('name', '').lower()
+        desc_match = query in channel.get('description', '').lower()
+        category_match = any(query in cat.lower() for cat in channel.get('categories', []))
+        
+        # Only include if matches and (discoverable OR user is subscribed/owner)
+        is_member = channel['id'] in subscribed_ids or channel['id'] in owned_ids
+        if (name_match or desc_match or category_match) and (channel.get('discoverable') or is_member):
+            ch_data = {
+                'id': channel['id'],
+                'name': channel['name'],
+                'description': channel.get('description', ''),
+                'branding': channel.get('branding', {}),
+                'subscribers': channel.get('subscribers', []),
+                'discoverable': channel.get('discoverable', False),
+                'likes': channel.get('likes', 0),
+                'views': channel.get('views', 0)
+            }
+            
+            if include_subscription:
+                ch_data['is_subscribed'] = is_member
+            
+            matched_channels.append(ch_data)
+    
+    # Sort: subscribed/owned first, then by popularity
+    matched_channels.sort(key=lambda x: (
+        -(1 if x.get('is_subscribed') else 0),
+        -len(x.get('subscribers', []))
+    ))
+    
+    return jsonify({'channels': matched_channels[:20]})
 
 
 @channels_bp.route('/channel/<channel_id>/like', methods=['POST'])

@@ -1,0 +1,88 @@
+{% extends "docs/base.html" %}
+
+{% block title %}Cookies{% endblock %}
+
+{% block content %}
+<div class="docs-header">
+    <div class="docs-breadcrumb">
+        <a href="/docs">Docs</a>
+        <span>/</span>
+        <a href="/docs/privacy">Privacy</a>
+        <span>/</span>
+        <span>Cookies</span>
+    </div>
+    <h1>Cookie Policy</h1>
+    <p>Information about how we use cookies and similar technologies.</p>
+</div>
+
+<article class="docs-article">
+    <h2>What Are Cookies?</h2>
+    <p>
+        Cookies are small text files stored on your device when you visit a website. 
+        They help websites remember your preferences and improve your experience.
+    </p>
+
+    <h2>Cookies We Use</h2>
+
+    <h3>Essential Cookies</h3>
+    <p>These cookies are necessary for the app to function properly:</p>
+    <ul>
+        <li><strong>Session cookies:</strong> Keep you logged in during your session</li>
+        <li><strong>Security cookies:</strong> Help protect against cross-site request forgery</li>
+        <li><strong>Load balancing:</strong> Distribute traffic across our servers</li>
+    </ul>
+
+    <div class="info-box">
+        <div class="info-box-title">🔒 Essential Only</div>
+        <p>
+            We only use essential cookies required for Menza to function. 
+            We do not use advertising or tracking cookies.
+        </p>
+    </div>
+
+    <h3>Functional Cookies</h3>
+    <p>These cookies remember your preferences:</p>
+    <ul>
+        <li>Theme preference (dark/light mode)</li>
+        <li>Language settings</li>
+        <li>Interface customizations</li>
+    </ul>
+
+    <h2>Third-Party Cookies</h2>
+    <p>
+        We do not allow third-party advertising cookies. The only third-party services we use are:
+    </p>
+    <ul>
+        <li><strong>Google Fonts:</strong> For typography (no tracking)</li>
+    </ul>
+
+    <h2>Managing Cookies</h2>
+    <p>You can control cookies through your browser settings:</p>
+    <ul>
+        <li><strong>Chrome:</strong> Settings → Privacy and Security → Cookies</li>
+        <li><strong>Firefox:</strong> Preferences → Privacy & Security → Cookies</li>
+        <li><strong>Safari:</strong> Preferences → Privacy → Manage Website Data</li>
+        <li><strong>Edge:</strong> Settings → Cookies and Site Permissions</li>
+    </ul>
+
+    <div class="info-box warning">
+        <div class="info-box-title">⚠️ Note</div>
+        <p>
+            Blocking essential cookies may prevent Menza from working correctly. 
+            You may not be able to log in or use certain features.
+        </p>
+    </div>
+
+    <div class="docs-nav-buttons">
+        <a href="/docs/privacy/your-rights" class="docs-nav-btn">
+            <span>← Previous</span>
+            <strong>Your Rights</strong>
+        </a>
+        <a href="/docs/privacy/retention" class="docs-nav-btn next">
+            <span>Next →</span>
+            <strong>Data Retention</strong>
+        </a>
+    </div>
+</article>
+{% endblock %}
+

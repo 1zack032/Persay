@@ -2,8 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Chat - Menza</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Menza">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Menza">
+    <meta name="msapplication-TileColor" content="#7c3aed">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- PWA Manifest & Icons -->
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/static/icons/icon-192.svg">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.svg">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Font Options for Preview -->
@@ -73,6 +89,128 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+        }
+
+        /* Main Tab Buttons - Akeyless Style */
+        /* Unified Button Style - Matching Discover Channels */
+        .sidebar-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(168, 85, 247, 0.05));
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: var(--radius-md);
+            color: var(--accent-secondary);
+            text-decoration: none;
+            font-family: inherit;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sidebar-btn:hover {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(168, 85, 247, 0.1));
+            border-color: rgba(124, 58, 237, 0.3);
+        }
+
+        .sidebar-btn.active {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(168, 85, 247, 0.15));
+            border-color: rgba(124, 58, 237, 0.5);
+            color: var(--text-primary);
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
+        }
+
+        .sidebar-btn svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-btn .btn-icon {
+            font-size: 1rem;
+        }
+
+        /* Main Tabs Row */
+        .main-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 1rem 0.5rem;
+        }
+
+        .main-tabs .sidebar-btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* Action Buttons Row */
+        .action-row {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0 1rem 0.5rem;
+        }
+
+        .action-row .sidebar-btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* Discover Channels - Always Visible */
+        .discover-row {
+            padding: 0 1rem 1rem;
+        }
+
+        .discover-row .sidebar-btn {
+            width: 100%;
+        }
+
+        .discover-row .sidebar-btn svg:last-child {
+            margin-left: auto;
+        }
+
+        /* Tab Content Panels */
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Channels Panel Content */
+        .channels-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .channel-section-title {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            padding: 0.75rem 0.75rem 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Create Channel Button in Channels Panel */
+        .channel-action-btn {
+            margin: 0.5rem;
+        }
+
+        .channel-action-btn .sidebar-btn {
+            width: 100%;
+        }
+
+        .channel-action-btn .sidebar-btn svg:last-child {
+            margin-left: auto;
         }
 
         .sidebar-title {
@@ -267,49 +405,6 @@
             50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
         }
 
-        /* Channels Navigation Link */
-        .channels-nav-link {
-            display: flex;
-            align-items: center;
-            gap: 0.625rem;
-            margin-top: 0.75rem;
-            padding: 0.75rem 1rem;
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.05), rgba(6, 182, 212, 0.03));
-            border: 1px solid rgba(124, 58, 237, 0.1);
-            border-radius: var(--radius-md);
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .channels-nav-link:hover {
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(6, 182, 212, 0.06));
-            border-color: rgba(124, 58, 237, 0.25);
-            color: var(--text-primary);
-            transform: translateX(2px);
-        }
-
-        .channels-nav-link .channels-icon {
-            font-size: 1rem;
-        }
-
-        .channels-nav-link .channels-text {
-            flex: 1;
-        }
-
-        .channels-nav-link svg {
-            opacity: 0.5;
-            transition: all 0.2s;
-        }
-
-        .channels-nav-link:hover svg {
-            opacity: 1;
-            transform: translateX(2px);
-            stroke: var(--accent-secondary);
-        }
-
         /* Dropdown Panel */
         .dropdown-panel {
             display: none;
@@ -318,7 +413,8 @@
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             overflow: hidden;
-            animation: slideDown 0.2s ease;
+            z-index: 100;
+            position: relative;
         }
 
         @keyframes slideDown {
@@ -328,6 +424,12 @@
 
         .dropdown-panel.show {
             display: block;
+            animation: slideDown 0.2s ease;
+        }
+        
+        .write-panel-container {
+            position: relative;
+            z-index: 100;
         }
 
         .dropdown-item {
@@ -514,6 +616,95 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-label .see-all {
+            font-size: 0.625rem;
+            color: var(--accent-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .section-label .see-all:hover {
+            color: var(--accent-primary);
+        }
+
+        /* My Channels List */
+        .my-channels-list {
+            padding: 0.25rem 0.5rem;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .my-channels-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .my-channels-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .channel-item {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+            margin-bottom: 0.25rem;
+        }
+
+        .channel-item:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .channel-item-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .channel-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .channel-item-name {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .channel-item-meta {
+            font-size: 0.6875rem;
+            color: var(--text-muted);
+        }
+
+        .empty-channels {
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .empty-channels a {
+            color: var(--accent-secondary);
+            text-decoration: none;
         }
 
         .contacts {
@@ -590,6 +781,51 @@
         .contact-status {
             font-size: 0.8125rem;
             color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 160px;
+        }
+        
+        /* Conversation Badge */
+        .conv-badge {
+            font-size: 0.6875rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 999px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            flex-shrink: 0;
+        }
+        
+        .group-badge {
+            background: var(--accent-primary);
+            color: white;
+        }
+        
+        /* All Users Section - Collapsible */
+        .section-label.expandable {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .section-label.expandable:hover {
+            color: var(--text-primary);
+        }
+        
+        .section-label .expand-icon {
+            transition: transform 0.2s ease;
+        }
+        
+        .section-label.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+        
+        .all-users-collapsed #allUsersList {
+            display: none;
         }
 
         /* Empty Contacts State */
@@ -610,7 +846,8 @@
 
         /* Sidebar Footer */
         .sidebar-footer {
-            padding: 0.875rem 1.25rem;
+            margin-top: auto;
+            padding: 1rem;
             border-top: 1px solid var(--border);
             display: flex;
             flex-direction: column;
@@ -653,13 +890,15 @@
         }
 
         .logout-btn {
-            color: var(--text-secondary);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(168, 85, 247, 0.04));
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            color: #c4b5fd;
         }
 
         .logout-btn:hover {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(239, 68, 68, 0.06));
+            border-color: rgba(239, 68, 68, 0.25);
+            color: #f87171;
         }
 
         /* Chat Area */
@@ -670,6 +909,18 @@
             background: var(--bg-primary);
             position: relative;
             min-width: 0;
+            overflow: hidden;
+        }
+
+        #active-chat {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        #active-chat.visible {
+            display: flex !important;
         }
 
         /* Chat Header */
@@ -680,6 +931,9 @@
             display: flex;
             align-items: center;
             gap: 1rem;
+            flex-shrink: 0;
+            min-height: 70px;
+            z-index: 10;
         }
 
         .chat-header-avatar {
@@ -729,6 +983,49 @@
             font-weight: 600;
         }
 
+        /* Call Buttons */
+        .call-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: auto;
+            margin-right: 0.75rem;
+        }
+        
+        .call-btn {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .call-btn:hover {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .voice-call-btn:hover {
+            background: #22c55e;
+            border-color: #22c55e;
+        }
+        
+        .video-call-btn:hover {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+        
+        .call-btn:active {
+            transform: scale(0.95);
+        }
+
         .chat-settings-btn {
             width: 38px;
             height: 38px;
@@ -773,6 +1070,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.625rem;
+            min-height: 0;
         }
 
         .message {
@@ -1048,19 +1346,15 @@
             height: 18px;
         }
 
-        /* Calculator Preview */
+        /* Calculator Preview - iOS Style Suggestion Bar */
         .calc-preview {
             display: none;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            margin-bottom: 0.75rem;
-            overflow: hidden;
-            animation: slideUp 0.2s ease;
+            margin-bottom: 0.5rem;
+            animation: slideUp 0.15s ease;
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -1068,113 +1362,116 @@
             display: block;
         }
 
-        .calc-header {
+        /* iOS-style suggestion bar */
+        .calc-suggestions {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.625rem 1rem;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(99, 102, 241, 0.1));
-            border-bottom: 1px solid var(--border);
-        }
-
-        .calc-title {
-            display: flex;
-            align-items: center;
             gap: 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--success);
+            padding: 0.5rem;
+            background: rgba(200, 200, 200, 0.12);
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        
+        .calc-suggestions::-webkit-scrollbar {
+            display: none;
         }
 
-        .calc-actions {
+        .calc-chip {
+            flex-shrink: 0;
+            padding: 0.625rem 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: #1a1a1a;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .calc-chip:hover {
+            background: #ffffff;
+            transform: scale(1.02);
+        }
+        
+        .calc-chip:active {
+            transform: scale(0.98);
+            background: #f0f0f0;
+        }
+
+        .calc-chip.expression {
+            color: #666;
+        }
+        
+        .calc-chip.full {
+            background: rgba(255, 255, 255, 0.98);
+            font-weight: 500;
+        }
+
+        .calc-chip.result {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            font-weight: 600;
+        }
+        
+        .calc-chip.result:hover {
+            box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3);
+        }
+
+        /* Dark mode adjustments */
+        @media (prefers-color-scheme: dark) {
+            .calc-suggestions {
+                background: rgba(60, 60, 60, 0.5);
+            }
+            
+            .calc-chip {
+                background: rgba(80, 80, 80, 0.9);
+                color: #ffffff;
+            }
+            
+            .calc-chip:hover {
+                background: rgba(90, 90, 90, 0.95);
+            }
+            
+            .calc-chip.expression {
+                color: #aaa;
+            }
+        }
+        
+        /* Multiple calculations - show total */
+        .calc-total-chip {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-        }
-
-        .calc-hint {
-            font-size: 0.6875rem;
-            color: var(--text-muted);
-            background: var(--bg-card-inner);
-            padding: 0.25rem 0.5rem;
-            border-radius: var(--radius-sm);
-        }
-
-        .calc-insert-btn {
-            padding: 0.5rem 1rem;
-            background: var(--success);
+            gap: 0.375rem;
+            padding: 0.625rem 1rem;
+            background: linear-gradient(135deg, #10b981, #059669);
             border: none;
             border-radius: var(--radius-sm);
             color: white;
-            font-family: inherit;
-            font-size: 0.75rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+            font-size: 0.9375rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.15s;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
         }
-
-        .calc-insert-btn:hover {
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        
+        .calc-total-chip:hover {
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
         }
-
-        @media (max-width: 480px) {
-            .calc-hint {
-                display: none;
-            }
-            
-            .calc-insert-btn {
-                padding: 0.625rem 1.25rem;
-                font-size: 0.8125rem;
-            }
-        }
-
-        .calc-results {
-            padding: 0.75rem 1rem;
-        }
-
-        .calc-line {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.375rem 0;
-            font-size: 0.875rem;
-            font-family: 'Monaco', 'Consolas', monospace;
-        }
-
-        .calc-expression {
-            color: var(--text-secondary);
-        }
-
-        .calc-equals {
-            color: var(--text-muted);
-            margin: 0 0.5rem;
-        }
-
-        .calc-result {
-            color: var(--success);
-            font-weight: 600;
-        }
-
-        .calc-total {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 1rem;
-            background: var(--bg-card-inner);
-            border-top: 1px solid var(--border);
-            font-family: 'Monaco', 'Consolas', monospace;
-        }
-
+        
         .calc-total-label {
-            font-size: 0.875rem;
-            font-weight: 700;
-            color: var(--accent-primary);
+            font-size: 0.75rem;
+            opacity: 0.9;
         }
 
-        .calc-total-value {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--accent-primary);
+        /* Hide old elements */
+        .calc-header, .calc-results, .calc-total, .calc-insert-btn, .calc-hint, .calc-actions {
+            display: none !important;
         }
 
         /* Scrollbar */
@@ -1340,6 +1637,232 @@
 
         .user-select-item.selected .user-select-check {
             display: flex;
+        }
+
+        /* Search Modal */
+        .search-modal {
+            max-width: 560px;
+            max-height: 85vh;
+        }
+
+        .search-input-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .search-input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .search-modal-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-modal-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .search-modal-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-category-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .search-cat-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.625rem 1rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(168, 85, 247, 0.05));
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .search-cat-tab:hover {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(168, 85, 247, 0.1));
+            border-color: rgba(124, 58, 237, 0.3);
+            color: var(--text-primary);
+        }
+
+        .search-cat-tab.active {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(168, 85, 247, 0.15));
+            border-color: rgba(124, 58, 237, 0.5);
+            color: var(--text-primary);
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
+        }
+
+        .search-cat-tab span {
+            font-size: 1rem;
+        }
+
+        .search-results-container {
+            min-height: 200px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .search-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1rem;
+            text-align: center;
+        }
+
+        .search-placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .search-placeholder p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-placeholder-hint {
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+
+        .search-result-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .search-result-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .search-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            padding: 0 0.5rem;
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .search-result-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .search-result-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #374151, #1f2937);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .search-result-avatar.user {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .search-result-avatar.group {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .search-result-avatar.channel {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .search-result-avatar.contact {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .search-result-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-result-name {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            margin-bottom: 0.125rem;
+        }
+
+        .search-result-meta {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .search-result-badge {
+            padding: 0.25rem 0.5rem;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: var(--text-muted);
+        }
+
+        .search-no-results {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        .search-no-results-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            opacity: 0.5;
+        }
+
+        .search-no-results p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
         }
 
         /* Group Creation Tabs */
@@ -2040,32 +2563,21 @@
         .top-nav .nav-logo {
             display: flex;
             align-items: center;
-            gap: 0.625rem;
             text-decoration: none;
             color: var(--text-primary);
         }
 
         .top-nav .nav-logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--font-display);
-            font-size: 0.875rem;
-            font-weight: 700;
-            box-shadow: 0 0 12px rgba(124, 58, 237, 0.3);
+            display: none;
         }
 
         .top-nav .nav-logo-text {
             font-family: var(--font-display);
-            font-size: 1.125rem;
+            font-size: 1.375rem;
             font-weight: 700;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            background: linear-gradient(135deg, #fff 0%, var(--accent-secondary) 100%);
+            background: linear-gradient(90deg, #ffffff 0%, #e879f9 50%, #a855f7 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -2125,6 +2637,537 @@
             display: flex;
             height: calc(100vh - 56px);
             width: 100%;
+            margin-top: 56px;
+        }
+
+        /* ==========================================
+           VOICE & VIDEO CALL UI - Full Page
+           ========================================== */
+        
+        /* Call Page (Full Screen) */
+        .call-page {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, #050508 0%, #0a0a12 50%, #0f0f1a 100%);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .call-page.active {
+            display: flex;
+        }
+        
+        /* Call Page Header */
+        .call-page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .call-page-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .call-back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .call-back-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .call-page-title h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .call-page-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .call-type-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            color: #22c55e;
+        }
+        
+        .call-type-indicator svg {
+            stroke: currentColor;
+        }
+        
+        .call-timer {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .timer-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: timerPulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes timerPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        
+        .participants-count {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Listener Banner */
+        .listener-banner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: rgba(245, 158, 11, 0.15);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        /* Participants Grid */
+        .participants-grid {
+            flex: 1;
+            display: grid;
+            gap: 1rem;
+            padding: 1.5rem;
+            overflow: auto;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            align-content: center;
+        }
+        
+        .participants-grid.single-participant {
+            grid-template-columns: 1fr;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .participants-grid.two-participants {
+            grid-template-columns: repeat(2, 1fr);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        /* Participant Tile */
+        .participant-tile {
+            position: relative;
+            background: linear-gradient(145deg, rgba(20, 20, 30, 0.8), rgba(15, 15, 25, 0.9));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        
+        .participant-tile:hover {
+            border-color: rgba(168, 85, 247, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .participant-tile.speaking {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3), 0 8px 32px rgba(34, 197, 94, 0.2);
+        }
+        
+        .participant-tile.speaking .speaking-ring {
+            opacity: 1;
+        }
+        
+        .speaking-ring {
+            position: absolute;
+            inset: -2px;
+            border-radius: var(--radius-xl);
+            border: 2px solid #22c55e;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            animation: speakingPulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes speakingPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+        }
+        
+        .participant-video-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .participant-video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .participant-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 8px 32px rgba(168, 85, 247, 0.3);
+        }
+        
+        .participant-tile.you .participant-avatar-large {
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .participant-info-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        
+        .participant-name-label {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .participant-status-icons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .status-icon-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-icon-badge.muted {
+            background: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        
+        .status-icon-badge.video-off {
+            background: rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+        
+        .status-icon-badge svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        /* Call Controls Bar */
+        .call-controls-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            padding: 1.25rem 2rem;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .controls-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .control-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.75rem 1.25rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 72px;
+        }
+        
+        .control-button:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .control-button:active {
+            transform: translateY(0);
+        }
+        
+        .control-button.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+        
+        .control-button.muted {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        
+        .control-button .control-icon {
+            width: 24px;
+            height: 24px;
+            position: relative;
+        }
+        
+        .control-button .control-icon svg {
+            width: 24px;
+            height: 24px;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .control-button .icon-on { display: block; }
+        .control-button .icon-off { display: none; }
+        .control-button.muted .icon-on { display: none; }
+        .control-button.muted .icon-off { display: block; }
+        
+        .control-button .control-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        
+        .control-button:hover .control-label,
+        .control-button.active .control-label {
+            color: var(--text-primary);
+        }
+        
+        .control-button.muted .control-label {
+            color: #ef4444;
+        }
+        
+        .end-call-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            background: #ef4444;
+            border: none;
+            border-radius: var(--radius-full);
+            color: white;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .end-call-button:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+        
+        .end-call-button:active {
+            transform: scale(0.98);
+        }
+        
+        .end-call-button svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Incoming Call Modal */
+        .incoming-call-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            z-index: 10001;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            min-width: 320px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .incoming-call-modal.show {
+            display: flex;
+            animation: incomingPulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes incomingPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            50% { box-shadow: 0 0 0 20px rgba(34, 197, 94, 0); }
+        }
+        
+        .incoming-call-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .incoming-call-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .incoming-call-type {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+        
+        .incoming-call-actions {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .incoming-call-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .incoming-call-btn.accept {
+            background: #22c55e;
+            color: white;
+        }
+        
+        .incoming-call-btn.accept:hover {
+            background: #16a34a;
+            transform: scale(1.1);
+        }
+        
+        .incoming-call-btn.decline {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .incoming-call-btn.decline:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+        
+        .incoming-call-btn svg {
+            width: 28px;
+            height: 28px;
+        }
+        
+        /* Active Call Indicator */
+        .active-call-indicator {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+        }
+        
+        .active-call-indicator.show {
+            display: flex;
+        }
+        
+        .active-call-indicator .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: white;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+        
+        /* Listener Mode Banner */
+        .listener-banner {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            text-align: center;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
         }
 
         /* Responsive */
@@ -2145,6 +3188,25 @@
                 padding: 0.5rem 0.75rem;
                 font-size: 0.8125rem;
             }
+            
+            .call-container {
+                padding: 0.75rem;
+            }
+            
+            .video-tile.local {
+                width: 120px;
+                height: 90px;
+            }
+            
+            .control-btn {
+                width: 48px;
+                height: 48px;
+            }
+            
+            .control-btn.end-call {
+                width: 56px;
+                height: 56px;
+            }
         }
     </style>
 </head>
@@ -2152,8 +3214,7 @@
     <!-- Top Navigation Bar -->
     <nav class="top-nav">
         <a href="/" class="nav-logo">
-            <div class="nav-logo-icon">M</div>
-            <span class="nav-logo-text">Menza</span>
+            <span class="nav-logo-text">MENZA</span>
         </a>
         <div class="nav-tabs">
             <a href="/chat" class="nav-tab active">Messages</a>
@@ -2168,111 +3229,171 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-title">Chats</div>
+            <div class="sidebar-title">{{ username }}</div>
             <div class="user-avatar">{{ username[0].upper() }}</div>
         </div>
 
-        <!-- Action Bar - Search & Write -->
-        <div class="action-bar">
-            <div class="action-buttons">
-                <button class="action-btn icon-only" id="searchBtn" onclick="togglePanel('search')" title="Search">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"/>
-                        <path d="M21 21l-4.35-4.35"/>
-                    </svg>
-                </button>
-                <button class="action-btn icon-only futuristic-write" id="writeBtn" onclick="togglePanel('write')" title="Compose">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="14 2 18 6 7 17 3 17 3 13 14 2"/>
-                        <line x1="3" y1="22" x2="21" y2="22"/>
-                        <path d="M18 6L22 2"/>
-                    </svg>
-                    <span class="write-glow"></span>
-                </button>
-            </div>
-            
-            <!-- Channels Link -->
-            <a href="/channels" class="channels-nav-link">
-                <span class="channels-icon">📺</span>
-                <span class="channels-text">Channels</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </a>
+        <!-- Main Tab Buttons -->
+        <div class="main-tabs">
+            <button class="sidebar-btn active" id="chatsTabBtn" onclick="switchMainTab('chats')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Chats
+            </button>
+            <button class="sidebar-btn" id="channelsTabBtn" onclick="switchMainTab('channels')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                My Channels
+            </button>
+        </div>
 
-            <!-- Write Panel -->
+        <!-- Action Buttons Row -->
+        <div class="action-row">
+            <button class="sidebar-btn" data-panel="search" onclick="togglePanel('search', event)" title="Search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                Search
+            </button>
+            <button class="sidebar-btn" data-panel="write" onclick="togglePanel('write', event)" title="Compose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="14 2 18 6 7 17 3 17 3 13 14 2"/>
+                    <line x1="3" y1="22" x2="21" y2="22"/>
+                </svg>
+                Write
+            </button>
+        </div>
+
+        <!-- Write Panel (dropdown) -->
+        <div class="write-panel-container" style="padding: 0 1rem;">
             <div class="dropdown-panel" id="writePanel">
                 <button class="dropdown-item" onclick="startNewMessage()">
-                    <div class="item-icon">💬</div>
+                    <div class="item-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
                     <div class="item-info">
                         <div class="item-title">New Message</div>
                         <div class="item-desc">Start a private conversation</div>
                     </div>
                 </button>
                 <button class="dropdown-item" onclick="startNewGroup()">
-                    <div class="item-icon">👥</div>
+                    <div class="item-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
                     <div class="item-info">
                         <div class="item-title">New Group</div>
                         <div class="item-desc">Create a group chat</div>
                     </div>
                 </button>
                 <a href="/channel/create" class="dropdown-item">
-                    <div class="item-icon">📺</div>
+                    <div class="item-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    </div>
                     <div class="item-info">
                         <div class="item-title">New Channel</div>
                         <div class="item-desc">Broadcast to subscribers</div>
                     </div>
                 </a>
             </div>
-
-            <!-- Search Panel -->
-            <div class="dropdown-panel" id="searchPanel">
-                <div class="search-panel">
-                    <div class="search-input-wrapper">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" 
-                               class="search-input" 
-                               placeholder="Search..." 
-                               id="globalSearch"
-                               oninput="handleSearch(this.value)">
-                    </div>
-                    <div class="search-tabs">
-                        <button class="search-tab active" data-type="all" onclick="setSearchType('all')">All</button>
-                        <button class="search-tab" data-type="users" onclick="setSearchType('users')">Users</button>
-                        <button class="search-tab" data-type="messages" onclick="setSearchType('messages')">Messages</button>
-                        <button class="search-tab" data-type="channels" onclick="setSearchType('channels')">Channels</button>
-                    </div>
-                    <div class="search-results" id="searchResults">
-                        <!-- Results will appear here -->
-                    </div>
-                </div>
-            </div>
         </div>
 
-        <div class="contacts-section">
-            <div class="section-label">Messages</div>
+        <!-- Discover Channels - Always Visible -->
+        <div class="discover-row">
+            <a href="/channels" class="sidebar-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                </svg>
+                Discover Channels
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </a>
         </div>
 
-        <div class="contacts" id="contacts">
-            {% for user in all_users %}
-            <div class="contact" data-username="{{ user }}" onclick="selectContact('{{ user }}')">
-                <div class="contact-avatar">
-                    {{ user[0].upper() }}
-                    <div class="status-indicator" id="status-{{ user }}"></div>
-                </div>
-                <div class="contact-info">
-                    <div class="contact-name">{{ user }}</div>
-                    <div class="contact-status">Click to start chatting</div>
+        <!-- CHATS TAB CONTENT -->
+        <div class="tab-content active" id="chatsTabContent">
+            <!-- Messages Section (Groups + Direct Messages combined) -->
+            <div class="contacts-section">
+                <div class="section-label">Messages</div>
+            </div>
+
+            <div class="contacts" id="messagesList">
+                <!-- Active conversations will be populated by JavaScript -->
+                <div class="empty-messages" id="emptyMessagesState" style="text-align: center; padding: 2rem 1rem; color: var(--text-muted);">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.4; margin-bottom: 0.75rem;">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <p style="font-size: 0.9375rem; font-weight: 500;">No messages yet</p>
+                    <p style="font-size: 0.8125rem; margin-top: 0.25rem;">Start a conversation using the Write button</p>
                 </div>
             </div>
-            {% endfor %}
             
-            {% if not all_users %}
-            <div class="empty-contacts">
-                <p>No contacts yet</p>
-                <p>Share Menza with friends to start chatting!</p>
+            <!-- All Users (for starting new chats) - Expandable -->
+            <div class="contacts-section" style="margin-top: 1rem;" id="allUsersSection">
+                <div class="section-label expandable" onclick="toggleAllUsers()">
+                    <span>Start New Chat</span>
+                    <svg class="expand-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </div>
             </div>
-            {% endif %}
+            <div class="contacts" id="allUsersList" style="display: none;">
+                {% for user in all_users %}
+                <div class="contact user-item" data-username="{{ user }}" onclick="selectContact('{{ user }}')">
+                    <div class="contact-avatar">
+                        {{ user[0].upper() }}
+                        <div class="status-indicator" id="status-{{ user }}"></div>
+                    </div>
+                    <div class="contact-info">
+                        <div class="contact-name">{{ user }}</div>
+                        <div class="contact-status">Click to start chatting</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- CHANNELS TAB CONTENT -->
+        <div class="tab-content" id="channelsTabContent">
+            <div class="channels-panel">
+                <!-- My Channels -->
+                <div class="channel-section-title">My Channels</div>
+                <div class="my-channels-list">
+                    {% if my_channels %}
+                        {% for channel in my_channels %}
+                        <a href="/channel/{{ channel.id }}" class="channel-item">
+                            <div class="channel-item-avatar" style="background: {{ channel.branding.accent_color }}20; color: {{ channel.branding.accent_color }};">
+                                {{ channel.branding.avatar_emoji }}
+                            </div>
+                            <div class="channel-item-info">
+                                <div class="channel-item-name">{{ channel.name }}</div>
+                                <div class="channel-item-meta">{{ channel.subscribers|length }} members</div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-channels">
+                            No channels yet.<br>
+                            <a href="/channels">Discover channels</a> or <a href="/channel/create">create one</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Create Channel Link -->
+                <div class="channel-action-btn">
+                    <a href="/channel/create" class="sidebar-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="16"/>
+                            <line x1="8" y1="12" x2="16" y2="12"/>
+                        </svg>
+                        Create Channel
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
         </div>
 
         <div class="sidebar-footer">
@@ -2295,7 +3416,7 @@
         </div>
 
         <!-- Active Chat (hidden by default) -->
-        <div id="active-chat" style="display: none; flex: 1; flex-direction: column;">
+        <div id="active-chat">
             <div class="chat-header">
                 <div class="chat-header-avatar" id="chat-avatar">?</div>
                 <div class="chat-header-info">
@@ -2304,6 +3425,20 @@
                         <span class="online-dot" id="chat-status-dot" style="display: none;"></span>
                         <span id="chat-status-text">Offline</span>
                     </p>
+                </div>
+                <!-- Call Buttons -->
+                <div class="call-buttons">
+                    <button class="call-btn voice-call-btn" onclick="startCall(false)" title="Voice Call">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+                        </svg>
+                    </button>
+                    <button class="call-btn video-call-btn" onclick="startCall(true)" title="Video Call">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="23 7 16 12 23 17 23 7"/>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                        </svg>
+                    </button>
                 </div>
                 <div class="encryption-badge">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2343,21 +3478,10 @@
             </div>
 
             <div class="input-area">
-                <!-- Calculator Preview -->
+                <!-- Calculator Preview - iOS Style -->
                 <div class="calc-preview" id="calcPreview">
-                    <div class="calc-header">
-                        <div class="calc-title">🧮 Calculator</div>
-                        <div class="calc-actions">
-                            <span class="calc-hint">⏎ Enter to insert</span>
-                            <button class="calc-insert-btn" onclick="insertCalculatedText()">Insert Results</button>
-                        </div>
-                    </div>
-                    <div class="calc-results" id="calcResults">
-                        <!-- Calculated results will appear here -->
-                    </div>
-                    <div class="calc-total" id="calcTotal" style="display: none;">
-                        <span class="calc-total-label">Total</span>
-                        <span class="calc-total-value" id="calcTotalValue">0</span>
+                    <div class="calc-suggestions" id="calcSuggestions">
+                        <!-- iOS-style suggestion chips will appear here -->
                     </div>
                 </div>
 
@@ -2406,7 +3530,7 @@
     <div class="modal-overlay" id="newGroupModal">
         <div class="modal" style="max-width: 520px;">
             <div class="modal-header">
-                <h3>👥 Create Group</h3>
+                <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 8px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Create Group</h3>
                 <button class="modal-close" onclick="closeModal('newGroupModal')">×</button>
             </div>
             <div class="modal-body">
@@ -2421,13 +3545,16 @@
                 <!-- Tabs for adding members -->
                 <div class="group-tabs">
                     <button class="group-tab active" onclick="switchGroupTab('contacts')">
-                        <span>👤</span> Contacts
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Contacts
                     </button>
                     <button class="group-tab" onclick="switchGroupTab('search')">
-                        <span>🔍</span> Search
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        Search
                     </button>
                     <button class="group-tab" onclick="switchGroupTab('invite')">
-                        <span>🔗</span> Invite Link
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        Invite Link
                     </button>
                 </div>
                 
@@ -2467,7 +3594,7 @@
                         </p>
                         <div class="invite-link-box" id="groupInviteLinkBox" style="display: none;">
                             <input type="text" class="modal-input" id="groupInviteLink" readonly style="font-family: monospace; font-size: 0.75rem;">
-                            <button class="invite-copy-btn" onclick="copyGroupInviteLink()">📋 Copy</button>
+                            <button class="invite-copy-btn" onclick="copyGroupInviteLink()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button>
                         </div>
                         <button class="generate-link-btn" id="generateGroupLinkBtn" onclick="generateGroupInviteLink()">
                             ✨ Generate Invite Link
@@ -2481,6 +3608,64 @@
             <div class="modal-footer">
                 <button class="modal-btn modal-btn-secondary" onclick="closeModal('newGroupModal')">Cancel</button>
                 <button class="modal-btn modal-btn-primary" onclick="createGroup()">Create Group</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Modal -->
+    <div class="modal-overlay" id="searchModal">
+        <div class="modal search-modal">
+            <div class="modal-header">
+                <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 8px;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>Search</h3>
+                <button class="modal-close" onclick="closeModal('searchModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- Search Input -->
+                <div class="search-input-container">
+                    <svg class="search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <input type="text" 
+                           class="search-modal-input" 
+                           placeholder="Search users, groups, channels, contacts..." 
+                           id="globalSearchInput"
+                           oninput="handleGlobalSearch(this.value)"
+                           autocomplete="off">
+                </div>
+
+                <!-- Search Category Tabs -->
+                <div class="search-category-tabs">
+                    <button class="search-cat-tab active" data-category="all" onclick="setSearchCategory('all')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        All
+                    </button>
+                    <button class="search-cat-tab" data-category="users" onclick="setSearchCategory('users')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Users
+                    </button>
+                    <button class="search-cat-tab" data-category="groups" onclick="setSearchCategory('groups')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Groups
+                    </button>
+                    <button class="search-cat-tab" data-category="channels" onclick="setSearchCategory('channels')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        Channels
+                    </button>
+                    <button class="search-cat-tab" data-category="contacts" onclick="setSearchCategory('contacts')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        Contacts
+                    </button>
+                </div>
+
+                <!-- Search Results -->
+                <div class="search-results-container" id="searchResultsContainer">
+                    <div class="search-placeholder">
+                        <div class="search-placeholder-icon">🔍</div>
+                        <p>Start typing to search...</p>
+                        <span class="search-placeholder-hint">Search for users, groups, channels, or synced contacts</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -2850,6 +4035,160 @@
         }
     </style>
 
+    <!-- Call Page (Full Screen Interactive) -->
+    <div class="call-page" id="callPage">
+        <!-- Call Page Header -->
+        <div class="call-page-header">
+            <div class="call-page-info">
+                <button class="call-back-btn" onclick="minimizeCall()" title="Minimize">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <div class="call-page-title">
+                    <h2 id="callPageTitle">Call</h2>
+                    <div class="call-page-meta">
+                        <span class="call-type-indicator" id="callTypeIndicator">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+                            </svg>
+                            <span id="callTypeText">Voice Call</span>
+                        </span>
+                        <span class="call-timer" id="callTimer">
+                            <span class="timer-dot"></span>
+                            <span id="callDuration">00:00</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="call-page-actions">
+                <span class="participants-count" id="participantsCount">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                    </svg>
+                    <span id="participantCountNum">1</span> in call
+                </span>
+            </div>
+        </div>
+        
+        <!-- Listener Banner (for channel viewers) -->
+        <div class="listener-banner" id="listenerBanner" style="display: none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 18v-6a9 9 0 0118 0v6"/>
+                <path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/>
+            </svg>
+            You're in listener mode. Only admins and moderators can speak in channel calls.
+        </div>
+        
+        <!-- Participants Grid -->
+        <div class="participants-grid" id="participantsGrid">
+            <!-- Your tile (always shown) -->
+            <div class="participant-tile you" id="localParticipantTile">
+                <div class="participant-video-container">
+                    <video id="localVideo" autoplay muted playsinline></video>
+                    <div class="participant-avatar-large" id="localAvatarFallback">
+                        <span>{{ username[0].upper() }}</span>
+                    </div>
+                </div>
+                <div class="participant-info-bar">
+                    <span class="participant-name-label">You</span>
+                    <div class="participant-status-icons" id="localStatusIcons">
+                        <!-- Status icons will be added here -->
+                    </div>
+                </div>
+                <div class="speaking-ring"></div>
+            </div>
+            
+            <!-- Remote participants will be added here dynamically -->
+        </div>
+        
+        <!-- Call Controls Bar -->
+        <div class="call-controls-bar">
+            <div class="controls-group">
+                <button class="control-button" id="toggleMicBtn" onclick="toggleMic()" title="Mute/Unmute">
+                    <div class="control-icon">
+                        <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+                            <path d="M19 10v2a7 7 0 01-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                        <svg class="icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                            <path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6"/>
+                            <path d="M17 16.95A7 7 0 015 12v-2m14 0v2a7 7 0 01-.11 1.23"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                    </div>
+                    <span class="control-label">Mic</span>
+                </button>
+                
+                <button class="control-button" id="toggleVideoBtn" onclick="toggleVideo()" title="Camera On/Off">
+                    <div class="control-icon">
+                        <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="23 7 16 12 23 17 23 7"/>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                        </svg>
+                        <svg class="icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 16v1a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2h2m5.66 0H14a2 2 0 012 2v3.34l1 1L23 7v10"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </div>
+                    <span class="control-label">Camera</span>
+                </button>
+                
+                <button class="control-button" id="screenShareBtn" onclick="toggleScreenShare()" title="Share Screen">
+                    <div class="control-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/>
+                            <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                    </div>
+                    <span class="control-label">Share</span>
+                </button>
+            </div>
+            
+            <button class="end-call-button" onclick="endCall()" title="End Call">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.68 13.31a16 16 0 003.41 2.6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7 2 2 0 011.72 2v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.42 19.42 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91"/>
+                    <line x1="23" y1="1" x2="1" y2="23"/>
+                </svg>
+                <span>End Call</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Incoming Call Modal -->
+    <div class="incoming-call-modal" id="incomingCallModal">
+        <div class="incoming-call-avatar" id="incomingCallAvatar">?</div>
+        <div class="incoming-call-name" id="incomingCallName">Unknown</div>
+        <div class="incoming-call-type" id="incomingCallType">Voice Call</div>
+        <div class="incoming-call-actions">
+            <button class="incoming-call-btn decline" onclick="declineIncomingCall()" title="Decline">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.68 13.31a16 16 0 003.41 2.6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7 2 2 0 011.72 2v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.42 19.42 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91"/>
+                    <line x1="23" y1="1" x2="1" y2="23"/>
+                </svg>
+            </button>
+            <button class="incoming-call-btn accept" onclick="acceptIncomingCall()" title="Accept">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Active Call Indicator (mini bar) -->
+    <div class="active-call-indicator" id="activeCallIndicator" onclick="returnToCall()">
+        <div class="pulse-dot"></div>
+        <span>In Call</span>
+        <span id="miniCallDuration">00:00</span>
+    </div>
+
     <script>
         // ============================================
         // PANEL & MODAL FUNCTIONS
@@ -2858,35 +4197,324 @@
         let activePanel = null;
         let searchType = 'all';
         let selectedGroupMembers = [];
+        let activeMainTab = 'chats';
         
-        function togglePanel(panel) {
+        function switchMainTab(tab) {
+            activeMainTab = tab;
+            
+            // Update tab buttons
+            document.getElementById('chatsTabBtn').classList.toggle('active', tab === 'chats');
+            document.getElementById('channelsTabBtn').classList.toggle('active', tab === 'channels');
+            
+            // Update content panels
+            document.getElementById('chatsTabContent').classList.toggle('active', tab === 'chats');
+            document.getElementById('channelsTabContent').classList.toggle('active', tab === 'channels');
+        }
+        
+        function togglePanel(panel, event) {
+            // Stop propagation to prevent document click handler from firing
+            if (event) {
+                event.stopPropagation();
+            }
+            
             const writePanel = document.getElementById('writePanel');
-            const searchPanel = document.getElementById('searchPanel');
-            const writeBtn = document.getElementById('writeBtn');
-            const searchBtn = document.getElementById('searchBtn');
             
-            // Close all first
-            writePanel.classList.remove('show');
-            searchPanel.classList.remove('show');
-            writeBtn.classList.remove('active');
-            searchBtn.classList.remove('active');
-            
-            if (activePanel === panel) {
-                activePanel = null;
+            if (panel === 'search') {
+                // Close write panel first
+                if (writePanel) {
+                    writePanel.classList.remove('show');
+                    activePanel = null;
+                }
+                // Open search modal
+                openSearchModal();
                 return;
             }
             
-            activePanel = panel;
-            
             if (panel === 'write') {
-                writePanel.classList.add('show');
-                writeBtn.classList.add('active');
-            } else if (panel === 'search') {
-                searchPanel.classList.add('show');
-                searchBtn.classList.add('active');
-                document.getElementById('globalSearch').focus();
+                // Toggle the write panel
+                if (writePanel.classList.contains('show')) {
+                    writePanel.classList.remove('show');
+                    activePanel = null;
+                } else {
+                    writePanel.classList.add('show');
+                    activePanel = 'write';
+                }
             }
         }
+        
+        // Close write panel when clicking outside
+        document.addEventListener('click', function(e) {
+            const writePanel = document.getElementById('writePanel');
+            if (!writePanel) return;
+            
+            // Check if click is inside the panel or on the write button
+            const isInsidePanel = writePanel.contains(e.target);
+            const isWriteButton = e.target.closest('[data-panel="write"]');
+            
+            if (writePanel.classList.contains('show') && !isInsidePanel && !isWriteButton) {
+                writePanel.classList.remove('show');
+                activePanel = null;
+            }
+        });
+        
+        // Search Modal Functions
+        let searchCategory = 'all';
+        
+        function openSearchModal() {
+            document.getElementById('searchModal').classList.add('show');
+            setTimeout(() => {
+                document.getElementById('globalSearchInput').focus();
+            }, 100);
+        }
+        
+        function setSearchCategory(category) {
+            searchCategory = category;
+            document.querySelectorAll('.search-cat-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.category === category);
+            });
+            // Re-run search with new category
+            handleGlobalSearch(document.getElementById('globalSearchInput').value);
+        }
+        
+        function handleGlobalSearch(query) {
+            const resultsContainer = document.getElementById('searchResultsContainer');
+            
+            if (!query.trim()) {
+                resultsContainer.innerHTML = `
+                    <div class="search-placeholder">
+                        <div class="search-placeholder-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        </div>
+                        <p>Start typing to search...</p>
+                        <span class="search-placeholder-hint">Search for users, groups, channels, or synced contacts</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            const lowerQuery = query.toLowerCase();
+            let html = '';
+            let hasResults = false;
+            
+            // Get users already in contacts (added)
+            const addedUsers = Array.from(document.querySelectorAll('.contact')).map(c => c.dataset.username);
+            
+            // Search Users - Show ADDED first, then DISCOVER
+            if (searchCategory === 'all' || searchCategory === 'users') {
+                // First: Added users matching query
+                const matchedAddedUsers = addedUsers.filter(u => u.toLowerCase().includes(lowerQuery));
+                
+                if (matchedAddedUsers.length > 0) {
+                    hasResults = true;
+                    html += `<div class="search-result-section">
+                        <div class="search-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Your Contacts</div>`;
+                    matchedAddedUsers.forEach(user => {
+                        html += `
+                            <div class="search-result-item" onclick="selectContactFromSearch('${user}')">
+                                <div class="search-result-avatar user">${user[0].toUpperCase()}</div>
+                                <div class="search-result-info">
+                                    <div class="search-result-name">${user}</div>
+                                    <div class="search-result-meta">Added contact</div>
+                                </div>
+                                <span class="search-result-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">Added</span>
+                            </div>`;
+                    });
+                    html += '</div>';
+                }
+                
+                // Then: Fetch other users not in contacts (discover)
+                fetch(`/api/users/search?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.users && data.users.length > 0) {
+                            // Filter out already added users
+                            const discoverUsers = data.users.filter(u => !addedUsers.includes(u.username));
+                            
+                            if (discoverUsers.length > 0) {
+                                let discoverHtml = `<div class="search-result-section">
+                                    <div class="search-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> Discover Users</div>`;
+                                discoverUsers.forEach(user => {
+                                    discoverHtml += `
+                                        <div class="search-result-item" onclick="selectContactFromSearch('${user.username}')">
+                                            <div class="search-result-avatar user" style="opacity: 0.7;">${user.username[0].toUpperCase()}</div>
+                                            <div class="search-result-info">
+                                                <div class="search-result-name">${user.username}</div>
+                                                <div class="search-result-meta">Menza user</div>
+                                            </div>
+                                            <span class="search-result-badge">New</span>
+                                        </div>`;
+                                });
+                                discoverHtml += '</div>';
+                                
+                                // Append to existing results
+                                const container = document.getElementById('searchResultsContainer');
+                                container.innerHTML = container.innerHTML.replace('<!-- USERS_END -->', discoverHtml + '<!-- USERS_END -->');
+                            }
+                        }
+                    })
+                    .catch(() => {});
+                
+                html += '<!-- USERS_END -->';
+            }
+            
+            // Search Groups - Show JOINED first, then DISCOVER
+            if (searchCategory === 'all' || searchCategory === 'groups') {
+                // TODO: Implement groups when group feature is complete
+                if (searchCategory === 'groups' && lowerQuery.length >= 2) {
+                    html += `<div class="search-result-section">
+                        <div class="search-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Groups</div>
+                        <div class="search-no-results">
+                            <p style="color: var(--text-muted); font-size: 0.875rem;">No groups found matching "${query}"</p>
+                        </div>
+                    </div>`;
+                }
+            }
+            
+            // Search Channels - Show SUBSCRIBED first, then DISCOVER
+            if (searchCategory === 'all' || searchCategory === 'channels') {
+                fetch(`/api/channels/search?q=${encodeURIComponent(query)}&include_subscription=true`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.channels && data.channels.length > 0) {
+                            // Separate subscribed vs discoverable
+                            const subscribedChannels = data.channels.filter(c => c.is_subscribed);
+                            const discoverChannels = data.channels.filter(c => !c.is_subscribed);
+                            
+                            let channelHtml = '';
+                            
+                            // First: Subscribed channels
+                            if (subscribedChannels.length > 0) {
+                                channelHtml += `<div class="search-result-section">
+                                    <div class="search-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Your Channels</div>`;
+                                subscribedChannels.forEach(channel => {
+                                    channelHtml += `
+                                        <div class="search-result-item" onclick="window.location.href='/channel/${channel.id}'">
+                                            <div class="search-result-avatar channel">${channel.branding?.avatar_emoji || '📺'}</div>
+                                            <div class="search-result-info">
+                                                <div class="search-result-name">${channel.name}</div>
+                                                <div class="search-result-meta">${channel.subscribers?.length || 0} members</div>
+                                            </div>
+                                            <span class="search-result-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">Joined</span>
+                                        </div>`;
+                                });
+                                channelHtml += '</div>';
+                            }
+                            
+                            // Then: Discoverable channels
+                            if (discoverChannels.length > 0) {
+                                channelHtml += `<div class="search-result-section">
+                                    <div class="search-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> Discover Channels</div>`;
+                                discoverChannels.forEach(channel => {
+                                    channelHtml += `
+                                        <div class="search-result-item" onclick="window.location.href='/channel/${channel.id}'">
+                                            <div class="search-result-avatar channel" style="opacity: 0.7;">${channel.branding?.avatar_emoji || '📺'}</div>
+                                            <div class="search-result-info">
+                                                <div class="search-result-name">${channel.name}</div>
+                                                <div class="search-result-meta">${channel.subscribers?.length || 0} members</div>
+                                            </div>
+                                            ${channel.discoverable ? '<span class="search-result-badge">Public</span>' : ''}
+                                        </div>`;
+                                });
+                                channelHtml += '</div>';
+                            }
+                            
+                            if (channelHtml) {
+                                const container = document.getElementById('searchResultsContainer');
+                                container.innerHTML = container.innerHTML.replace('<!-- CHANNELS_END -->', channelHtml + '<!-- CHANNELS_END -->');
+                            }
+                        }
+                    })
+                    .catch(() => {});
+                
+                html += '<!-- CHANNELS_END -->';
+            }
+            
+            // Search Contacts (synced from phone)
+            if (searchCategory === 'all' || searchCategory === 'contacts') {
+                const syncedContacts = window.syncedContacts || [];
+                
+                // Separate: On Menza vs Not on Menza
+                const matchedContacts = syncedContacts.filter(c => 
+                    c.name.toLowerCase().includes(lowerQuery) || 
+                    (c.phone && c.phone.includes(lowerQuery))
+                );
+                
+                const onMenzaContacts = matchedContacts.filter(c => c.onMenza);
+                const notOnMenzaContacts = matchedContacts.filter(c => !c.onMenza);
+                
+                if (onMenzaContacts.length > 0) {
+                    hasResults = true;
+                    html += `<div class="search-result-section">
+                        <div class="search-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> Contacts on Menza</div>`;
+                    onMenzaContacts.forEach(contact => {
+                        html += `
+                            <div class="search-result-item" onclick="selectContactFromSearch('${contact.menzaUsername}')">
+                                <div class="search-result-avatar contact">${contact.name[0].toUpperCase()}</div>
+                                <div class="search-result-info">
+                                    <div class="search-result-name">${contact.name}</div>
+                                    <div class="search-result-meta">@${contact.menzaUsername}</div>
+                                </div>
+                                <span class="search-result-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">On Menza</span>
+                            </div>`;
+                    });
+                    html += '</div>';
+                }
+                
+                if (notOnMenzaContacts.length > 0) {
+                    hasResults = true;
+                    html += `<div class="search-result-section">
+                        <div class="search-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg> Invite to Menza</div>`;
+                    notOnMenzaContacts.forEach(contact => {
+                        html += `
+                            <div class="search-result-item" onclick="inviteContact('${contact.phone}')">
+                                <div class="search-result-avatar contact" style="opacity: 0.6;">${contact.name[0].toUpperCase()}</div>
+                                <div class="search-result-info">
+                                    <div class="search-result-name">${contact.name}</div>
+                                    <div class="search-result-meta">${contact.phone || 'No phone'}</div>
+                                </div>
+                                <span class="search-result-badge">Invite</span>
+                            </div>`;
+                    });
+                    html += '</div>';
+                }
+                
+                if (matchedContacts.length === 0 && searchCategory === 'contacts' && lowerQuery.length >= 2) {
+                    html += `<div class="search-result-section">
+                        <div class="search-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> Contacts</div>
+                        <div class="search-no-results">
+                            <p style="color: var(--text-muted); font-size: 0.875rem;">No synced contacts found</p>
+                            <p style="font-size: 0.75rem; margin-top: 0.5rem; color: var(--text-muted);">Enable Contact Sync in Settings → Privacy</p>
+                        </div>
+                    </div>`;
+                }
+            }
+            
+            if (!hasResults && html.replace(/<!-- [A-Z_]+ -->/g, '').trim() === '') {
+                html = `
+                    <div class="search-no-results">
+                        <div class="search-no-results-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        </div>
+                        <p>No results found for "${query}"</p>
+                    </div>
+                `;
+            }
+            
+            resultsContainer.innerHTML = html;
+        }
+        
+        function selectContactFromSearch(username) {
+            closeModal('searchModal');
+            selectContact(username);
+        }
+        
+        function inviteContact(phone) {
+            // Show invite option
+            alert(`Invite ${phone} to Menza!\nShare link: https://menza.app/invite`);
+        }
+        
+        // Initialize synced contacts array
+        window.syncedContacts = [];
         
         function setSearchType(type) {
             searchType = type;
@@ -2932,12 +4560,18 @@
         }
         
         function startNewMessage() {
-            togglePanel('write');
+            // Close the write dropdown
+            document.getElementById('writePanel').classList.remove('show');
+            activePanel = null;
+            // Open the new message modal
             document.getElementById('newMessageModal').classList.add('show');
         }
         
         function startNewGroup() {
-            togglePanel('write');
+            // Close the write dropdown
+            document.getElementById('writePanel').classList.remove('show');
+            activePanel = null;
+            
             selectedGroupMembers = [];
             currentGroupInviteCode = null;
             
@@ -2949,13 +4583,15 @@
             document.getElementById('groupSearchInput').value = '';
             document.getElementById('groupSearchResults').innerHTML = `
                 <div class="search-placeholder">
-                    <span style="font-size: 1.5rem; opacity: 0.5;">🔍</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.5;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                     <p style="color: var(--text-muted); font-size: 0.8125rem;">Type a username to search</p>
                 </div>`;
             
             // Reset invite link
             document.getElementById('groupInviteLinkBox').style.display = 'none';
-            document.getElementById('generateGroupLinkBtn').innerHTML = '✨ Generate Invite Link';
+            document.getElementById('generateGroupLinkBtn').innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Generate Invite Link`;
             
             // Reset tabs to first tab
             switchGroupTab('contacts');
@@ -2963,6 +4599,7 @@
             // Hide selected members preview
             document.getElementById('selectedMembersPreview').style.display = 'none';
             
+            // Open the new group modal
             document.getElementById('newGroupModal').classList.add('show');
         }
         
@@ -3120,15 +4757,16 @@
                 alert('Please select at least one member');
                 return;
             }
-            // TODO: Implement group creation with backend
+            
             const inviteCode = currentGroupInviteCode || null;
-            console.log('Creating group:', { 
-                name: groupName, 
-                members: selectedGroupMembers, 
-                inviteCode 
+            
+            // Emit socket event to create group
+            socket.emit('create_group', {
+                name: groupName,
+                members: selectedGroupMembers,
+                invite_code: inviteCode
             });
             
-            showToast(`👥 Group "${groupName}" created with ${selectedGroupMembers.length} member(s)!`, 'success');
             closeModal('newGroupModal');
         }
         
@@ -3256,11 +4894,24 @@
                     await displayMessage(msg);
                 }
                 
+                // If there are messages, this is an active conversation
+                if (data.messages.length > 0 && currentFriend) {
+                    const lastMsg = data.messages[data.messages.length - 1];
+                    trackDMConversation(currentFriend, lastMsg.from === myUsername ? 'You: ...' : '...');
+                }
+                
                 scrollToBottom();
             });
             
             socket.on('new_message', async (data) => {
                 await displayMessage(data);
+                
+                // Update the conversation preview
+                if (currentFriend) {
+                    const preview = data.from === myUsername ? 'You: Sent a message' : 'New message';
+                    trackDMConversation(currentFriend, preview);
+                }
+                
                 scrollToBottom();
             });
             
@@ -3385,6 +5036,266 @@
                 
                 loadSharedNotes();
             });
+            
+            // ==========================================
+            // GROUP CHAT EVENTS
+            // ==========================================
+            
+            socket.on('group_created', (data) => {
+                showToast(`👥 Group "${data.group.name}" created!`, 'success');
+                renderGroups([data.group], true); // Prepend to list
+                loadUserGroups(); // Refresh full list
+            });
+            
+            socket.on('group_invite', (data) => {
+                showToast(`👥 You've been added to "${data.group.name}"`, 'info');
+                renderGroups([data.group], true);
+                loadUserGroups();
+            });
+            
+            socket.on('user_groups', (data) => {
+                renderGroups(data.groups);
+            });
+            
+            socket.on('group_history', async (data) => {
+                // Only render if this is the currently selected group
+                if (currentGroup && currentGroup.id === data.group_id) {
+                    const messagesDiv = document.getElementById('messages');
+                    messagesDiv.innerHTML = '';
+                    
+                    for (const msg of data.messages) {
+                        await displayGroupMessage(msg);
+                    }
+                    
+                    scrollToBottom();
+                }
+            });
+            
+            socket.on('new_group_message', async (data) => {
+                // Only display if we're in this group
+                if (currentGroup && currentGroup.id === data.group_id) {
+                    await displayGroupMessage(data.message);
+                    scrollToBottom();
+                }
+                
+                // Update conversation preview
+                const group = userGroups.find(g => g.id === data.group_id);
+                if (group) {
+                    group.last_message = `${data.message.sender}: Message`;
+                    group.last_message_time = data.message.timestamp;
+                    renderActiveConversations();
+                }
+            });
+            
+            socket.on('group_notes_list', (data) => {
+                if (currentGroup && currentGroup.id === data.group_id) {
+                    renderSharedNotes(data.notes);
+                    updateNotesBadge(data.notes);
+                }
+            });
+            
+            socket.on('group_error', (data) => {
+                showToast(data.error, 'error');
+            });
+            
+            // Load user's groups on connect
+            socket.emit('get_user_groups');
+        }
+        
+        // ==========================================
+        // MESSAGES & CONVERSATIONS FUNCTIONS
+        // ==========================================
+        
+        let activeConversations = []; // Stores both groups and DMs
+        let userGroups = [];
+        
+        function loadUserGroups() {
+            if (socket && socket.connected) {
+                socket.emit('get_user_groups');
+            }
+        }
+        
+        function addActiveConversation(type, data) {
+            // Check if already exists
+            const existingIndex = activeConversations.findIndex(conv => 
+                conv.type === type && conv.id === data.id
+            );
+            
+            if (existingIndex === -1) {
+                activeConversations.unshift({
+                    type: type, // 'group' or 'dm'
+                    ...data,
+                    lastActivity: data.lastActivity || new Date().toISOString()
+                });
+            } else {
+                // Update existing
+                activeConversations[existingIndex] = {
+                    ...activeConversations[existingIndex],
+                    ...data,
+                    lastActivity: new Date().toISOString()
+                };
+                // Move to top
+                const item = activeConversations.splice(existingIndex, 1)[0];
+                activeConversations.unshift(item);
+            }
+            
+            renderActiveConversations();
+        }
+        
+        function renderActiveConversations() {
+            const container = document.getElementById('messagesList');
+            const emptyState = document.getElementById('emptyMessagesState');
+            if (!container) return;
+            
+            // Combine groups and active DMs, sort by last activity
+            const allConversations = [...activeConversations];
+            
+            // Add groups to conversations
+            userGroups.forEach(group => {
+                const exists = allConversations.find(c => c.type === 'group' && c.id === group.id);
+                if (!exists) {
+                    allConversations.push({
+                        type: 'group',
+                        id: group.id,
+                        name: group.name,
+                        avatar: group.avatar_emoji || '👥',
+                        members: group.members,
+                        lastMessage: group.last_message,
+                        lastActivity: group.last_message_time || group.created_at
+                    });
+                }
+            });
+            
+            // Sort by last activity (most recent first)
+            allConversations.sort((a, b) => {
+                const timeA = new Date(a.lastActivity || 0);
+                const timeB = new Date(b.lastActivity || 0);
+                return timeB - timeA;
+            });
+            
+            if (allConversations.length === 0) {
+                if (emptyState) emptyState.style.display = 'block';
+                container.innerHTML = '';
+                container.appendChild(emptyState);
+                return;
+            }
+            
+            if (emptyState) emptyState.style.display = 'none';
+            
+            const html = allConversations.map(conv => {
+                if (conv.type === 'group') {
+                    return `
+                        <div class="contact group-item" data-group-id="${conv.id}" onclick="selectGroup('${conv.id}')">
+                            <div class="contact-avatar" style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));">
+                                ${conv.avatar || '👥'}
+                            </div>
+                            <div class="contact-info">
+                                <div class="contact-name">${conv.name}</div>
+                                <div class="contact-status">${conv.lastMessage || `${conv.members?.length || 0} members`}</div>
+                            </div>
+                            <span class="conv-badge group-badge">Group</span>
+                        </div>`;
+                } else {
+                    // Direct message
+                    return `
+                        <div class="contact dm-item" data-username="${conv.id}" onclick="selectContact('${conv.id}')">
+                            <div class="contact-avatar">
+                                ${conv.id[0].toUpperCase()}
+                                <div class="status-indicator ${onlineUsers.has(conv.id) ? 'online' : ''}" id="status-${conv.id}"></div>
+                            </div>
+                            <div class="contact-info">
+                                <div class="contact-name">${conv.name || conv.id}</div>
+                                <div class="contact-status">${conv.lastMessage || 'Click to continue chatting'}</div>
+                            </div>
+                        </div>`;
+                }
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        function renderGroups(groups, prepend = false) {
+            userGroups = groups;
+            renderActiveConversations();
+        }
+        
+        let currentGroup = null; // Currently selected group
+        let currentChatType = 'dm'; // 'dm' or 'group'
+        
+        function selectGroup(groupId) {
+            const group = userGroups.find(g => g.id === groupId);
+            if (!group) {
+                showToast('Group not found', 'error');
+                return;
+            }
+            
+            // Clear DM state
+            currentFriend = null;
+            currentGroup = group;
+            currentChatType = 'group';
+            
+            // Update UI
+            document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
+            const groupEl = document.querySelector(`[data-group-id="${groupId}"]`);
+            if (groupEl) groupEl.classList.add('active');
+            
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('active-chat').classList.add('visible');
+            document.getElementById('active-chat').style.display = 'flex';
+            
+            // Hide shared notes panel when switching chats
+            const notesPanel = document.getElementById('sharedNotesPanel');
+            if (notesPanel) {
+                notesPanel.style.display = 'none';
+                sharedNotesVisible = false;
+            }
+            
+            // Clear unlocked notes cache
+            unlockedNotes = {};
+            
+            // Update header for group
+            document.getElementById('chat-avatar').textContent = group.avatar_emoji || '👥';
+            document.getElementById('chat-avatar').style.background = 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))';
+            document.getElementById('chat-avatar').style.fontSize = '1.25rem';
+            document.getElementById('chat-username').textContent = group.name;
+            document.getElementById('chat-status-dot').style.display = 'none';
+            document.getElementById('chat-status-text').textContent = `${group.members.length} members`;
+            
+            // Join group room via socket
+            socket.emit('join_group', { group_id: groupId });
+            
+            // Load shared notes for this group
+            loadGroupSharedNotes(groupId);
+            
+            document.getElementById('message-input').focus();
+        }
+        
+        function loadGroupSharedNotes(groupId) {
+            socket.emit('get_group_notes', { group_id: groupId });
+        }
+        
+        // Track when a DM conversation becomes active
+        function trackDMConversation(username, lastMessage = null) {
+            addActiveConversation('dm', {
+                id: username,
+                name: username,
+                lastMessage: lastMessage
+            });
+        }
+        
+        // Toggle All Users section visibility
+        function toggleAllUsers() {
+            const section = document.getElementById('allUsersSection');
+            const list = document.getElementById('allUsersList');
+            const label = section.querySelector('.section-label');
+            
+            if (list.style.display === 'none') {
+                list.style.display = 'block';
+                label.classList.add('expanded');
+            } else {
+                list.style.display = 'none';
+                label.classList.remove('expanded');
+            }
         }
         
         function updateOnlineStatus() {
@@ -3408,6 +5319,9 @@
         // ============================================
         
         function selectContact(username) {
+            // Clear group state
+            currentGroup = null;
+            currentChatType = 'dm';
             currentFriend = username;
             
             document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
@@ -3415,6 +5329,7 @@
             if (contactEl) contactEl.classList.add('active');
             
             document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('active-chat').classList.add('visible');
             document.getElementById('active-chat').style.display = 'flex';
             
             // Hide shared notes panel when switching chats
@@ -3427,11 +5342,17 @@
             // Clear unlocked notes cache for new chat
             unlockedNotes = {};
             
+            // Reset avatar styling for DM
             document.getElementById('chat-avatar').textContent = username[0].toUpperCase();
+            document.getElementById('chat-avatar').style.background = '';
+            document.getElementById('chat-avatar').style.fontSize = '';
             document.getElementById('chat-username').textContent = username;
             updateOnlineStatus();
             
             socket.emit('join_chat', { friend: username });
+            
+            // Track this as an active conversation
+            trackDMConversation(username);
             
             document.getElementById('message-input').focus();
         }
@@ -3521,7 +5442,24 @@
             const input = document.getElementById('message-input');
             const message = input.value.trim();
             
-            if (!message || !currentFriend) return;
+            if (!message) return;
+            
+            // Handle group messages
+            if (currentChatType === 'group' && currentGroup) {
+                socket.emit('group_message', {
+                    group_id: currentGroup.id,
+                    content: message,
+                    encrypted: false // Group messages stored as plaintext for now
+                });
+                
+                input.value = '';
+                input.style.height = 'auto';
+                input.focus();
+                return;
+            }
+            
+            // Handle DM messages
+            if (!currentFriend) return;
             
             const sharedSecret = getSharedSecret(myUsername, currentFriend);
             const encrypted = await encryptMessage(message, sharedSecret);
@@ -3534,6 +5472,42 @@
             input.value = '';
             input.style.height = 'auto';
             input.focus();
+        }
+        
+        // Display a group message
+        async function displayGroupMessage(msg) {
+            const messagesDiv = document.getElementById('messages');
+            
+            const isSent = msg.sender === myUsername;
+            const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const messageId = msg.id || '';
+            
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${isSent ? 'sent' : 'received'}`;
+            messageEl.id = `msg-${messageId}`;
+            
+            // Show sender name for received messages in groups
+            const senderHtml = !isSent ? `<div class="message-sender" style="font-size: 0.75rem; color: var(--accent-primary); margin-bottom: 0.25rem; font-weight: 500;">${msg.sender}</div>` : '';
+            
+            messageEl.innerHTML = `
+                <div class="message-bubble">
+                    ${senderHtml}
+                    <div class="message-text">${escapeHtml(msg.content)}</div>
+                    <div class="message-info">
+                        <span class="message-time">${time}</span>
+                    </div>
+                </div>
+                ${isSent ? `
+                <div class="message-actions">
+                    <button class="msg-action-btn" onclick="deleteMessage('${messageId}', true)" title="Delete for everyone">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                        </svg>
+                    </button>
+                </div>` : ''}
+            `;
+            
+            messagesDiv.appendChild(messageEl);
         }
         
         function handleKeyDown(event) {
@@ -3666,8 +5640,13 @@
             sharedNotesVisible = !sharedNotesVisible;
             panel.style.display = sharedNotesVisible ? 'block' : 'none';
             
-            if (sharedNotesVisible && currentFriend) {
-                loadSharedNotes();
+            // Load notes for both DM and group chats
+            if (sharedNotesVisible) {
+                if (currentChatType === 'group' && currentGroup) {
+                    loadSharedNotes();
+                } else if (currentFriend) {
+                    loadSharedNotes();
+                }
             }
         }
         
@@ -3679,6 +5658,15 @@
         }
         
         function loadSharedNotes() {
+            // Handle group notes
+            if (currentChatType === 'group' && currentGroup) {
+                socket.emit('get_group_notes', {
+                    group_id: currentGroup.id
+                });
+                return;
+            }
+            
+            // Handle DM notes
             if (!currentFriend) return;
             
             socket.emit('get_shared_notes', {
@@ -3788,6 +5776,17 @@
         }
         
         function openCreateNoteModal() {
+            // Handle group chats
+            if (currentChatType === 'group' && currentGroup) {
+                document.getElementById('noteRecipientName').textContent = currentGroup.name + ' (Group)';
+                document.getElementById('noteTitle').value = '';
+                document.getElementById('noteContent').value = '';
+                document.getElementById('creatorPhrase').value = '';
+                document.getElementById('createNoteModal').classList.add('show');
+                return;
+            }
+            
+            // Handle DM chats
             if (!currentFriend) return;
             
             document.getElementById('noteRecipientName').textContent = currentFriend;
@@ -3812,14 +5811,30 @@
                 return;
             }
             
-            console.log('Creating shared note:', { friend: currentFriend, title, content });
-            
-            socket.emit('create_shared_note', {
-                friend: currentFriend,
-                title: title,
-                content: content,
-                phrase: phrase
-            });
+            // Handle group notes
+            if (currentChatType === 'group' && currentGroup) {
+                console.log('Creating group note:', { group: currentGroup.name, title, content });
+                
+                socket.emit('create_group_note', {
+                    group_id: currentGroup.id,
+                    title: title,
+                    content: content,
+                    phrase: phrase
+                });
+            } else if (currentFriend) {
+                // Handle DM notes
+                console.log('Creating shared note:', { friend: currentFriend, title, content });
+                
+                socket.emit('create_shared_note', {
+                    friend: currentFriend,
+                    title: title,
+                    content: content,
+                    phrase: phrase
+                });
+            } else {
+                showToast('No active chat selected', 'error');
+                return;
+            }
             
             closeModal('createNoteModal');
             showToast('📝 Shared note created!', 'success');
@@ -4014,9 +6029,7 @@
         
         function detectCalculations(text) {
             const preview = document.getElementById('calcPreview');
-            const resultsContainer = document.getElementById('calcResults');
-            const totalContainer = document.getElementById('calcTotal');
-            const totalValue = document.getElementById('calcTotalValue');
+            const suggestionsContainer = document.getElementById('calcSuggestions');
             
             // Pattern to match math expressions: number operator number
             // Supports: x, *, ×, +, -, /, ÷
@@ -4040,7 +6053,7 @@
                         case '×':
                         case '*':
                             result = num1 * num2;
-                            displayOperator = 'x';
+                            displayOperator = '×';
                             break;
                         case '+':
                             result = num1 + num2;
@@ -4066,36 +6079,58 @@
             });
             
             if (calculations.length > 0) {
-                // Build HTML for results
-                let html = calculations.map(calc => `
-                    <div class="calc-line">
-                        <span class="calc-expression">${calc.expression}</span>
-                        <span>
-                            <span class="calc-equals">=</span>
-                            <span class="calc-result">${formatNumber(calc.result)}</span>
-                        </span>
-                    </div>
-                `).join('');
+                // Build iOS-style suggestion chips
+                let html = '';
                 
-                resultsContainer.innerHTML = html;
-                
-                // Calculate and show total if multiple calculations
-                if (calculations.length > 1) {
-                    const total = calculations.reduce((sum, calc) => sum + calc.result, 0);
-                    totalValue.textContent = formatNumber(total);
-                    totalContainer.style.display = 'flex';
-                    lastTotal = total;
+                if (calculations.length === 1) {
+                    // Single calculation - show 3 options like iOS
+                    const calc = calculations[0];
+                    const resultStr = formatNumber(calc.result);
+                    
+                    html = `
+                        <button class="calc-chip expression" onclick="insertCalcText('"${calc.expression}="')">"${calc.expression}="</button>
+                        <button class="calc-chip full" onclick="insertCalcText('${calc.expression}=${resultStr}')">${calc.expression}=${resultStr}</button>
+                        <button class="calc-chip result" onclick="insertCalcText('${resultStr}')">${resultStr}</button>
+                    `;
                 } else {
-                    totalContainer.style.display = 'none';
-                    lastTotal = calculations[0].result;
+                    // Multiple calculations - show each result + total
+                    calculations.forEach(calc => {
+                        const resultStr = formatNumber(calc.result);
+                        html += `<button class="calc-chip full" onclick="insertCalcText('${calc.expression}=${resultStr}')">${calc.expression}=${resultStr}</button>`;
+                    });
+                    
+                    // Add total chip
+                    const total = calculations.reduce((sum, calc) => sum + calc.result, 0);
+                    const totalStr = formatNumber(total);
+                    html += `<button class="calc-total-chip" onclick="insertCalcText('Total: ${totalStr}')"><span class="calc-total-label">Total</span> ${totalStr}</button>`;
+                    lastTotal = total;
                 }
                 
+                suggestionsContainer.innerHTML = html;
                 lastCalculations = calculations;
                 preview.classList.add('show');
             } else {
                 lastCalculations = [];
                 lastTotal = 0;
                 preview.classList.remove('show');
+            }
+        }
+        
+        function insertCalcText(text) {
+            const input = document.getElementById('message-input');
+            if (input) {
+                // Replace the current expression with the selected text
+                const currentText = input.value;
+                const mathPattern = /(\d+(?:\.\d+)?)\s*([x×*+\-\/÷])\s*(\d+(?:\.\d+)?)/gi;
+                
+                // Find and replace the last expression
+                const newText = currentText.replace(mathPattern, text);
+                input.value = newText;
+                input.focus();
+                
+                // Hide calculator
+                document.getElementById('calcPreview').classList.remove('show');
+                lastCalculations = [];
             }
         }
         
@@ -4181,11 +6216,807 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             initSocket();
+            
+            // Check for navigation from channels page
+            if (localStorage.getItem('openNewMessage')) {
+                localStorage.removeItem('openNewMessage');
+                setTimeout(() => startNewMessage(), 300);
+            }
+            if (localStorage.getItem('openNewGroup')) {
+                localStorage.removeItem('openNewGroup');
+                setTimeout(() => startNewGroup(), 300);
+            }
+            if (localStorage.getItem('selectUser')) {
+                const user = localStorage.getItem('selectUser');
+                localStorage.removeItem('selectUser');
+                setTimeout(() => selectContact(user), 300);
+            }
         });
         
         // ============================================
-        // FONT PREVIEW (TEMPORARY - FOR SELECTION)
+        // PWA Service Worker Registration
         // ============================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then((registration) => {
+                        console.log('✅ Menza PWA ready:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('⚠️ SW registration failed:', error);
+                    });
+            });
+        }
+        
+        // ============================================
+        // VOICE & VIDEO CALL FUNCTIONS
+        // ============================================
+        
+        // Call State
+        let currentCall = null;
+        let localStream = null;
+        let screenStream = null;
+        let peerConnections = {}; // username -> RTCPeerConnection
+        let callDurationInterval = null;
+        let callStartTime = null;
+        let incomingCallData = null;
+        let isMuted = false;
+        let isVideoOff = false;
+        let isScreenSharing = false;
+        let canSpeak = true; // For channel calls
+        
+        // ICE Servers (STUN/TURN)
+        const iceConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' }
+            ]
+        };
+        
+        // Start a call
+        async function startCall(withVideo = false) {
+            if (!currentFriend && !currentGroup) {
+                showToast('Select a chat first', 'error');
+                return;
+            }
+            
+            try {
+                // Get media stream
+                const constraints = {
+                    audio: true,
+                    video: withVideo
+                };
+                
+                localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                // Determine call type and target
+                let callType, targetId, targetName;
+                
+                if (currentChatType === 'group' && currentGroup) {
+                    callType = 'group';
+                    targetId = currentGroup.id;
+                    targetName = currentGroup.name;
+                } else if (currentFriend) {
+                    callType = 'dm';
+                    targetId = currentFriend;
+                    targetName = currentFriend;
+                }
+                
+                // Emit start call event
+                socket.emit('start_call', {
+                    type: callType,
+                    target_id: targetId,
+                    video: withVideo
+                });
+                
+                showToast(`📞 Starting ${withVideo ? 'video' : 'voice'} call...`, 'info');
+                
+            } catch (err) {
+                console.error('Failed to start call:', err);
+                showToast('Failed to access microphone/camera. Please check permissions.', 'error');
+            }
+        }
+        
+        // Socket event: Call started
+        socket.on('call_started', (data) => {
+            currentCall = data;
+            canSpeak = data.can_speak !== false;
+            showCallUI(data);
+            startCallTimer();
+            
+            console.log('📞 Call started:', data);
+        });
+        
+        // Socket event: Incoming call
+        socket.on('incoming_call', (data) => {
+            incomingCallData = data;
+            showIncomingCallModal(data);
+            
+            // Play ringtone sound (if you have one)
+            console.log('📞 Incoming call from:', data.caller);
+        });
+        
+        // Show incoming call modal
+        function showIncomingCallModal(data) {
+            const modal = document.getElementById('incomingCallModal');
+            const avatar = document.getElementById('incomingCallAvatar');
+            const name = document.getElementById('incomingCallName');
+            const type = document.getElementById('incomingCallType');
+            
+            avatar.textContent = data.caller[0].toUpperCase();
+            
+            if (data.type === 'group') {
+                name.textContent = data.group_name;
+                type.textContent = `Group ${data.with_video ? 'Video' : 'Voice'} Call from ${data.caller}`;
+            } else if (data.type === 'channel') {
+                name.textContent = data.channel_name;
+                type.textContent = `Channel ${data.with_video ? 'Video' : 'Voice'} Call`;
+                if (!data.can_speak) {
+                    type.textContent += ' (Listener Mode)';
+                }
+            } else {
+                name.textContent = data.caller;
+                type.textContent = data.with_video ? 'Video Call' : 'Voice Call';
+            }
+            
+            modal.classList.add('show');
+        }
+        
+        // Accept incoming call
+        async function acceptIncomingCall() {
+            if (!incomingCallData) return;
+            
+            const data = incomingCallData;
+            
+            try {
+                // Get media stream (if allowed to speak)
+                canSpeak = data.can_speak !== false;
+                
+                if (canSpeak) {
+                    const constraints = {
+                        audio: true,
+                        video: data.with_video
+                    };
+                    localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                }
+                
+                // Join the call
+                socket.emit('join_call', {
+                    call_id: data.call_id,
+                    video: data.with_video && canSpeak
+                });
+                
+                // Hide modal
+                document.getElementById('incomingCallModal').classList.remove('show');
+                
+            } catch (err) {
+                console.error('Failed to join call:', err);
+                showToast('Failed to access microphone/camera', 'error');
+            }
+        }
+        
+        // Decline incoming call
+        function declineIncomingCall() {
+            if (!incomingCallData) return;
+            
+            socket.emit('decline_call', { call_id: incomingCallData.call_id });
+            document.getElementById('incomingCallModal').classList.remove('show');
+            incomingCallData = null;
+        }
+        
+        // Socket event: Call joined
+        socket.on('call_joined', (data) => {
+            currentCall = data;
+            canSpeak = data.can_speak !== false;
+            showCallUI(data);
+            startCallTimer();
+            
+            // Set up peer connections for existing participants
+            data.participants.forEach(participant => {
+                if (participant.username !== myUsername) {
+                    createPeerConnection(participant.username, true);
+                }
+            });
+            
+            console.log('📞 Joined call:', data);
+        });
+        
+        // Socket event: New participant joined
+        socket.on('participant_joined', (data) => {
+            console.log('👤 Participant joined:', data.participant.username);
+            showToast(`${data.participant.username} joined the call`, 'info');
+            
+            // Create peer connection for new participant
+            createPeerConnection(data.participant.username, false);
+            
+            // Add video tile
+            addVideoTile(data.participant);
+        });
+        
+        // Socket event: Participant left
+        socket.on('participant_left', (data) => {
+            console.log('👤 Participant left:', data.username);
+            showToast(`${data.username} left the call`, 'info');
+            
+            // Remove peer connection
+            if (peerConnections[data.username]) {
+                peerConnections[data.username].close();
+                delete peerConnections[data.username];
+            }
+            
+            // Remove participant tile
+            const tile = document.getElementById(`participant-tile-${data.username}`);
+            if (tile) tile.remove();
+            
+            // Update count and layout
+            updateParticipantCount();
+            updateGridLayout();
+        });
+        
+        // Socket event: Call signal (WebRTC)
+        socket.on('call_signal', async (data) => {
+            const pc = peerConnections[data.from_user];
+            if (!pc) {
+                createPeerConnection(data.from_user, false);
+            }
+            
+            try {
+                if (data.signal_type === 'offer') {
+                    await peerConnections[data.from_user].setRemoteDescription(
+                        new RTCSessionDescription(data.signal_data)
+                    );
+                    const answer = await peerConnections[data.from_user].createAnswer();
+                    await peerConnections[data.from_user].setLocalDescription(answer);
+                    
+                    socket.emit('call_signal', {
+                        call_id: currentCall.call_id,
+                        to_user: data.from_user,
+                        signal_type: 'answer',
+                        signal_data: answer
+                    });
+                    
+                } else if (data.signal_type === 'answer') {
+                    await peerConnections[data.from_user].setRemoteDescription(
+                        new RTCSessionDescription(data.signal_data)
+                    );
+                    
+                } else if (data.signal_type === 'ice-candidate') {
+                    await peerConnections[data.from_user].addIceCandidate(
+                        new RTCIceCandidate(data.signal_data)
+                    );
+                }
+            } catch (err) {
+                console.error('Signal handling error:', err);
+            }
+        });
+        
+        // Create peer connection
+        function createPeerConnection(username, initiator) {
+            if (peerConnections[username]) {
+                return peerConnections[username];
+            }
+            
+            const pc = new RTCPeerConnection(iceConfig);
+            peerConnections[username] = pc;
+            
+            // Add local stream tracks
+            if (localStream && canSpeak) {
+                localStream.getTracks().forEach(track => {
+                    pc.addTrack(track, localStream);
+                });
+            }
+            
+            // Handle ICE candidates
+            pc.onicecandidate = (event) => {
+                if (event.candidate) {
+                    socket.emit('call_signal', {
+                        call_id: currentCall.call_id,
+                        to_user: username,
+                        signal_type: 'ice-candidate',
+                        signal_data: event.candidate
+                    });
+                }
+            };
+            
+            // Handle incoming tracks
+            pc.ontrack = (event) => {
+                console.log('📹 Received track from:', username);
+                const tile = document.getElementById(`video-tile-${username}`);
+                if (tile) {
+                    const video = tile.querySelector('video') || document.createElement('video');
+                    video.srcObject = event.streams[0];
+                    video.autoplay = true;
+                    video.playsinline = true;
+                    if (!tile.querySelector('video')) {
+                        tile.insertBefore(video, tile.firstChild);
+                    }
+                    // Remove audio-only styling
+                    tile.classList.remove('audio-only');
+                }
+            };
+            
+            // If initiator, create and send offer
+            if (initiator) {
+                pc.createOffer()
+                    .then(offer => pc.setLocalDescription(offer))
+                    .then(() => {
+                        socket.emit('call_signal', {
+                            call_id: currentCall.call_id,
+                            to_user: username,
+                            signal_type: 'offer',
+                            signal_data: pc.localDescription
+                        });
+                    })
+                    .catch(err => console.error('Create offer error:', err));
+            }
+            
+            return pc;
+        }
+        
+        // Show call UI (Full Page)
+        function showCallUI(data) {
+            const callPage = document.getElementById('callPage');
+            const title = document.getElementById('callPageTitle');
+            const typeText = document.getElementById('callTypeText');
+            const typeIndicator = document.getElementById('callTypeIndicator');
+            const listenerBanner = document.getElementById('listenerBanner');
+            const videoBtn = document.getElementById('toggleVideoBtn');
+            const localTile = document.getElementById('localParticipantTile');
+            const localAvatar = document.getElementById('localAvatarFallback');
+            const participantsGrid = document.getElementById('participantsGrid');
+            
+            // Set call info
+            if (data.type === 'group') {
+                title.textContent = data.group_name || 'Group Call';
+            } else if (data.type === 'channel') {
+                title.textContent = data.channel_name || 'Channel Call';
+            } else {
+                title.textContent = data.target || 'Call';
+            }
+            
+            // Set call type
+            typeText.textContent = data.with_video ? 'Video Call' : 'Voice Call';
+            typeIndicator.style.color = data.with_video ? '#a855f7' : '#22c55e';
+            
+            // Update type indicator icon
+            if (data.with_video) {
+                typeIndicator.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="23 7 16 12 23 17 23 7"/>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                    <span id="callTypeText">Video Call</span>
+                `;
+            }
+            
+            // Show/hide video button based on call type
+            videoBtn.style.display = 'flex';
+            
+            // Show listener banner if needed
+            listenerBanner.style.display = !canSpeak ? 'flex' : 'none';
+            
+            // Disable controls if listener
+            if (!canSpeak) {
+                document.getElementById('toggleMicBtn').disabled = true;
+                document.getElementById('toggleMicBtn').classList.add('muted');
+                document.getElementById('screenShareBtn').disabled = true;
+                videoBtn.disabled = true;
+            }
+            
+            // Show local video if we have a stream
+            if (localStream && canSpeak) {
+                const localVideo = document.getElementById('localVideo');
+                localVideo.srcObject = localStream;
+                
+                // Hide avatar fallback if video is enabled
+                if (data.with_video) {
+                    localAvatar.style.display = 'none';
+                    localVideo.style.display = 'block';
+                } else {
+                    localAvatar.style.display = 'flex';
+                    localVideo.style.display = 'none';
+                }
+            }
+            
+            // Update participant count
+            updateParticipantCount();
+            
+            // Show the call page
+            callPage.classList.add('active');
+            
+            // Show mini indicator
+            document.getElementById('activeCallIndicator').classList.add('show');
+        }
+        
+        // Add participant tile to grid
+        function addParticipantTile(participant) {
+            const grid = document.getElementById('participantsGrid');
+            
+            // Check if tile already exists
+            if (document.getElementById(`participant-tile-${participant.username}`)) {
+                return;
+            }
+            
+            const tile = document.createElement('div');
+            tile.className = 'participant-tile';
+            tile.id = `participant-tile-${participant.username}`;
+            
+            const avatarLetter = participant.username[0].toUpperCase();
+            const statusIcons = [];
+            
+            if (!participant.audio) {
+                statusIcons.push(`<div class="status-icon-badge muted" title="Muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6"/></svg></div>`);
+            }
+            if (!participant.video && currentCall?.with_video) {
+                statusIcons.push(`<div class="status-icon-badge video-off" title="Camera Off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 16v1a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2h2"/><line x1="1" y1="1" x2="23" y2="23"/></svg></div>`);
+            }
+            
+            tile.innerHTML = `
+                <div class="participant-video-container">
+                    <video autoplay playsinline></video>
+                    <div class="participant-avatar-large">
+                        <span>${avatarLetter}</span>
+                    </div>
+                </div>
+                <div class="participant-info-bar">
+                    <span class="participant-name-label">${participant.username}</span>
+                    <div class="participant-status-icons">
+                        ${statusIcons.join('')}
+                    </div>
+                </div>
+                <div class="speaking-ring"></div>
+            `;
+            
+            // Hide video, show avatar by default
+            const video = tile.querySelector('video');
+            const avatar = tile.querySelector('.participant-avatar-large');
+            video.style.display = 'none';
+            avatar.style.display = 'flex';
+            
+            grid.appendChild(tile);
+            updateParticipantCount();
+            updateGridLayout();
+        }
+        
+        // Update participant count display
+        function updateParticipantCount() {
+            const count = document.querySelectorAll('.participant-tile').length;
+            document.getElementById('participantCountNum').textContent = count;
+        }
+        
+        // Update grid layout based on participant count
+        function updateGridLayout() {
+            const grid = document.getElementById('participantsGrid');
+            const count = document.querySelectorAll('.participant-tile').length;
+            
+            grid.classList.remove('single-participant', 'two-participants');
+            
+            if (count === 1) {
+                grid.classList.add('single-participant');
+            } else if (count === 2) {
+                grid.classList.add('two-participants');
+            }
+        }
+        
+        // Minimize call (go back to chat but keep call active)
+        function minimizeCall() {
+            document.getElementById('callPage').classList.remove('active');
+            // Mini indicator stays visible
+        }
+        
+        // Legacy function for compatibility
+        function addVideoTile(participant) {
+            addParticipantTile(participant);
+        }
+        
+        // Toggle microphone
+        function toggleMic() {
+            if (!canSpeak || !localStream) return;
+            
+            isMuted = !isMuted;
+            localStream.getAudioTracks().forEach(track => {
+                track.enabled = !isMuted;
+            });
+            
+            const btn = document.getElementById('toggleMicBtn');
+            btn.classList.toggle('muted', isMuted);
+            
+            // Update local status icons
+            const localStatusIcons = document.getElementById('localStatusIcons');
+            if (isMuted) {
+                if (!localStatusIcons.querySelector('.muted')) {
+                    const icon = document.createElement('div');
+                    icon.className = 'status-icon-badge muted';
+                    icon.title = 'Muted';
+                    icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6"/></svg>';
+                    localStatusIcons.appendChild(icon);
+                }
+            } else {
+                const mutedIcon = localStatusIcons.querySelector('.muted');
+                if (mutedIcon) mutedIcon.remove();
+            }
+            
+            // Notify others
+            socket.emit('toggle_audio', {
+                call_id: currentCall.call_id,
+                enabled: !isMuted
+            });
+        }
+        
+        // Toggle video
+        function toggleVideo() {
+            if (!canSpeak) return;
+            
+            isVideoOff = !isVideoOff;
+            
+            if (localStream) {
+                localStream.getVideoTracks().forEach(track => {
+                    track.enabled = !isVideoOff;
+                });
+            }
+            
+            const btn = document.getElementById('toggleVideoBtn');
+            btn.classList.toggle('muted', isVideoOff);
+            
+            // Update local video display
+            const localVideo = document.getElementById('localVideo');
+            const localAvatar = document.getElementById('localAvatarFallback');
+            const localStatusIcons = document.getElementById('localStatusIcons');
+            
+            if (isVideoOff) {
+                localVideo.style.display = 'none';
+                localAvatar.style.display = 'flex';
+                if (!localStatusIcons.querySelector('.video-off')) {
+                    const icon = document.createElement('div');
+                    icon.className = 'status-icon-badge video-off';
+                    icon.title = 'Camera Off';
+                    icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 16v1a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2h2"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+                    localStatusIcons.appendChild(icon);
+                }
+            } else {
+                localVideo.style.display = 'block';
+                localAvatar.style.display = 'none';
+                const videoOffIcon = localStatusIcons.querySelector('.video-off');
+                if (videoOffIcon) videoOffIcon.remove();
+            }
+            
+            // Notify others
+            socket.emit('toggle_video', {
+                call_id: currentCall.call_id,
+                enabled: !isVideoOff
+            });
+        }
+        
+        // Toggle screen share
+        async function toggleScreenShare() {
+            if (!canSpeak) return;
+            
+            if (isScreenSharing) {
+                // Stop screen share
+                if (screenStream) {
+                    screenStream.getTracks().forEach(track => track.stop());
+                    screenStream = null;
+                }
+                isScreenSharing = false;
+                document.getElementById('screenShareBtn').classList.remove('active');
+                
+                socket.emit('stop_screen_share', { call_id: currentCall.call_id });
+                
+            } else {
+                // Start screen share
+                try {
+                    screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                    isScreenSharing = true;
+                    document.getElementById('screenShareBtn').classList.add('active');
+                    
+                    // Replace video track in peer connections
+                    const videoTrack = screenStream.getVideoTracks()[0];
+                    for (const pc of Object.values(peerConnections)) {
+                        const sender = pc.getSenders().find(s => s.track?.kind === 'video');
+                        if (sender) {
+                            sender.replaceTrack(videoTrack);
+                        }
+                    }
+                    
+                    socket.emit('start_screen_share', { call_id: currentCall.call_id });
+                    
+                    // Handle when user stops sharing via browser
+                    videoTrack.onended = () => {
+                        toggleScreenShare();
+                    };
+                    
+                } catch (err) {
+                    console.error('Screen share error:', err);
+                    showToast('Failed to share screen', 'error');
+                }
+            }
+        }
+        
+        // End call
+        function endCall() {
+            if (!currentCall) return;
+            
+            socket.emit('leave_call', { call_id: currentCall.call_id });
+            cleanupCall();
+        }
+        
+        // Socket event: Call ended
+        socket.on('call_ended', (data) => {
+            console.log('📞 Call ended:', data.reason);
+            showToast(`Call ended: ${data.reason}`, 'info');
+            cleanupCall();
+        });
+        
+        // Socket event: Call declined
+        socket.on('call_declined', (data) => {
+            console.log('📞 Call declined by:', data.declined_by);
+            showToast(`${data.declined_by} declined the call`, 'info');
+            cleanupCall();
+        });
+        
+        // Socket event: Call error
+        socket.on('call_error', (data) => {
+            console.error('📞 Call error:', data.error);
+            showToast(data.error, 'error');
+        });
+        
+        // Cleanup call resources
+        function cleanupCall() {
+            // Stop local stream
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            
+            // Stop screen share
+            if (screenStream) {
+                screenStream.getTracks().forEach(track => track.stop());
+                screenStream = null;
+            }
+            
+            // Close all peer connections
+            for (const pc of Object.values(peerConnections)) {
+                pc.close();
+            }
+            peerConnections = {};
+            
+            // Clear timer
+            if (callDurationInterval) {
+                clearInterval(callDurationInterval);
+                callDurationInterval = null;
+            }
+            
+            // Reset state
+            currentCall = null;
+            callStartTime = null;
+            isMuted = false;
+            isVideoOff = false;
+            isScreenSharing = false;
+            canSpeak = true;
+            
+            // Hide UI
+            document.getElementById('callPage').classList.remove('active');
+            document.getElementById('activeCallIndicator').classList.remove('show');
+            document.getElementById('incomingCallModal').classList.remove('show');
+            
+            // Clear participants grid (keep local tile template)
+            const grid = document.getElementById('participantsGrid');
+            const localTile = document.getElementById('localParticipantTile');
+            grid.innerHTML = '';
+            grid.appendChild(localTile);
+            
+            // Reset local video
+            const localVideo = document.getElementById('localVideo');
+            const localAvatar = document.getElementById('localAvatarFallback');
+            localVideo.srcObject = null;
+            localVideo.style.display = 'none';
+            localAvatar.style.display = 'flex';
+            
+            // Reset buttons
+            document.getElementById('toggleMicBtn').classList.remove('muted');
+            document.getElementById('toggleMicBtn').disabled = false;
+            document.getElementById('toggleVideoBtn').classList.remove('muted');
+            document.getElementById('toggleVideoBtn').disabled = false;
+            document.getElementById('screenShareBtn').classList.remove('active');
+            document.getElementById('screenShareBtn').disabled = false;
+            
+            // Reset local status icons
+            document.getElementById('localStatusIcons').innerHTML = '';
+        }
+        
+        // Start call duration timer
+        function startCallTimer() {
+            callStartTime = Date.now();
+            const durationEl = document.getElementById('callDuration');
+            const miniDurationEl = document.getElementById('miniCallDuration');
+            const statusEl = document.getElementById('callStatusText');
+            
+            durationEl.style.display = 'inline';
+            statusEl.textContent = 'Connected';
+            
+            callDurationInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                const seconds = (elapsed % 60).toString().padStart(2, '0');
+                const timeStr = `${minutes}:${seconds}`;
+                
+                durationEl.textContent = timeStr;
+                miniDurationEl.textContent = timeStr;
+            }, 1000);
+        }
+        
+        // Return to call from mini indicator
+        function returnToCall() {
+            if (currentCall) {
+                document.getElementById('callPage').classList.add('active');
+            }
+        }
+        
+        // Participant audio changed
+        socket.on('participant_audio_changed', (data) => {
+            const tile = document.getElementById(`participant-tile-${data.username}`);
+            if (tile) {
+                const statusDiv = tile.querySelector('.participant-status-icons');
+                if (!data.audio) {
+                    if (!statusDiv.querySelector('.muted')) {
+                        const icon = document.createElement('div');
+                        icon.className = 'status-icon-badge muted';
+                        icon.title = 'Muted';
+                        icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6"/></svg>';
+                        statusDiv.appendChild(icon);
+                    }
+                } else {
+                    const mutedIcon = statusDiv.querySelector('.muted');
+                    if (mutedIcon) mutedIcon.remove();
+                }
+            }
+        });
+        
+        // Participant video changed
+        socket.on('participant_video_changed', (data) => {
+            const tile = document.getElementById(`participant-tile-${data.username}`);
+            if (tile) {
+                const video = tile.querySelector('video');
+                const avatar = tile.querySelector('.participant-avatar-large');
+                const statusDiv = tile.querySelector('.participant-status-icons');
+                
+                if (data.video) {
+                    video.style.display = 'block';
+                    avatar.style.display = 'none';
+                    const videoOffIcon = statusDiv.querySelector('.video-off');
+                    if (videoOffIcon) videoOffIcon.remove();
+                } else {
+                    video.style.display = 'none';
+                    avatar.style.display = 'flex';
+                    if (!statusDiv.querySelector('.video-off')) {
+                        const icon = document.createElement('div');
+                        icon.className = 'status-icon-badge video-off';
+                        icon.title = 'Camera Off';
+                        icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 16v1a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2h2"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+                        statusDiv.appendChild(icon);
+                    }
+                }
+            }
+        });
+        
+        // Screen share notifications
+        socket.on('screen_share_started', (data) => {
+            showToast(`${data.username} started sharing their screen`, 'info');
+        });
+        
+        socket.on('screen_share_stopped', (data) => {
+            showToast(`${data.username} stopped sharing their screen`, 'info');
+        });
+        
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Show install button if you want
+            console.log('📱 Menza can be installed as an app!');
+        });
         
     </script>
 </body>

@@ -1,0 +1,107 @@
+{% extends "docs/base.html" %}
+
+{% block title %}Data Collection{% endblock %}
+
+{% block content %}
+<div class="docs-header">
+    <div class="docs-breadcrumb">
+        <a href="/docs">Docs</a>
+        <span>/</span>
+        <a href="/docs/privacy">Privacy</a>
+        <span>/</span>
+        <span>Data Collection</span>
+    </div>
+    <h1>Data Collection</h1>
+    <p>What information we collect and why we need it.</p>
+</div>
+
+<article class="docs-article">
+    <h2>Information You Provide</h2>
+    <p>When you create an account and use Menza, you may provide us with:</p>
+
+    <h3>Account Information</h3>
+    <ul>
+        <li><strong>Username:</strong> Your chosen display name for the platform</li>
+        <li><strong>Email Address:</strong> For account recovery and important notifications</li>
+        <li><strong>Password:</strong> Securely hashed and stored (we never store plain text passwords)</li>
+        <li><strong>Age Verification:</strong> Confirmation that you are 18 years or older</li>
+    </ul>
+
+    <h3>Profile Information</h3>
+    <ul>
+        <li>Profile picture (optional)</li>
+        <li>Display name (optional)</li>
+        <li>Bio or status message (optional)</li>
+    </ul>
+
+    <h3>Communication Data</h3>
+    <ul>
+        <li><strong>Messages:</strong> End-to-end encrypted; we cannot read message content</li>
+        <li><strong>Media:</strong> Photos, videos, and files you share (encrypted)</li>
+        <li><strong>Channel content:</strong> Posts you create in public or private channels</li>
+    </ul>
+
+    <div class="info-box">
+        <div class="info-box-title">🔐 Encryption Note</div>
+        <p>
+            Message content is end-to-end encrypted using AES-256. This means we cannot read, 
+            access, or decrypt your messages—only you and your recipients have the keys.
+        </p>
+    </div>
+
+    <h2>Information Collected Automatically</h2>
+    <p>When you use Menza, we automatically collect certain technical information:</p>
+
+    <h3>Device Information</h3>
+    <ul>
+        <li>Device type (mobile, desktop, tablet)</li>
+        <li>Operating system and version</li>
+        <li>Browser type and version</li>
+        <li>Screen resolution</li>
+    </ul>
+
+    <h3>Usage Information</h3>
+    <ul>
+        <li>Login timestamps</li>
+        <li>Features used</li>
+        <li>Error logs and crash reports</li>
+        <li>Performance metrics</li>
+    </ul>
+
+    <h3>Connection Information</h3>
+    <ul>
+        <li>IP address (temporarily, for security purposes)</li>
+        <li>Connection timestamps</li>
+        <li>General geographic location (country/region level only)</li>
+    </ul>
+
+    <div class="info-box warning">
+        <div class="info-box-title">⚠️ What We Don't Collect</div>
+        <p>
+            We do NOT collect: message content (encrypted), contact lists from your device, 
+            location data, browsing history, or any data from other apps.
+        </p>
+    </div>
+
+    <h2>Legal Basis for Collection</h2>
+    <p>Under GDPR, we collect data based on:</p>
+    <ul>
+        <li><strong>Contract:</strong> To provide you with our messaging service</li>
+        <li><strong>Legitimate Interest:</strong> To improve security and prevent abuse</li>
+        <li><strong>Consent:</strong> For optional features like analytics</li>
+        <li><strong>Legal Obligation:</strong> To comply with applicable laws</li>
+    </ul>
+
+    <div class="docs-nav-buttons">
+        <a href="/docs/privacy" class="docs-nav-btn">
+            <span>← Previous</span>
+            <strong>Privacy Overview</strong>
+        </a>
+        <a href="/docs/privacy/data-usage" class="docs-nav-btn next">
+            <span>Next →</span>
+            <strong>Data Usage</strong>
+        </a>
+    </div>
+</article>
+{% endblock %}
+

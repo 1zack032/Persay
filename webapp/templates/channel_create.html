@@ -6,105 +6,232 @@
     <title>Create Channel - Menza</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/static/icons/icon-192.svg">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
-            --bg-primary: #030306;
-            --bg-secondary: #08080c;
-            --bg-card: #0c0c12;
-            --bg-card-inner: #101018;
-            --bg-card-hover: #14141e;
-            --bg-input: #0a0a10;
-            --accent-primary: #6366f1;
-            --accent-secondary: #8b5cf6;
-            --accent-glow: rgba(99, 102, 241, 0.15);
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #0f0f18;
+            --bg-card: #141420;
+            --bg-card-hover: #1a1a28;
+            --bg-input: #0d0d14;
+            --accent-primary: #7c3aed;
+            --accent-secondary: #a855f7;
+            --accent-tertiary: #06b6d4;
             --text-primary: #ffffff;
-            --text-secondary: #9ca3af;
-            --text-dim: #6b7280;
-            --text-muted: #4b5563;
-            --border: rgba(255, 255, 255, 0.04);
-            --border-subtle: rgba(255, 255, 255, 0.06);
-            --border-hover: rgba(255, 255, 255, 0.1);
+            --text-secondary: #a1a1aa;
+            --text-muted: #6b7280;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --success: #10b981;
             --error: #ef4444;
-            --radius-sm: 8px;
-            --radius-md: 12px;
+            --warning: #f59e0b;
+            --radius-sm: 6px;
+            --radius-md: 10px;
             --radius-lg: 16px;
-            --radius-full: 9999px;
+            --radius-full: 50%;
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: linear-gradient(180deg, rgba(2, 2, 5, 0.98), rgba(6, 6, 10, 0.95));
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.1);
+        }
+
+        .nav-logo {
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 560px;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.9375rem;
-            margin-bottom: 2rem;
-            transition: color 0.2s;
-            font-weight: 500;
-        }
-
-        .back-link:hover {
             color: var(--text-primary);
         }
 
-        .card {
+        .nav-logo-text {
+            font-size: 1.375rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #ffffff 0%, #e879f9 50%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .nav-tab {
+            padding: 0.5rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .nav-tab.active {
+            color: var(--text-primary);
+            background: var(--accent-primary);
+        }
+
+        /* Main Container */
+        .main-container {
+            margin-top: 56px;
+            min-height: calc(100vh - 56px);
+            display: flex;
+        }
+
+        /* Sidebar */
+        .create-sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 0;
+            flex-shrink: 0;
+        }
+
+        .create-nav {
+            list-style: none;
+        }
+
+        .create-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+        }
+
+        .create-nav-item:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .create-nav-item.active {
+            color: var(--accent-secondary);
+            background: rgba(168, 85, 247, 0.08);
+            border-left-color: var(--accent-secondary);
+        }
+
+        .create-nav-item .icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .create-nav-item .icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Content Area */
+        .create-content {
+            flex: 1;
+            padding: 2rem 3rem;
+            max-width: 800px;
+        }
+
+        .create-header {
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .create-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .create-header h1 svg {
+            width: 28px;
+            height: 28px;
+            color: var(--accent-secondary);
+        }
+
+        .create-header p {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Section */
+        .create-section {
+            display: none;
+        }
+
+        .create-section.active {
+            display: block;
+        }
+
+        .section-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 2rem;
-        }
-
-        .card-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .card-header h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
-        }
-
-        .card-header p {
-            color: var(--text-secondary);
-            font-size: 0.9375rem;
-        }
-
-        .error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            color: var(--error);
-            padding: 1rem;
-            border-radius: var(--radius-md);
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
-            text-align: center;
-            font-size: 0.9375rem;
         }
 
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title svg {
+            width: 18px;
+            height: 18px;
+            color: var(--accent-secondary);
+        }
+
+        /* Form Elements */
         .form-group {
             margin-bottom: 1.5rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
         }
 
         label {
@@ -115,11 +242,17 @@
             margin-bottom: 0.5rem;
         }
 
+        .label-hint {
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+
         input, textarea {
             width: 100%;
             padding: 0.875rem 1rem;
             background: var(--bg-input);
-            border: 1px solid var(--border-subtle);
+            border: 1px solid var(--border);
             border-radius: var(--radius-md);
             color: var(--text-primary);
             font-family: inherit;
@@ -134,8 +267,7 @@
 
         input:focus, textarea:focus {
             border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-            background: var(--bg-card);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
         }
 
         input::placeholder, textarea::placeholder {
@@ -145,25 +277,12 @@
         textarea {
             resize: vertical;
             min-height: 100px;
-            line-height: 1.6;
         }
 
-        /* Branding Section */
-        .branding-section {
-            background: var(--bg-card-inner);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 1.25rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .branding-section h3 {
-            font-size: 0.9375rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .input-hint {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
         }
 
         /* Emoji Picker */
@@ -171,31 +290,30 @@
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
-            margin-top: 0.5rem;
         }
 
         .emoji-option {
-            width: 42px;
-            height: 42px;
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
+            font-size: 1.375rem;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .emoji-option:hover {
-            background: var(--bg-card);
+            background: var(--bg-card-hover);
             border-color: var(--border-hover);
         }
 
         .emoji-option.selected {
             border-color: var(--accent-primary);
-            background: var(--accent-glow);
+            background: rgba(124, 58, 237, 0.15);
         }
 
         .emoji-option input {
@@ -205,17 +323,16 @@
         /* Color Picker */
         .color-picker {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.75rem;
             flex-wrap: wrap;
-            margin-top: 0.5rem;
         }
 
         .color-option {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
             cursor: pointer;
-            border: 2px solid transparent;
+            border: 3px solid transparent;
             transition: all 0.2s;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
@@ -226,7 +343,7 @@
 
         .color-option.selected {
             border-color: white;
-            box-shadow: 0 0 0 2px var(--bg-primary), 0 2px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 0 2px var(--bg-primary), 0 2px 12px rgba(0, 0, 0, 0.4);
         }
 
         .color-option input {
@@ -234,19 +351,34 @@
         }
 
         /* Toggle Switch */
-        .visibility-option {
-            margin-bottom: 1rem;
-        }
-
-        .toggle-label {
+        .toggle-row {
             display: flex;
             align-items: flex-start;
+            justify-content: space-between;
             gap: 1rem;
-            cursor: pointer;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .toggle-label input {
-            display: none;
+        .toggle-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .toggle-info {
+            flex: 1;
+        }
+
+        .toggle-title {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .toggle-desc {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
         }
 
         .toggle-switch {
@@ -257,6 +389,7 @@
             border: 1px solid var(--border);
             border-radius: var(--radius-full);
             flex-shrink: 0;
+            cursor: pointer;
             transition: all 0.3s;
         }
 
@@ -272,62 +405,59 @@
             transition: all 0.3s;
         }
 
-        .toggle-label input:checked + .toggle-switch {
+        input:checked + .toggle-switch {
             background: var(--accent-primary);
             border-color: var(--accent-primary);
         }
 
-        .toggle-label input:checked + .toggle-switch::after {
+        input:checked + .toggle-switch::after {
             transform: translateX(22px);
             background: white;
         }
 
-        .toggle-info {
+        .toggle-label {
             display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
+            align-items: center;
+            cursor: pointer;
         }
 
-        .toggle-title {
-            font-weight: 600;
-            font-size: 0.9375rem;
-            color: var(--text-primary);
-        }
-
-        .toggle-desc {
-            font-size: 0.8125rem;
-            color: var(--text-muted);
+        .toggle-label input {
+            display: none;
         }
 
         .visibility-note {
             display: flex;
             align-items: flex-start;
             gap: 0.75rem;
-            padding: 0.875rem 1rem;
-            background: var(--accent-glow);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 1rem;
+            background: rgba(124, 58, 237, 0.1);
+            border: 1px solid rgba(124, 58, 237, 0.2);
             border-radius: var(--radius-md);
-            font-size: 0.8125rem;
-            color: var(--text-secondary);
+            margin-top: 1rem;
         }
 
-        .visibility-note.private-note {
+        .visibility-note.private {
             background: rgba(255, 255, 255, 0.03);
             border-color: var(--border);
         }
 
-        .note-icon {
-            font-size: 1rem;
+        .visibility-note svg {
+            width: 18px;
+            height: 18px;
             flex-shrink: 0;
+            color: var(--accent-secondary);
         }
 
-        /* Member Invite Section */
-        .section-desc {
-            font-size: 0.8125rem;
+        .visibility-note.private svg {
             color: var(--text-muted);
-            margin-bottom: 1rem;
         }
 
+        .visibility-note span {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* Members Section */
         .members-list {
             display: flex;
             flex-direction: column;
@@ -340,19 +470,34 @@
             align-items: center;
             gap: 0.75rem;
             padding: 0.75rem 1rem;
-            background: var(--bg-card-inner);
+            background: var(--bg-input);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
         }
 
-        .member-item .username {
-            flex: 1;
-            font-weight: 500;
-            color: var(--text-primary);
+        .member-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 600;
         }
 
-        .member-item .member-role {
-            display: flex;
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-weight: 500;
+            font-size: 0.9375rem;
+        }
+
+        .member-role-badge {
+            display: inline-flex;
             align-items: center;
             gap: 0.25rem;
             padding: 0.25rem 0.625rem;
@@ -362,56 +507,41 @@
             text-transform: uppercase;
         }
 
-        .member-role.admin {
-            background: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
+        .member-role-badge.admin {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
         }
 
-        .member-role.mod {
-            background: rgba(99, 102, 241, 0.1);
-            color: var(--accent-primary);
+        .member-role-badge.mod {
+            background: rgba(124, 58, 237, 0.15);
+            color: var(--accent-secondary);
         }
 
-        .member-role.viewer {
-            background: rgba(107, 114, 128, 0.1);
-            color: var(--text-dim);
+        .member-role-badge.viewer {
+            background: rgba(107, 114, 128, 0.15);
+            color: var(--text-secondary);
         }
 
-        .member-item .remove-btn {
+        .member-remove {
             background: none;
             border: none;
             color: var(--text-muted);
             cursor: pointer;
             padding: 0.25rem;
-            font-size: 1rem;
             transition: color 0.15s;
         }
 
-        .member-item .remove-btn:hover {
+        .member-remove:hover {
             color: var(--error);
         }
 
         .add-member-row {
             display: flex;
             gap: 0.5rem;
-            margin-bottom: 1.25rem;
         }
 
-        .member-input {
+        .add-member-row input {
             flex: 1;
-            padding: 0.75rem 1rem;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 0.9375rem;
-        }
-
-        .member-input:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
         .role-select {
@@ -431,197 +561,202 @@
             border-color: var(--accent-primary);
         }
 
-        .add-member-btn {
-            padding: 0.75rem 1.25rem;
-            background: var(--bg-card-inner);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-
-        .add-member-btn:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--accent-primary);
-        }
-
-        .roles-help {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
+        .roles-info {
+            margin-top: 1.5rem;
             padding: 1rem;
-            background: var(--bg-card-inner);
+            background: var(--bg-input);
             border-radius: var(--radius-md);
         }
 
-        .role-info {
+        .role-info-item {
             display: flex;
             gap: 0.75rem;
-            align-items: flex-start;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .role-icon {
-            font-size: 1rem;
+        .role-info-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .role-info-item svg {
+            width: 18px;
+            height: 18px;
             flex-shrink: 0;
         }
 
-        .role-info strong {
+        .role-info-item strong {
             font-size: 0.8125rem;
-            color: var(--text-primary);
+            display: block;
+            margin-bottom: 0.125rem;
         }
 
-        .role-info p {
+        .role-info-item p {
             font-size: 0.75rem;
             color: var(--text-muted);
             margin: 0;
         }
 
-        /* Preview */
-        .preview {
-            background: var(--bg-card-inner);
+        /* Preview Section */
+        .preview-card {
+            background: var(--bg-input);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             padding: 1.25rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .preview h3 {
-            font-size: 0.8125rem;
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 600;
-        }
-
-        .preview-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 1rem;
             display: flex;
             align-items: center;
             gap: 1rem;
         }
 
         .preview-avatar {
-            width: 48px;
-            height: 48px;
+            width: 56px;
+            height: 56px;
             border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.75rem;
         }
 
         .preview-info h4 {
-            font-size: 1rem;
+            font-size: 1.125rem;
             font-weight: 600;
-            letter-spacing: -0.01em;
         }
 
         .preview-info p {
-            font-size: 0.8125rem;
+            font-size: 0.875rem;
             color: var(--text-muted);
-            margin-top: 0.125rem;
+            margin-top: 0.25rem;
         }
 
-        /* Button */
-        .btn {
-            width: 100%;
-            padding: 0.875rem;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border: none;
-            border-radius: var(--radius-md);
-            color: white;
-            font-family: inherit;
-            font-size: 0.9375rem;
+        .preview-badge {
+            margin-left: auto;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
             font-weight: 600;
+        }
+
+        .preview-badge.public {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+        }
+
+        .preview-badge.private {
+            background: rgba(107, 114, 128, 0.15);
+            color: var(--text-secondary);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(168, 85, 247, 0.08));
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-radius: var(--radius-md);
+            color: #e9d5ff;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 0 30px var(--accent-glow), 0 4px 16px rgba(0, 0, 0, 0.3);
-        }
-        /* Top Navigation Bar */
-        .top-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 56px;
-            padding: 0 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            background: linear-gradient(180deg, rgba(3, 3, 6, 0.98), rgba(8, 8, 12, 0.95));
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.22), rgba(168, 85, 247, 0.12));
+            border-color: rgba(124, 58, 237, 0.45);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
         }
 
-        .top-nav .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.625rem;
-            text-decoration: none;
-            color: var(--text-primary);
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            color: white;
         }
 
-        .top-nav .nav-logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #7c3aed, #06b6d4);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.875rem;
-            font-weight: 700;
+        .btn-primary:hover {
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
         }
 
-        .top-nav .nav-logo-text {
-            font-size: 1.125rem;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 0.25rem;
-            align-items: center;
-        }
-
-        .nav-tab {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 500;
+        .btn-sm {
             padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: all 0.2s ease;
+            font-size: 0.8125rem;
         }
 
-        .nav-tab:hover {
-            color: var(--text-primary);
-            background: rgba(124, 58, 237, 0.1);
-        }
-
-        .nav-tab.active {
-            color: var(--text-primary);
-            background: rgba(124, 58, 237, 0.15);
-        }
-
-        .nav-tab.logout:hover {
-            color: #ef4444;
+        /* Error Message */
+        .error-message {
             background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--error);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .error-message svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .create-sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 1rem 0;
+            }
+
+            .create-nav {
+                display: flex;
+                overflow-x: auto;
+                padding: 0 1rem;
+            }
+
+            .create-nav-item {
+                padding: 0.75rem 1rem;
+                border-left: none;
+                border-bottom: 2px solid transparent;
+                white-space: nowrap;
+            }
+
+            .create-nav-item.active {
+                border-left: none;
+                border-bottom-color: var(--accent-secondary);
+            }
+
+            .create-content {
+                padding: 1.5rem;
+            }
+
+            .add-member-row {
+                flex-direction: column;
+            }
+
+            .role-select {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -629,159 +764,495 @@
     <!-- Top Navigation Bar -->
     <nav class="top-nav">
         <a href="/" class="nav-logo">
-            <div class="nav-logo-icon">M</div>
             <span class="nav-logo-text">Menza</span>
         </a>
         <div class="nav-tabs">
             <a href="/chat" class="nav-tab">Messages</a>
             <a href="/channels" class="nav-tab active">Channels</a>
             <a href="/settings" class="nav-tab">Settings</a>
-            <a href="/logout" class="nav-tab logout">Sign Out</a>
+            <a href="/logout" class="nav-tab">Sign Out</a>
         </div>
     </nav>
 
-    <div class="container" style="padding-top: 80px;">
+    <div class="main-container">
+        <!-- Sidebar Navigation -->
+        <aside class="create-sidebar">
+            <ul class="create-nav">
+                <li class="create-nav-item active" onclick="switchSection('basic')">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </span>
+                    Basic Info
+                </li>
+                <li class="create-nav-item" onclick="switchSection('branding')">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="13.5" cy="6.5" r="2.5"/>
+                            <circle cx="17.5" cy="10.5" r="2.5"/>
+                            <circle cx="8.5" cy="7.5" r="2.5"/>
+                            <circle cx="6.5" cy="12.5" r="2.5"/>
+                            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2z"/>
+                        </svg>
+                    </span>
+                    Branding
+                </li>
+                <li class="create-nav-item" onclick="switchSection('visibility')">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </span>
+                    Visibility
+                </li>
+                <li class="create-nav-item" onclick="switchSection('members')">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </span>
+                    Members
+                </li>
+                <li class="create-nav-item" onclick="switchSection('preview')">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                    </span>
+                    Preview
+                </li>
+            </ul>
+        </aside>
 
-        <div class="card">
-            <div class="card-header">
-                <h1>📺 Create Channel</h1>
-                <p>Share content with your subscribers</p>
-            </div>
-
-            {% if error %}
-            <div class="error">{{ error }}</div>
-            {% endif %}
-
+        <!-- Content Area -->
+        <main class="create-content">
             <form method="POST" id="createForm">
-                <div class="form-group">
-                    <label for="name">Channel Name *</label>
-                    <input type="text" id="name" name="name" placeholder="My Awesome Channel" required maxlength="50">
+                {% if error %}
+                <div class="error-message">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    {{ error }}
                 </div>
+                {% endif %}
 
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" name="description" placeholder="What's your channel about?" maxlength="500"></textarea>
-                </div>
-
-                <div class="branding-section">
-                    <h3>🎨 Branding</h3>
-                    
-                    <div class="form-group">
-                        <label>Channel Icon</label>
-                        <div class="emoji-picker" id="emojiPicker">
-                            {% for emoji in ['📢', '🎯', '💡', '🚀', '🎨', '📚', '🎮', '🎵', '💬', '⭐', '🔥', '💎', '🌟', '📣', '🎤', '📰'] %}
-                            <label class="emoji-option {% if loop.first %}selected{% endif %}">
-                                <input type="radio" name="avatar_emoji" value="{{ emoji }}" {% if loop.first %}checked{% endif %}>
-                                {{ emoji }}
-                            </label>
-                            {% endfor %}
+                <!-- Basic Info Section -->
+                <div class="create-section active" id="section-basic">
+                    <div class="create-header">
+                        <div>
+                            <h1>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                                Basic Information
+                            </h1>
+                            <p>Set up your channel name and description</p>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Accent Color</label>
-                        <div class="color-picker" id="colorPicker">
-                            {% for color in ['#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f59e0b', '#22c55e', '#06b6d4', '#3b82f6'] %}
-                            <label class="color-option {% if loop.first %}selected{% endif %}" style="background: {{ color }};">
-                                <input type="radio" name="accent_color" value="{{ color }}" {% if loop.first %}checked{% endif %}>
-                            </label>
-                            {% endfor %}
+                    <div class="section-card">
+                        <div class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                            </svg>
+                            Channel Details
                         </div>
+
+                        <div class="form-group">
+                            <label for="name">Channel Name <span style="color: var(--error);">*</span></label>
+                            <input type="text" id="name" name="name" placeholder="My Awesome Channel" required maxlength="50">
+                            <div class="input-hint">Choose a unique name for your channel</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description <span class="label-hint">(optional)</span></label>
+                            <textarea id="description" name="description" placeholder="What's your channel about?" maxlength="500"></textarea>
+                            <div class="input-hint">Help others understand what your channel is about</div>
+                        </div>
+                    </div>
+
+                    <div class="action-bar">
+                        <button type="button" class="btn btn-primary" onclick="switchSection('branding')">
+                            Continue to Branding
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Visibility Settings -->
-                <div class="branding-section">
-                    <h3>👁️ Visibility</h3>
-                    
-                    <div class="visibility-option">
-                        <label class="toggle-label">
-                            <input type="checkbox" name="discoverable" id="discoverableToggle" checked>
-                            <span class="toggle-switch"></span>
+                <!-- Branding Section -->
+                <div class="create-section" id="section-branding">
+                    <div class="create-header">
+                        <div>
+                            <h1>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="13.5" cy="6.5" r="2.5"/>
+                                    <circle cx="17.5" cy="10.5" r="2.5"/>
+                                    <circle cx="8.5" cy="7.5" r="2.5"/>
+                                    <circle cx="6.5" cy="12.5" r="2.5"/>
+                                    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2z"/>
+                                </svg>
+                                Branding
+                            </h1>
+                            <p>Customize how your channel looks</p>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                                <line x1="9" y1="9" x2="9.01" y2="9"/>
+                                <line x1="15" y1="9" x2="15.01" y2="9"/>
+                            </svg>
+                            Channel Icon
+                        </div>
+
+                        <div class="form-group">
+                            <label>Select an emoji for your channel</label>
+                            <div class="emoji-picker" id="emojiPicker">
+                                {% for emoji in ['📢', '🎯', '💡', '🚀', '🎨', '📚', '🎮', '🎵', '💬', '⭐', '🔥', '💎', '🌟', '📣', '🎤', '📰'] %}
+                                <label class="emoji-option {% if loop.first %}selected{% endif %}">
+                                    <input type="radio" name="avatar_emoji" value="{{ emoji }}" {% if loop.first %}checked{% endif %}>
+                                    {{ emoji }}
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+                            </svg>
+                            Accent Color
+                        </div>
+
+                        <div class="form-group">
+                            <label>Choose your channel's theme color</label>
+                            <div class="color-picker" id="colorPicker">
+                                {% for color in ['#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f59e0b', '#22c55e', '#06b6d4', '#3b82f6'] %}
+                                <label class="color-option {% if loop.first %}selected{% endif %}" style="background: {{ color }};">
+                                    <input type="radio" name="accent_color" value="{{ color }}" {% if loop.first %}checked{% endif %}>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-bar">
+                        <button type="button" class="btn" onclick="switchSection('basic')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                            Back
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="switchSection('visibility')">
+                            Continue to Visibility
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Visibility Section -->
+                <div class="create-section" id="section-visibility">
+                    <div class="create-header">
+                        <div>
+                            <h1>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                Visibility Settings
+                            </h1>
+                            <p>Control who can find and access your channel</p>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                            </svg>
+                            Discoverability
+                        </div>
+
+                        <div class="toggle-row">
                             <div class="toggle-info">
-                                <span class="toggle-title">Discoverable</span>
-                                <span class="toggle-desc">Allow others to find your channel in search and discovery</span>
+                                <div class="toggle-title">Make channel discoverable</div>
+                                <div class="toggle-desc">Allow others to find your channel in search results and discovery</div>
                             </div>
-                        </label>
+                            <label class="toggle-label">
+                                <input type="checkbox" name="discoverable" id="discoverableToggle" checked>
+                                <span class="toggle-switch"></span>
+                            </label>
+                        </div>
+
+                        <div class="visibility-note" id="visibilityNote">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            <span>Your channel will appear in search results and the discovery section. High engagement channels get featured in trending.</span>
+                        </div>
                     </div>
-                    
-                    <div class="visibility-note" id="visibilityNote">
-                        <span class="note-icon">🌟</span>
-                        <span class="note-text">Your channel will appear in search results and the discovery section. High engagement channels get featured in trending.</span>
+
+                    <div class="action-bar">
+                        <button type="button" class="btn" onclick="switchSection('branding')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                            Back
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="switchSection('members')">
+                            Continue to Members
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Invite Members -->
-                <div class="branding-section">
-                    <h3>👥 Invite Members</h3>
-                    <p class="section-desc">Optionally invite users to your channel. You can always add more later.</p>
-                    
-                    <div class="members-list" id="membersList">
-                        <!-- Members will be added here dynamically -->
-                    </div>
-                    
-                    <div class="add-member-row">
-                        <input type="text" id="memberInput" placeholder="Enter username" class="member-input">
-                        <select id="roleSelect" class="role-select">
-                            <option value="viewer">👁️ Viewer</option>
-                            <option value="mod">✏️ Moderator</option>
-                            <option value="admin">👑 Admin</option>
-                        </select>
-                        <button type="button" id="addMemberBtn" class="add-member-btn">Add</button>
-                    </div>
-                    
-                    <div class="roles-help">
-                        <div class="role-info">
-                            <span class="role-icon">👑</span>
-                            <div>
-                                <strong>Admin</strong>
-                                <p>Full access: manage settings, members, posts, and permissions</p>
-                            </div>
-                        </div>
-                        <div class="role-info">
-                            <span class="role-icon">✏️</span>
-                            <div>
-                                <strong>Moderator</strong>
-                                <p>Can post content and moderate comments, but cannot change settings</p>
-                            </div>
-                        </div>
-                        <div class="role-info">
-                            <span class="role-icon">👁️</span>
-                            <div>
-                                <strong>Viewer</strong>
-                                <p>Read-only access to all channel content</p>
-                            </div>
+                <!-- Members Section -->
+                <div class="create-section" id="section-members">
+                    <div class="create-header">
+                        <div>
+                            <h1>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                                Invite Members
+                            </h1>
+                            <p>Add people to your channel with specific roles</p>
                         </div>
                     </div>
-                    
-                    <input type="hidden" name="invited_members" id="invitedMembersInput" value="[]">
+
+                    <div class="section-card">
+                        <div class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="8.5" cy="7" r="4"/>
+                                <line x1="20" y1="8" x2="20" y2="14"/>
+                                <line x1="23" y1="11" x2="17" y2="11"/>
+                            </svg>
+                            Add Members
+                        </div>
+
+                        <div class="members-list" id="membersList">
+                            <!-- Members will be added here -->
+                        </div>
+
+                        <div class="add-member-row">
+                            <input type="text" id="memberInput" placeholder="Enter username">
+                            <select id="roleSelect" class="role-select">
+                                <option value="viewer">Viewer</option>
+                                <option value="mod">Moderator</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                            <button type="button" id="addMemberBtn" class="btn btn-sm">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Add
+                            </button>
+                        </div>
+
+                        <input type="hidden" name="invited_members" id="invitedMembersInput" value="[]">
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                            Role Permissions
+                        </div>
+
+                        <div class="roles-info">
+                            <div class="role-info-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                                <div>
+                                    <strong>Admin</strong>
+                                    <p>Full access: manage settings, members, posts, and permissions</p>
+                                </div>
+                            </div>
+                            <div class="role-info-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                                <div>
+                                    <strong>Moderator</strong>
+                                    <p>Can post content and moderate comments, but cannot change settings</p>
+                                </div>
+                            </div>
+                            <div class="role-info-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <div>
+                                    <strong>Viewer</strong>
+                                    <p>Read-only access to all channel content</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-bar">
+                        <button type="button" class="btn" onclick="switchSection('visibility')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                            Back
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="switchSection('preview')">
+                            Continue to Preview
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="preview">
-                    <h3>Preview</h3>
-                    <div class="preview-card">
-                        <div class="preview-avatar" id="previewAvatar" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">
-                            📢
-                        </div>
-                        <div class="preview-info">
-                            <h4 id="previewName">Your Channel</h4>
-                            <p id="previewDesc">Channel description...</p>
+                <!-- Preview Section -->
+                <div class="create-section" id="section-preview">
+                    <div class="create-header">
+                        <div>
+                            <h1>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <polyline points="21 15 16 10 5 21"/>
+                                </svg>
+                                Preview & Create
+                            </h1>
+                            <p>Review your channel before creating it</p>
                         </div>
                     </div>
-                </div>
 
-                <button type="submit" class="btn">Create Channel</button>
+                    <div class="section-card">
+                        <div class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                            </svg>
+                            Channel Preview
+                        </div>
+
+                        <div class="preview-card">
+                            <div class="preview-avatar" id="previewAvatar" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">
+                                📢
+                            </div>
+                            <div class="preview-info">
+                                <h4 id="previewName">Your Channel</h4>
+                                <p id="previewDesc">Channel description...</p>
+                            </div>
+                            <span class="preview-badge public" id="previewBadge">Public</span>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            Summary
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border);">
+                                <span style="color: var(--text-muted);">Name</span>
+                                <span id="summaryName">-</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border);">
+                                <span style="color: var(--text-muted);">Visibility</span>
+                                <span id="summaryVisibility">Public</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 0.5rem 0;">
+                                <span style="color: var(--text-muted);">Members</span>
+                                <span id="summaryMembers">0 invited</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-bar">
+                        <button type="button" class="btn" onclick="switchSection('members')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                            Back
+                        </button>
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            Create Channel
+                        </button>
+                    </div>
+                </div>
             </form>
-        </div>
+        </main>
     </div>
 
     <script>
+        // Section navigation
+        function switchSection(section) {
+            // Update nav items
+            document.querySelectorAll('.create-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[onclick="switchSection('${section}')"]`).classList.add('active');
+
+            // Update sections
+            document.querySelectorAll('.create-section').forEach(s => {
+                s.classList.remove('active');
+            });
+            document.getElementById(`section-${section}`).classList.add('active');
+
+            // Update summary when going to preview
+            if (section === 'preview') {
+                updateSummary();
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         // Live preview updates
         const nameInput = document.getElementById('name');
         const descInput = document.getElementById('description');
         const previewName = document.getElementById('previewName');
         const previewDesc = document.getElementById('previewDesc');
         const previewAvatar = document.getElementById('previewAvatar');
+        const previewBadge = document.getElementById('previewBadge');
 
         nameInput.addEventListener('input', () => {
             previewName.textContent = nameInput.value || 'Your Channel';
@@ -806,7 +1277,7 @@
                 document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
                 option.classList.add('selected');
                 const color = option.querySelector('input').value;
-                previewAvatar.style.background = color + '15';
+                previewAvatar.style.background = color + '20';
                 previewAvatar.style.color = color;
             });
         });
@@ -819,58 +1290,75 @@
             if (discoverableToggle.checked) {
                 visibilityNote.className = 'visibility-note';
                 visibilityNote.innerHTML = `
-                    <span class="note-icon">🌟</span>
-                    <span class="note-text">Your channel will appear in search results and the discovery section. High engagement channels get featured in trending.</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    <span>Your channel will appear in search results and the discovery section. High engagement channels get featured in trending.</span>
                 `;
+                previewBadge.textContent = 'Public';
+                previewBadge.className = 'preview-badge public';
             } else {
-                visibilityNote.className = 'visibility-note private-note';
+                visibilityNote.className = 'visibility-note private';
                 visibilityNote.innerHTML = `
-                    <span class="note-icon">🔒</span>
-                    <span class="note-text">Your channel is private. Only people with a direct link can find and subscribe to it. It won't appear in search or discovery.</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    <span>Your channel is private. Only people with a direct link can find and subscribe to it. It won't appear in search or discovery.</span>
                 `;
+                previewBadge.textContent = 'Private';
+                previewBadge.className = 'preview-badge private';
             }
         }
 
         discoverableToggle.addEventListener('change', updateVisibilityNote);
 
-        // Member invite management
+        // Member management
         const membersList = document.getElementById('membersList');
         const memberInput = document.getElementById('memberInput');
         const roleSelect = document.getElementById('roleSelect');
         const addMemberBtn = document.getElementById('addMemberBtn');
         const invitedMembersInput = document.getElementById('invitedMembersInput');
-        
+
         let invitedMembers = [];
 
         function getRoleLabel(role) {
             const labels = {
-                'admin': '👑 Admin',
-                'mod': '✏️ Moderator',
-                'viewer': '👁️ Viewer'
+                'admin': 'Admin',
+                'mod': 'Moderator',
+                'viewer': 'Viewer'
             };
             return labels[role] || role;
         }
 
         function renderMembersList() {
+            if (invitedMembers.length === 0) {
+                membersList.innerHTML = '';
+                return;
+            }
+
             membersList.innerHTML = invitedMembers.map((member, index) => `
                 <div class="member-item">
-                    <span class="username">@${member.username}</span>
-                    <span class="member-role ${member.role}">${getRoleLabel(member.role)}</span>
-                    <button type="button" class="remove-btn" data-index="${index}">✕</button>
+                    <div class="member-avatar">${member.username[0].toUpperCase()}</div>
+                    <div class="member-info">
+                        <div class="member-name">@${member.username}</div>
+                    </div>
+                    <span class="member-role-badge ${member.role}">${getRoleLabel(member.role)}</span>
+                    <button type="button" class="member-remove" onclick="removeMember(${index})">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
                 </div>
             `).join('');
 
-            // Add remove handlers
-            membersList.querySelectorAll('.remove-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const index = parseInt(e.target.dataset.index);
-                    invitedMembers.splice(index, 1);
-                    renderMembersList();
-                });
-            });
-
-            // Update hidden input
             invitedMembersInput.value = JSON.stringify(invitedMembers);
+        }
+
+        function removeMember(index) {
+            invitedMembers.splice(index, 1);
+            renderMembersList();
         }
 
         addMemberBtn.addEventListener('click', () => {
@@ -882,7 +1370,6 @@
                 return;
             }
 
-            // Check for duplicates
             if (invitedMembers.some(m => m.username.toLowerCase() === username.toLowerCase())) {
                 alert('This user is already in the list');
                 return;
@@ -894,13 +1381,19 @@
             memberInput.focus();
         });
 
-        // Allow Enter key to add member
         memberInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 addMemberBtn.click();
             }
         });
+
+        // Update summary
+        function updateSummary() {
+            document.getElementById('summaryName').textContent = nameInput.value || '-';
+            document.getElementById('summaryVisibility').textContent = discoverableToggle.checked ? 'Public' : 'Private';
+            document.getElementById('summaryMembers').textContent = `${invitedMembers.length} invited`;
+        }
     </script>
 </body>
 </html>
