@@ -63,7 +63,7 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            max-width: 420px;
+            max-width: 520px;
         }
 
         .back-link {
@@ -189,6 +189,99 @@
             color: var(--text-muted);
         }
 
+        /* Seed Phrase Grid */
+        .seed-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 400px) {
+            .seed-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .seed-word-box {
+            position: relative;
+        }
+
+        .seed-word-number {
+            position: absolute;
+            left: 0.625rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+            background: var(--accent-glow);
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .seed-word-input {
+            width: 100%;
+            padding: 0.625rem 0.625rem 0.625rem 2rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            transition: all 0.2s;
+            text-transform: lowercase;
+        }
+
+        .seed-word-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        .seed-word-input::placeholder {
+            color: var(--text-muted);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            text-transform: none;
+        }
+
+        .seed-word-input.filled {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .seed-word-input.error {
+            border-color: var(--error);
+            background: var(--error-bg);
+        }
+
+        .seed-progress {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .seed-progress-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .seed-progress-count {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        .seed-progress-count.complete {
+            color: var(--success);
+        }
+
         .btn {
             width: 100%;
             padding: 0.875rem 1.25rem;
@@ -298,16 +391,70 @@
             </div>
             {% endif %}
             
-            <form method="POST">
+            <form method="POST" id="recoveryForm">
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input type="text" id="username" name="username" placeholder="Enter your username" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="seed_phrase">Recovery Phrase</label>
-                    <textarea id="seed_phrase" name="seed_phrase" placeholder="Enter your 12-word recovery phrase" required></textarea>
-                    <p class="help-text">Enter all 12 words separated by spaces</p>
+                    <label>Recovery Phrase</label>
+                    <div class="seed-progress">
+                        <span class="seed-progress-text">Enter each word in order</span>
+                        <span class="seed-progress-count" id="wordCount">0/12 words</span>
+                    </div>
+                    <div class="seed-grid">
+                        <div class="seed-word-box">
+                            <span class="seed-word-number">1</span>
+                            <input type="text" class="seed-word-input" data-index="1" placeholder="word 1" autocomplete="off" autocapitalize="none" spellcheck="false">
+                        </div>
+                        <div class="seed-word-box">
+                            <span class="seed-word-number">2</span>
+                            <input type="text" class="seed-word-input" data-index="2" placeholder="word 2" autocomplete="off" autocapitalize="none" spellcheck="false">
+                        </div>
+                        <div class="seed-word-box">
+                            <span class="seed-word-number">3</span>
+                            <input type="text" class="seed-word-input" data-index="3" placeholder="word 3" autocomplete="off" autocapitalize="none" spellcheck="false">
+                        </div>
+                        <div class="seed-word-box">
+                            <span class="seed-word-number">4</span>
+                            <input type="text" class="seed-word-input" data-index="4" placeholder="word 4" autocomplete="off" autocapitalize="none" spellcheck="false">
+                        </div>
+                        <div class="seed-word-box">
+                            <span class="seed-word-number">5</span>
+                            <input type="text" class="seed-word-input" data-index="5" placeholder="word 5" autocomplete="off" autocapitalize="none" spellcheck="false">
+                        </div>
+                        <div class="seed-word-box">
+                            <span class="seed-word-number">6</span>
+                            <input type="text" class="seed-word-input" data-index="6" placeholder="word 6" autocomplete="off" autocapitalize="none" spellcheck="false">
+                        </div>
+                        <div class="seed-word-box">
+                            <span class="seed-word-number">7</span>
+                            <input type="text" class="seed-word-input" data-index="7" placeholder="word 7" autocomplete="off" autocapitalize="none" spellcheck="false">
+                        </div>
+                        <div class="seed-word-box">
+                            <span class="seed-word-number">8</span>
+                            <input type="text" class="seed-word-input" data-index="8" placeholder="word 8" autocomplete="off" autocapitalize="none" spellcheck="false">
+                        </div>
+                        <div class="seed-word-box">
+                            <span class="seed-word-number">9</span>
+                            <input type="text" class="seed-word-input" data-index="9" placeholder="word 9" autocomplete="off" autocapitalize="none" spellcheck="false">
+                        </div>
+                        <div class="seed-word-box">
+                            <span class="seed-word-number">10</span>
+                            <input type="text" class="seed-word-input" data-index="10" placeholder="word 10" autocomplete="off" autocapitalize="none" spellcheck="false">
+                        </div>
+                        <div class="seed-word-box">
+                            <span class="seed-word-number">11</span>
+                            <input type="text" class="seed-word-input" data-index="11" placeholder="word 11" autocomplete="off" autocapitalize="none" spellcheck="false">
+                        </div>
+                        <div class="seed-word-box">
+                            <span class="seed-word-number">12</span>
+                            <input type="text" class="seed-word-input" data-index="12" placeholder="word 12" autocomplete="off" autocapitalize="none" spellcheck="false">
+                        </div>
+                    </div>
+                    <!-- Hidden input to hold combined seed phrase for form submission -->
+                    <input type="hidden" id="seed_phrase" name="seed_phrase">
                 </div>
                 
                 <div class="form-group">
@@ -316,8 +463,113 @@
                     <p class="help-text">Must be at least 8 characters</p>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Reset Password</button>
+                <button type="submit" class="btn btn-primary" id="submitBtn" disabled>Reset Password</button>
             </form>
+            
+            <script>
+                const wordInputs = document.querySelectorAll('.seed-word-input');
+                const seedPhraseInput = document.getElementById('seed_phrase');
+                const wordCountEl = document.getElementById('wordCount');
+                const submitBtn = document.getElementById('submitBtn');
+                
+                function updateSeedPhrase() {
+                    const words = [];
+                    let filledCount = 0;
+                    
+                    wordInputs.forEach((input, index) => {
+                        const word = input.value.trim().toLowerCase();
+                        words.push(word);
+                        
+                        // Update visual state
+                        if (word) {
+                            filledCount++;
+                            input.classList.add('filled');
+                            input.classList.remove('error');
+                        } else {
+                            input.classList.remove('filled');
+                        }
+                    });
+                    
+                    // Update combined seed phrase
+                    seedPhraseInput.value = words.join(' ').trim();
+                    
+                    // Update counter
+                    wordCountEl.textContent = `${filledCount}/12 words`;
+                    if (filledCount === 12) {
+                        wordCountEl.classList.add('complete');
+                        submitBtn.disabled = false;
+                    } else {
+                        wordCountEl.classList.remove('complete');
+                        submitBtn.disabled = true;
+                    }
+                }
+                
+                wordInputs.forEach((input, index) => {
+                    // Auto-advance to next field
+                    input.addEventListener('input', (e) => {
+                        // Convert to lowercase
+                        e.target.value = e.target.value.toLowerCase();
+                        
+                        // Check if space was typed (pasting multiple words)
+                        if (e.target.value.includes(' ')) {
+                            const words = e.target.value.split(/\s+/).filter(w => w);
+                            if (words.length > 1) {
+                                // Distribute words across remaining inputs
+                                let currentIndex = index;
+                                words.forEach((word, i) => {
+                                    if (currentIndex < wordInputs.length) {
+                                        wordInputs[currentIndex].value = word;
+                                        currentIndex++;
+                                    }
+                                });
+                                // Focus on next empty or last filled
+                                if (currentIndex < wordInputs.length) {
+                                    wordInputs[currentIndex].focus();
+                                } else {
+                                    wordInputs[wordInputs.length - 1].focus();
+                                }
+                            } else {
+                                e.target.value = words[0] || '';
+                            }
+                        }
+                        
+                        updateSeedPhrase();
+                    });
+                    
+                    // Handle Enter/Tab to move to next field
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === 'Tab') {
+                            e.preventDefault();
+                            const nextIndex = index + 1;
+                            if (nextIndex < wordInputs.length) {
+                                wordInputs[nextIndex].focus();
+                            } else {
+                                // Focus password field if all words entered
+                                document.getElementById('new_password').focus();
+                            }
+                        }
+                        // Backspace on empty field goes to previous
+                        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                            wordInputs[index - 1].focus();
+                        }
+                    });
+                });
+                
+                // Form validation
+                document.getElementById('recoveryForm').addEventListener('submit', (e) => {
+                    const words = seedPhraseInput.value.split(' ').filter(w => w);
+                    if (words.length !== 12) {
+                        e.preventDefault();
+                        alert('Please enter all 12 recovery words');
+                        // Highlight empty fields
+                        wordInputs.forEach(input => {
+                            if (!input.value.trim()) {
+                                input.classList.add('error');
+                            }
+                        });
+                    }
+                });
+            </script>
             
             <div class="alt-link">
                 Remember your password? <a href="/login">Sign in</a>
