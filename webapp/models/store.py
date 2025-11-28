@@ -13,15 +13,27 @@ from typing import Dict, List, Optional, Any
 # MongoDB connection
 try:
     from pymongo import MongoClient
-    from pymongo.errors import ConnectionFailure
+    from pymongo.errors import ConnectionFailure, OperationFailure
     
     MONGODB_URI = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URI')
     
     if MONGODB_URI:
+        # Check if URI looks valid
+        if not MONGODB_URI.startswith('mongodb'):
+            print(f"⚠️ Invalid MONGODB_URI format - must start with 'mongodb://' or 'mongodb+srv://'")
+            raise ValueError("Invalid URI format")
+        
+        print(f"🔄 Connecting to MongoDB...")
         client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=10000)
+        
+        # Test connection
         client.admin.command('ping')
-        db = client.get_default_database() or client['menza']
-        print("✅ Connected to MongoDB")
+        db = client['menza']
+        
+        # Test we can access the database
+        db.list_collection_names()
+        
+        print("✅ Connected to MongoDB successfully!")
         USE_MONGODB = True
     else:
         print("⚠️ MONGODB_URI not set - using in-memory storage (data will be lost on restart)")
@@ -31,12 +43,16 @@ except ImportError:
     print("⚠️ pymongo not installed - using in-memory storage")
     USE_MONGODB = False
     db = None
+except OperationFailure as e:
+    print(f"⚠️ MongoDB auth error: {e.details.get('errmsg', str(e))} - using in-memory storage")
+    USE_MONGODB = False
+    db = None
 except ConnectionFailure as e:
-    print(f"⚠️ MongoDB connection failed - using in-memory storage")
+    print(f"⚠️ MongoDB connection failed: {str(e)[:100]} - using in-memory storage")
     USE_MONGODB = False
     db = None
 except Exception as e:
-    print(f"⚠️ MongoDB error - using in-memory storage")
+    print(f"⚠️ MongoDB error ({type(e).__name__}): {str(e)[:100]} - using in-memory storage")
     USE_MONGODB = False
     db = None
 
