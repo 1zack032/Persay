@@ -15,43 +15,28 @@ try:
     from pymongo import MongoClient
     from pymongo.errors import ConnectionFailure
     
-    # Debug: Check what env vars are available
     MONGODB_URI = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URI')
     
-    # Debug logging
-    print(f"🔍 DEBUG: MONGODB_URI exists: {MONGODB_URI is not None}")
-    print(f"🔍 DEBUG: MONGODB_URI length: {len(MONGODB_URI) if MONGODB_URI else 0}")
     if MONGODB_URI:
-        # Mask the password for logging
-        masked = MONGODB_URI[:30] + "..." if len(MONGODB_URI) > 30 else MONGODB_URI
-        print(f"🔍 DEBUG: URI starts with: {masked}")
-    
-    if MONGODB_URI:
-        print("🔄 Attempting MongoDB connection...")
-        client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
-        # Test connection
+        client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=10000)
         client.admin.command('ping')
         db = client.get_default_database() or client['menza']
-        print("✅ Connected to MongoDB successfully!")
-        print(f"✅ Using database: {db.name}")
+        print("✅ Connected to MongoDB")
         USE_MONGODB = True
     else:
         print("⚠️ MONGODB_URI not set - using in-memory storage (data will be lost on restart)")
-        # Debug: List available env vars that might be MongoDB related
-        mongo_vars = [k for k in os.environ.keys() if 'MONGO' in k.upper() or 'DB' in k.upper()]
-        print(f"🔍 DEBUG: Available DB-related env vars: {mongo_vars}")
         USE_MONGODB = False
         db = None
-except ImportError as e:
-    print(f"⚠️ pymongo not installed: {e} - using in-memory storage")
+except ImportError:
+    print("⚠️ pymongo not installed - using in-memory storage")
     USE_MONGODB = False
     db = None
 except ConnectionFailure as e:
-    print(f"⚠️ MongoDB connection failed: {e} - using in-memory storage")
+    print(f"⚠️ MongoDB connection failed - using in-memory storage")
     USE_MONGODB = False
     db = None
 except Exception as e:
-    print(f"⚠️ MongoDB error: {type(e).__name__}: {e} - using in-memory storage")
+    print(f"⚠️ MongoDB error - using in-memory storage")
     USE_MONGODB = False
     db = None
 
