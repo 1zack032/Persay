@@ -1431,10 +1431,31 @@ store = DataStore()
 # TEST USERS (for development only)
 # ==========================================
 # Remove these in production!
+import hashlib
+
+def _test_seed_hash(phrase):
+    """Hash a seed phrase for test users"""
+    return hashlib.sha256(phrase.encode()).hexdigest()
+
+# Test seed phrases (for testing recovery - in production users get random phrases)
+TEST_SEED_PHRASES = {
+    'test1': 'abandon ability able about above absent absorb abstract absurd abuse access accident',
+    'test2': 'account accuse achieve acid acoustic acquire across act action actor actress actual',
+    'test3': 'adapt add addict address adjust admit adult advance advice aerobic affair afford',
+    'test4': 'afraid again age agent agree ahead aim air airport aisle alarm album',
+    'test5': 'alcohol alert alien all alley allow almost alone alpha already also alter',
+}
+
 store.create_user('test1', '1234567890')
 store.create_user('test2', '1234567890')
 store.create_user('test3', '1234567890')
 store.create_user('test4', '1234567890')
 store.create_user('test5', '1234567890')
+
+# Add seed hashes for test users
+for username, phrase in TEST_SEED_PHRASES.items():
+    store.update_user_profile(username, {'seed_hash': _test_seed_hash(phrase)})
+
 print("✅ Test users created: test1, test2, test3, test4, test5 (password: 1234567890)")
+print("📝 Test recovery phrases added for each user (see TEST_SEED_PHRASES in store.py)")
 

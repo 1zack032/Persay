@@ -132,11 +132,22 @@ def recover():
     """Account recovery page using seed phrase"""
     if request.method == 'POST':
         username = request.form.get('username', '').strip().lower()
-        seed_phrase = request.form.get('seed_phrase', '').strip().lower()
+        seed_phrase_raw = request.form.get('seed_phrase', '').strip().lower()
         new_password = request.form.get('new_password', '')
         
-        if not username or not seed_phrase or not new_password:
+        if not username or not seed_phrase_raw or not new_password:
             return render_template('recover.html', error="All fields are required")
+        
+        # Normalize seed phrase: collapse multiple spaces, strip, lowercase
+        seed_words = seed_phrase_raw.split()
+        
+        # Validate exactly 12 words
+        if len(seed_words) != 12:
+            return render_template('recover.html', 
+                error=f"Recovery phrase must be exactly 12 words (you entered {len(seed_words)})")
+        
+        # Rejoin with single spaces for consistent hashing
+        seed_phrase = ' '.join(seed_words)
         
         if len(new_password) < Config.MIN_PASSWORD_LENGTH:
             return render_template('recover.html', 
@@ -150,8 +161,12 @@ def recover():
         provided_hash = hash_seed_phrase(seed_phrase)
         stored_hash = user.get('seed_hash')
         
-        if not stored_hash or provided_hash != stored_hash:
-            return render_template('recover.html', error="Invalid recovery phrase")
+        if not stored_hash:
+            return render_template('recover.html', 
+                error="This account was created before recovery phrases were enabled. Please contact support.")
+        
+        if provided_hash != stored_hash:
+            return render_template('recover.html', error="Invalid recovery phrase. Please check your words and try again.")
         
         # Update password
         store.update_user_profile(username, {'password': new_password})

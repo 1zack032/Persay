@@ -490,8 +490,9 @@
                         }
                     });
                     
-                    // Update combined seed phrase
-                    seedPhraseInput.value = words.join(' ').trim();
+                    // Update combined seed phrase - filter out empty words to avoid double spaces
+                    const filteredWords = words.filter(w => w.length > 0);
+                    seedPhraseInput.value = filteredWords.join(' ');
                     
                     // Update counter
                     wordCountEl.textContent = `${filledCount}/12 words`;
@@ -507,12 +508,13 @@
                 wordInputs.forEach((input, index) => {
                     // Auto-advance to next field
                     input.addEventListener('input', (e) => {
-                        // Convert to lowercase
-                        e.target.value = e.target.value.toLowerCase();
+                        // Convert to lowercase and remove non-letter characters (except spaces for paste)
+                        let value = e.target.value.toLowerCase();
                         
                         // Check if space was typed (pasting multiple words)
-                        if (e.target.value.includes(' ')) {
-                            const words = e.target.value.split(/\s+/).filter(w => w);
+                        if (value.includes(' ')) {
+                            // Clean each word to only contain letters
+                            const words = value.split(/\s+/).filter(w => w).map(w => w.replace(/[^a-z]/g, ''));
                             if (words.length > 1) {
                                 // Distribute words across remaining inputs
                                 let currentIndex = index;
@@ -531,6 +533,9 @@
                             } else {
                                 e.target.value = words[0] || '';
                             }
+                        } else {
+                            // Single word - only allow letters
+                            e.target.value = value.replace(/[^a-z]/g, '');
                         }
                         
                         updateSeedPhrase();
