@@ -38,6 +38,18 @@ def search_users():
     return jsonify({'users': matched_users})
 
 
+@main_bp.route('/api/users/contacts')
+def get_contacts():
+    """Get users the current user has chatted with"""
+    if 'username' not in session:
+        return jsonify({'error': 'Not authenticated'}), 401
+    
+    current_user = session['username']
+    contacts = store.get_chat_partners(current_user)
+    
+    return jsonify({'contacts': contacts})
+
+
 @main_bp.route('/')
 def index():
     """Home page - shows login or redirects to chat"""

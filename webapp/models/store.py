@@ -310,6 +310,47 @@ class DataStore:
             return True
         return False
     
+    def get_chat_partners(self, username: str) -> List[dict]:
+        """Get list of users that this user has chatted with (most recent first)"""
+        partners = {}
+        
+        # Scan all message rooms to find chat partners
+        for room_id, messages in self.messages.items():
+            # Skip group rooms
+            if room_id.startswith('group_'):
+                continue
+            
+            # Check if this user is in the room
+            users_in_room = room_id.split('_')
+            if len(users_in_room) == 2 and username in users_in_room:
+                other_user = users_in_room[0] if users_in_room[1] == username else users_in_room[1]
+                
+                # Get last message timestamp
+                last_msg_time = None
+                if messages:
+                    last_msg = messages[-1]
+                    last_msg_time = last_msg.get('timestamp')
+                
+                # Only include if there are messages
+                if messages:
+                    user_data = self.get_user(other_user)
+                    partners[other_user] = {
+                        'username': other_user,
+                        'display_name': user_data.get('display_name', other_user) if user_data else other_user,
+                        'profile_image': user_data.get('profile_image') if user_data else None,
+                        'last_message_time': last_msg_time,
+                        'message_count': len(messages)
+                    }
+        
+        # Sort by last message time (most recent first)
+        sorted_partners = sorted(
+            partners.values(), 
+            key=lambda x: x['last_message_time'] or '', 
+            reverse=True
+        )
+        
+        return sorted_partners
+    
     # ==========================================
     # CHAT SETTINGS METHODS
     # ==========================================
@@ -1427,35 +1468,5 @@ class DataStore:
 # Global store instance
 store = DataStore()
 
-# ==========================================
-# TEST USERS (for development only)
-# ==========================================
-# Remove these in production!
-import hashlib
-
-def _test_seed_hash(phrase):
-    """Hash a seed phrase for test users"""
-    return hashlib.sha256(phrase.encode()).hexdigest()
-
-# Test seed phrases (for testing recovery - in production users get random phrases)
-TEST_SEED_PHRASES = {
-    'test1': 'abandon ability able about above absent absorb abstract absurd abuse access accident',
-    'test2': 'account accuse achieve acid acoustic acquire across act action actor actress actual',
-    'test3': 'adapt add addict address adjust admit adult advance advice aerobic affair afford',
-    'test4': 'afraid again age agent agree ahead aim air airport aisle alarm album',
-    'test5': 'alcohol alert alien all alley allow almost alone alpha already also alter',
-}
-
-store.create_user('test1', '1234567890')
-store.create_user('test2', '1234567890')
-store.create_user('test3', '1234567890')
-store.create_user('test4', '1234567890')
-store.create_user('test5', '1234567890')
-
-# Add seed hashes for test users
-for username, phrase in TEST_SEED_PHRASES.items():
-    store.update_user_profile(username, {'seed_hash': _test_seed_hash(phrase)})
-
-print("✅ Test users created: test1, test2, test3, test4, test5 (password: 1234567890)")
-print("📝 Test recovery phrases added for each user (see TEST_SEED_PHRASES in store.py)")
+# No test users in production - users must register
 

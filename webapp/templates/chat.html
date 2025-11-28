@@ -421,6 +421,11 @@
             from { opacity: 0; transform: translateY(-8px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
 
         .dropdown-panel.show {
             display: block;
@@ -3507,20 +3512,52 @@
 
     <!-- New Message Modal -->
     <div class="modal-overlay" id="newMessageModal">
-        <div class="modal">
+        <div class="modal" style="max-width: 480px;">
             <div class="modal-header">
-                <h3>New Message</h3>
+                <h3>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 8px;">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    New Message
+                </h3>
                 <button class="modal-close" onclick="closeModal('newMessageModal')">×</button>
             </div>
             <div class="modal-body">
-                <input type="text" class="modal-input" placeholder="Search users..." id="newMessageSearch" oninput="filterUsers(this.value)">
-                <div class="user-select-list" id="userSelectList">
-                    {% for user in all_users %}
-                    <div class="user-select-item" onclick="selectUserForMessage('{{ user }}')">
-                        <div class="user-select-avatar">{{ user[0].upper() }}</div>
-                        <div class="user-select-name">{{ user }}</div>
+                <!-- Tabs for finding users -->
+                <div class="group-tabs" style="margin-bottom: 1rem;">
+                    <button class="group-tab active" onclick="switchMessageTab('recent')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Recent
+                    </button>
+                    <button class="group-tab" onclick="switchMessageTab('search')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        Search Users
+                    </button>
+                </div>
+                
+                <!-- Recent Contacts Tab -->
+                <div id="messageRecentTab" class="group-tab-content active">
+                    <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.75rem;">People you've chatted with:</p>
+                    <div class="user-select-list" id="recentContactsList">
+                        <div class="loading-placeholder" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                            <div class="spinner" style="width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 0.5rem;"></div>
+                            Loading contacts...
+                        </div>
                     </div>
-                    {% endfor %}
+                </div>
+                
+                <!-- Search Tab -->
+                <div id="messageSearchTab" class="group-tab-content">
+                    <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.75rem;">Find any user by username:</p>
+                    <input type="text" class="modal-input" placeholder="Enter username..." id="newMessageSearchInput" oninput="searchUsersForMessage(this.value)" style="margin-bottom: 0.75rem;">
+                    <div class="user-select-list" id="messageSearchResults">
+                        <div class="search-placeholder" style="text-align: center; padding: 2rem;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 0.5rem;">
+                                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                            </svg>
+                            <p style="color: var(--text-muted); font-size: 0.8125rem;">Type a username to find users</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -4563,8 +4600,147 @@
             // Close the write dropdown
             document.getElementById('writePanel').classList.remove('show');
             activePanel = null;
+            
+            // Reset tabs to Recent
+            switchMessageTab('recent');
+            
+            // Clear search
+            const searchInput = document.getElementById('newMessageSearchInput');
+            if (searchInput) searchInput.value = '';
+            document.getElementById('messageSearchResults').innerHTML = `
+                <div class="search-placeholder" style="text-align: center; padding: 2rem;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 0.5rem;">
+                        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <p style="color: var(--text-muted); font-size: 0.8125rem;">Type a username to find users</p>
+                </div>`;
+            
+            // Load recent contacts
+            loadRecentContacts();
+            
             // Open the new message modal
             document.getElementById('newMessageModal').classList.add('show');
+        }
+        
+        function switchMessageTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('#newMessageModal .group-tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.group-tab').classList.add('active');
+            
+            // Update tab content
+            document.getElementById('messageRecentTab').classList.remove('active');
+            document.getElementById('messageSearchTab').classList.remove('active');
+            
+            if (tab === 'recent') {
+                document.getElementById('messageRecentTab').classList.add('active');
+                loadRecentContacts();
+            } else {
+                document.getElementById('messageSearchTab').classList.add('active');
+                document.getElementById('newMessageSearchInput').focus();
+            }
+        }
+        
+        function loadRecentContacts() {
+            const listDiv = document.getElementById('recentContactsList');
+            listDiv.innerHTML = `
+                <div class="loading-placeholder" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                    <div class="spinner" style="width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 0.5rem;"></div>
+                    Loading contacts...
+                </div>`;
+            
+            fetch('/api/users/contacts')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.contacts && data.contacts.length > 0) {
+                        let html = '';
+                        data.contacts.forEach(contact => {
+                            const initial = contact.display_name ? contact.display_name[0].toUpperCase() : contact.username[0].toUpperCase();
+                            const displayName = contact.display_name || contact.username;
+                            html += `
+                                <div class="user-select-item" onclick="selectUserForMessage('${contact.username}')">
+                                    <div class="user-select-avatar">${initial}</div>
+                                    <div class="user-select-info" style="flex: 1;">
+                                        <div class="user-select-name">${displayName}</div>
+                                        ${contact.display_name && contact.display_name !== contact.username ? `<div style="font-size: 0.75rem; color: var(--text-muted);">@${contact.username}</div>` : ''}
+                                    </div>
+                                    <span style="font-size: 0.6875rem; color: var(--text-muted);">${contact.message_count} msgs</span>
+                                </div>`;
+                        });
+                        listDiv.innerHTML = html;
+                    } else {
+                        listDiv.innerHTML = `
+                            <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 0.5rem;">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                                <p style="font-size: 0.8125rem;">No recent conversations</p>
+                                <p style="font-size: 0.75rem; margin-top: 0.25rem;">Search for users to start a chat</p>
+                            </div>`;
+                    }
+                })
+                .catch(err => {
+                    listDiv.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: var(--error);">
+                            Failed to load contacts
+                        </div>`;
+                });
+        }
+        
+        function searchUsersForMessage(query) {
+            const resultsDiv = document.getElementById('messageSearchResults');
+            
+            if (!query.trim() || query.length < 2) {
+                resultsDiv.innerHTML = `
+                    <div class="search-placeholder" style="text-align: center; padding: 2rem;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 0.5rem;">
+                            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                        </svg>
+                        <p style="color: var(--text-muted); font-size: 0.8125rem;">Type at least 2 characters to search</p>
+                    </div>`;
+                return;
+            }
+            
+            resultsDiv.innerHTML = `
+                <div style="text-align: center; padding: 1rem; color: var(--text-muted);">
+                    <div class="spinner" style="width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto;"></div>
+                </div>`;
+            
+            fetch(`/api/users/search?q=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.users && data.users.length > 0) {
+                        let html = '';
+                        data.users.forEach(user => {
+                            const initial = user.display_name ? user.display_name[0].toUpperCase() : user.username[0].toUpperCase();
+                            const displayName = user.display_name || user.username;
+                            html += `
+                                <div class="user-select-item" onclick="selectUserForMessage('${user.username}')">
+                                    <div class="user-select-avatar">${initial}</div>
+                                    <div class="user-select-info" style="flex: 1;">
+                                        <div class="user-select-name">${displayName}</div>
+                                        ${user.display_name && user.display_name !== user.username ? `<div style="font-size: 0.75rem; color: var(--text-muted);">@${user.username}</div>` : ''}
+                                    </div>
+                                </div>`;
+                        });
+                        resultsDiv.innerHTML = html;
+                    } else {
+                        resultsDiv.innerHTML = `
+                            <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 0.5rem;">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <p style="font-size: 0.8125rem;">No users found for "${query}"</p>
+                            </div>`;
+                    }
+                })
+                .catch(err => {
+                    resultsDiv.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: var(--error);">
+                            Search failed. Please try again.
+                        </div>`;
+                });
         }
         
         function startNewGroup() {
