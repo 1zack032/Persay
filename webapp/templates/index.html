@@ -99,20 +99,17 @@
             align-items: center;
             gap: 0.75rem;
             font-size: 1.5rem;
-            font-weight: 700;
+            font-weight: 800;
             text-decoration: none;
-            color: var(--text-primary);
+            letter-spacing: 0.1em;
         }
 
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
+        .logo-text {
+            background: linear-gradient(90deg, #ffffff 0%, #a855f7 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: 'Inter', sans-serif;
         }
 
         .nav-links {
@@ -489,8 +486,7 @@
     <!-- Navigation -->
     <nav>
         <a href="/" class="logo">
-            <div class="logo-icon">🔐</div>
-            Menza
+            <span class="logo-text">MENZA</span>
         </a>
         <div class="nav-links">
             <a href="#features">Features</a>
@@ -606,7 +602,7 @@
 
     <!-- Footer -->
     <footer>
-        <p>© 2025 Menza. All rights reserved.</p>
+        <p>© 2025 <span style="background: linear-gradient(90deg, #ffffff 0%, #a855f7 50%, #ec4899 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700; letter-spacing: 0.05em;">MENZA</span>. All rights reserved.</p>
         <p style="margin-top: 0.5rem;">
             <a href="/privacy">Privacy Policy</a> • 
             <a href="/terms">Terms of Service</a> • 

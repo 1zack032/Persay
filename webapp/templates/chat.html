@@ -91,6 +91,16 @@
             justify-content: space-between;
         }
 
+        .sidebar-logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            background: linear-gradient(90deg, #ffffff 0%, #a855f7 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         /* Main Tab Buttons - Akeyless Style */
         /* Unified Button Style - Matching Discover Channels */
         .sidebar-btn {
@@ -3234,8 +3244,8 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-title">{{ username }}</div>
-            <div class="user-avatar">{{ username[0].upper() }}</div>
+            <span class="sidebar-logo">MENZA</span>
+            <div class="user-avatar" title="{{ username }}">{{ username[0].upper() }}</div>
         </div>
 
         <!-- Main Tab Buttons -->

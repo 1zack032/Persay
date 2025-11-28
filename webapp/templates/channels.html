@@ -132,6 +132,19 @@
         .sidebar-header {
             padding: 1rem;
             border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            background: linear-gradient(90deg, #ffffff 0%, #a855f7 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         /* Sidebar Buttons */
@@ -825,6 +838,9 @@
     <div class="app-container">
         <!-- Sidebar (same as chat) -->
         <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-logo">MENZA</span>
+            </div>
             <!-- Main Tabs -->
             <div class="main-tabs">
                 <a href="/chat" class="sidebar-btn">

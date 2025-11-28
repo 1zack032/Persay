@@ -95,15 +95,15 @@
         }
 
         .logo {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.75rem;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            background: linear-gradient(90deg, #ffffff 0%, #a855f7 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin: 0 auto 1.25rem;
+            text-align: center;
         }
 
         .card-header h1 {
@@ -240,9 +240,9 @@
         
         <div class="card">
             <div class="card-header">
-                <div class="logo">🔐</div>
+                <div class="logo">MENZA</div>
                 <h1>Welcome back</h1>
-                <p>Sign in to continue to Menza</p>
+                <p>Sign in to continue</p>
             </div>
             
             {% if error %}
