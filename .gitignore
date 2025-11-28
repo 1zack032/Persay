@@ -1,5 +1,17 @@
-# Sensitive data
+# Sensitive data - NEVER commit these!
 keystore.json
+.env
+.env.local
+.env.production
+.env.*.local
+*.pem
+*.key
+secrets.json
+credentials.json
+
+# Database credentials
+mongo_credentials.txt
+database.ini
 
 # Python
 __pycache__/
@@ -9,10 +21,13 @@ __pycache__/
 .Python
 env/
 venv/
-.env
+ENV/
+.venv/
 *.egg-info/
 dist/
 build/
+eggs/
+*.egg
 
 # IDE
 .idea/
@@ -20,10 +35,29 @@ build/
 *.swp
 *.swo
 .DS_Store
+*.sublime-project
+*.sublime-workspace
 
 # Logs
 *.log
+logs/
 
 # Local config
 instance/
+config.local.py
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# iOS/Xcode (for when you build the app)
+ios/
+*.xcworkspace
+*.xcodeproj
+Pods/
 
