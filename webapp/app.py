@@ -45,8 +45,10 @@ app = Flask(__name__)
 config = get_config()
 app.config.from_object(config)
 
-# Initialize SocketIO
-socketio = SocketIO(app, cors_allowed_origins=config.SOCKETIO_CORS_ALLOWED_ORIGINS)
+# Initialize SocketIO with threading mode for production
+import os
+async_mode = 'threading' if os.environ.get('FLASK_DEBUG', 'true').lower() == 'false' else None
+socketio = SocketIO(app, cors_allowed_origins=config.SOCKETIO_CORS_ALLOWED_ORIGINS, async_mode=async_mode)
 
 
 # ============================================

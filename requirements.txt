@@ -3,6 +3,7 @@
 
 # Web Framework
 Flask==3.0.0
+Werkzeug==3.0.1
 Flask-SocketIO==5.3.6
 
 # WebSocket Support (pure Python - no compilation needed)
@@ -15,3 +16,6 @@ gunicorn==21.2.0
 
 # Utilities
 python-dotenv==1.0.0
+Jinja2==3.1.2
+itsdangerous==2.1.2
+click==8.1.7
