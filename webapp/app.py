@@ -45,6 +45,14 @@ app = Flask(__name__)
 config = get_config()
 app.config.from_object(config)
 
+# Enable response compression for faster page loads
+try:
+    from flask_compress import Compress
+    Compress(app)
+    print("✅ Response compression enabled")
+except ImportError:
+    print("⚠️ Flask-Compress not installed, skipping compression")
+
 # Initialize SocketIO with threading mode for production
 import os
 async_mode = 'threading' if os.environ.get('FLASK_DEBUG', 'true').lower() == 'false' else None
