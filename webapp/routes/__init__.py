@@ -1,5 +1,5 @@
 """
-🛣️ Routes Package
+Routes Package
 
 This package contains all HTTP route blueprints.
 Each module handles a specific feature area.
@@ -27,4 +27,3 @@ def register_routes(app):
 
 
 __all__ = ['register_routes', 'auth_bp', 'main_bp', 'channels_bp', 'legal_bp', 'docs_bp', 'settings_bp']
-

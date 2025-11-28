@@ -1,8 +1,8 @@
 """
-🔐 Persay Web Application Package
+Menza Web Application Package
 
-This package contains the Flask web application for Persay.
+Secure encrypted messaging platform.
 """
 
 __version__ = "1.0.0"
-__author__ = "Persay Team"
+__author__ = "Menza Team"

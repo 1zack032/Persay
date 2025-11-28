@@ -8,10 +8,19 @@ keystore.json
 *.key
 secrets.json
 credentials.json
+config.py.bak
+*.secret
 
 # Database credentials
 mongo_credentials.txt
 database.ini
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded files (user content)
+webapp/static/uploads/
+uploads/
 
 # Python
 __pycache__/

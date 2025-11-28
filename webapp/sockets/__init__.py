@@ -1,5 +1,5 @@
 """
-🔌 WebSocket Events Package
+WebSocket Events Package
 
 Real-time communication handlers using Socket.IO.
 Each module handles events for a specific feature area.
@@ -18,4 +18,3 @@ def register_socket_events(socketio):
 
 
 __all__ = ['register_socket_events']
-
