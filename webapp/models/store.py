@@ -687,7 +687,8 @@ class DataStore:
 
     def create_channel(self, name: str, description: str, owner: str,
                        accent_color: str, avatar_emoji: str,
-                       discoverable: bool = True, tags: list = None) -> dict:
+                       discoverable: bool = True, tags: list = None,
+                       avatar_type: str = 'emoji', avatar_image: str = None) -> dict:
         """Create a new channel"""
         channel_id = self.generate_id()
         
@@ -703,6 +704,8 @@ class DataStore:
             'branding': {
                 'accent_color': accent_color,
                 'avatar_emoji': avatar_emoji,
+                'avatar_type': avatar_type,  # 'emoji' or 'image'
+                'avatar_image': avatar_image,  # Base64 encoded image data
             },
             'subscribers': [owner],  # For backwards compatibility
             'members': {

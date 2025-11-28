@@ -188,6 +188,15 @@
             justify-content: center;
             font-size: 1.125rem;
             flex-shrink: 0;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .channel-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .channel-info {
@@ -276,6 +285,15 @@
             font-size: 1.375rem;
             background: var(--accent-glow);
             color: var(--accent-primary);
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .header-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .header-info {
@@ -413,6 +431,15 @@
             align-items: center;
             justify-content: center;
             font-size: 1.125rem;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .post-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .post-meta {
@@ -1104,8 +1131,8 @@
         <div class="channel-list">
             {% for ch in my_channels %}
             <a href="/channel/{{ ch.id }}" class="channel-item {% if ch.id == channel.id %}active{% endif %}">
-                <div class="channel-avatar" style="background: {{ ch.branding.accent_color }}15; color: {{ ch.branding.accent_color }};">
-                    {{ ch.branding.avatar_emoji }}
+                <div class="channel-avatar" style="{% if ch.branding.avatar_type == 'image' and ch.branding.avatar_image %}background-image: url({{ ch.branding.avatar_image }});{% else %}background: {{ ch.branding.accent_color }}15; color: {{ ch.branding.accent_color }};{% endif %}">
+                    {% if ch.branding.avatar_type != 'image' or not ch.branding.avatar_image %}{{ ch.branding.avatar_emoji }}{% endif %}
                 </div>
                 <div class="channel-info">
                     <div class="channel-name">{{ ch.name }}</div>
@@ -1121,8 +1148,8 @@
         <div class="channel-list">
             {% for ch in subscribed_channels %}
             <a href="/channel/{{ ch.id }}" class="channel-item {% if ch.id == channel.id %}active{% endif %}">
-                <div class="channel-avatar" style="background: {{ ch.branding.accent_color }}15; color: {{ ch.branding.accent_color }};">
-                    {{ ch.branding.avatar_emoji }}
+                <div class="channel-avatar" style="{% if ch.branding.avatar_type == 'image' and ch.branding.avatar_image %}background-image: url({{ ch.branding.avatar_image }});{% else %}background: {{ ch.branding.accent_color }}15; color: {{ ch.branding.accent_color }};{% endif %}">
+                    {% if ch.branding.avatar_type != 'image' or not ch.branding.avatar_image %}{{ ch.branding.avatar_emoji }}{% endif %}
                 </div>
                 <div class="channel-info">
                     <div class="channel-name">{{ ch.name }}</div>
@@ -1144,7 +1171,7 @@
     <div class="main-area">
         <!-- Channel Header -->
         <div class="channel-header">
-            <div class="header-avatar">{{ channel.branding.avatar_emoji }}</div>
+            <div class="header-avatar" style="{% if channel.branding.avatar_type == 'image' and channel.branding.avatar_image %}background-image: url({{ channel.branding.avatar_image }});{% endif %}">{% if channel.branding.avatar_type != 'image' or not channel.branding.avatar_image %}{{ channel.branding.avatar_emoji }}{% endif %}</div>
             <div class="header-info">
                 <div class="header-name">{{ channel.name }}</div>
                 <div class="header-stats">
@@ -1207,7 +1234,7 @@
                 {% for post in posts %}
                 <div class="post" id="post-{{ post.id }}">
                     <div class="post-header">
-                        <div class="post-avatar">{{ channel.branding.avatar_emoji }}</div>
+                        <div class="post-avatar" style="{% if channel.branding.avatar_type == 'image' and channel.branding.avatar_image %}background-image: url({{ channel.branding.avatar_image }});{% endif %}">{% if channel.branding.avatar_type != 'image' or not channel.branding.avatar_image %}{{ channel.branding.avatar_emoji }}{% endif %}</div>
                         <div class="post-meta">
                             <div class="post-author">{{ post.author }}</div>
                             <div class="post-time">{{ post.timestamp[:16].replace('T', ' ') }}</div>

@@ -219,6 +219,8 @@ def create_channel():
         description = request.form.get('description', '').strip()
         accent_color = request.form.get('accent_color', Config.DEFAULT_ACCENT_COLOR)
         avatar_emoji = request.form.get('avatar_emoji', Config.DEFAULT_AVATAR_EMOJI)
+        avatar_type = request.form.get('avatar_type', 'emoji')
+        avatar_image_data = request.form.get('avatar_image_data', '')
         discoverable = request.form.get('discoverable') == 'on'  # Checkbox
         invited_members_json = request.form.get('invited_members', '[]')
         
@@ -245,7 +247,9 @@ def create_channel():
             owner=session['username'],
             accent_color=accent_color,
             avatar_emoji=avatar_emoji,
-            discoverable=discoverable
+            discoverable=discoverable,
+            avatar_type=avatar_type,
+            avatar_image=avatar_image_data if avatar_type == 'image' else None
         )
         
         # Add invited members with their roles

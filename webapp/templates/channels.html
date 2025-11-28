@@ -314,6 +314,15 @@
             align-items: center;
             justify-content: center;
             font-size: 1.25rem;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .channel-list-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .channel-list-info {
@@ -491,6 +500,15 @@
             justify-content: center;
             font-size: 1.5rem;
             flex-shrink: 0;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .channel-card-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .channel-card-info {
@@ -895,8 +913,8 @@
                 {% if my_channels %}
                     {% for channel in my_channels %}
                     <a href="/channel/{{ channel.id }}" class="channel-list-item">
-                        <div class="channel-list-avatar" style="background: {{ channel.branding.accent_color }}20; color: {{ channel.branding.accent_color }};">
-                            {{ channel.branding.avatar_emoji }}
+                        <div class="channel-list-avatar" style="{% if channel.branding.avatar_type == 'image' and channel.branding.avatar_image %}background-image: url({{ channel.branding.avatar_image }});{% else %}background: {{ channel.branding.accent_color }}20; color: {{ channel.branding.accent_color }};{% endif %}">
+                            {% if channel.branding.avatar_type != 'image' or not channel.branding.avatar_image %}{{ channel.branding.avatar_emoji }}{% endif %}
                         </div>
                         <div class="channel-list-info">
                             <div class="channel-list-name">{{ channel.name }}</div>
@@ -910,8 +928,8 @@
                 <div class="section-label" style="margin-top: 1.5rem;">Subscribed</div>
                     {% for channel in subscribed %}
                     <a href="/channel/{{ channel.id }}" class="channel-list-item">
-                        <div class="channel-list-avatar" style="background: {{ channel.branding.accent_color }}20; color: {{ channel.branding.accent_color }};">
-                            {{ channel.branding.avatar_emoji }}
+                        <div class="channel-list-avatar" style="{% if channel.branding.avatar_type == 'image' and channel.branding.avatar_image %}background-image: url({{ channel.branding.avatar_image }});{% else %}background: {{ channel.branding.accent_color }}20; color: {{ channel.branding.accent_color }};{% endif %}">
+                            {% if channel.branding.avatar_type != 'image' or not channel.branding.avatar_image %}{{ channel.branding.avatar_emoji }}{% endif %}
                         </div>
                         <div class="channel-list-info">
                             <div class="channel-list-name">{{ channel.name }}</div>
@@ -987,8 +1005,8 @@
                         </span>
                         {% endif %}
                         <div class="channel-card-header">
-                            <div class="channel-card-avatar" style="background: {{ channel.branding.accent_color }}20; color: {{ channel.branding.accent_color }};">
-                                {{ channel.branding.avatar_emoji }}
+                            <div class="channel-card-avatar" style="{% if channel.branding.avatar_type == 'image' and channel.branding.avatar_image %}background-image: url({{ channel.branding.avatar_image }});{% else %}background: {{ channel.branding.accent_color }}20; color: {{ channel.branding.accent_color }};{% endif %}">
+                                {% if channel.branding.avatar_type != 'image' or not channel.branding.avatar_image %}{{ channel.branding.avatar_emoji }}{% endif %}
                             </div>
                             <div class="channel-card-info">
                                 <div class="channel-card-name">{{ channel.name }}</div>
@@ -1122,9 +1140,14 @@
                 if (channelData.channels && channelData.channels.length > 0) {
                     html += '<div style="font-size: 0.75rem; color: var(--text-muted); padding: 0.5rem 0.75rem; text-transform: uppercase; margin-top: 0.5rem;">Channels</div>';
                     channelData.channels.forEach(channel => {
+                        const hasImage = channel.branding?.avatar_type === 'image' && channel.branding?.avatar_image;
+                        const avatarStyle = hasImage 
+                            ? `background-image: url(${channel.branding.avatar_image}); background-size: cover; background-position: center;` 
+                            : `background: ${channel.branding?.accent_color || '#6366f1'}20; color: ${channel.branding?.accent_color || '#6366f1'};`;
+                        const avatarContent = hasImage ? '' : (channel.branding?.avatar_emoji || '📺');
                         html += `
                             <a href="/channel/${channel.id}" class="user-select-item" style="text-decoration: none; color: inherit;">
-                                <div class="user-select-avatar" style="background: ${channel.branding?.accent_color || '#6366f1'}20; color: ${channel.branding?.accent_color || '#6366f1'}; border-radius: 8px;">${channel.branding?.avatar_emoji || '📺'}</div>
+                                <div class="user-select-avatar" style="${avatarStyle} border-radius: 8px;">${avatarContent}</div>
                                 <div class="user-select-name">${channel.name}</div>
                             </a>`;
                     });
@@ -1175,9 +1198,14 @@
                         if (data.channels && data.channels.length > 0) {
                             let html = '';
                             data.channels.forEach(channel => {
+                                const hasImage = channel.branding?.avatar_type === 'image' && channel.branding?.avatar_image;
+                                const avatarStyle = hasImage 
+                                    ? `background-image: url(${channel.branding.avatar_image}); background-size: cover; background-position: center;` 
+                                    : `background: ${channel.branding?.accent_color || '#6366f1'}20; color: ${channel.branding?.accent_color || '#6366f1'};`;
+                                const avatarContent = hasImage ? '' : (channel.branding?.avatar_emoji || '📺');
                                 html += `
                                     <a href="/channel/${channel.id}" class="user-select-item" style="text-decoration: none; color: inherit;">
-                                        <div style="width: 32px; height: 32px; border-radius: 8px; background: ${channel.branding?.accent_color || '#6366f1'}20; color: ${channel.branding?.accent_color || '#6366f1'}; display: flex; align-items: center; justify-content: center;">${channel.branding?.avatar_emoji || '📺'}</div>
+                                        <div style="width: 32px; height: 32px; border-radius: 8px; ${avatarStyle} display: flex; align-items: center; justify-content: center;">${avatarContent}</div>
                                         <div>
                                             <div style="font-weight: 500;">${channel.name}</div>
                                             <div style="font-size: 0.75rem; color: var(--text-muted);">${channel.subscribers?.length || 0} members</div>
