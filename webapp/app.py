@@ -53,6 +53,20 @@ try:
 except ImportError:
     print("⚠️ Flask-Compress not installed, skipping compression")
 
+# Add caching headers for static files
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # 1 year for static files
+
+@app.after_request
+def add_cache_headers(response):
+    # Cache static assets aggressively
+    if 'static' in response.headers.get('Content-Location', '') or \
+       response.content_type and ('javascript' in response.content_type or 
+                                   'css' in response.content_type or
+                                   'image' in response.content_type):
+        response.cache_control.max_age = 31536000
+        response.cache_control.public = True
+    return response
+
 # Initialize SocketIO with threading mode for production
 import os
 # Always use threading in production for better performance
