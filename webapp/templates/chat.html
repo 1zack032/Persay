@@ -422,9 +422,10 @@
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
-            overflow: hidden;
-            z-index: 100;
+            overflow: visible;
+            z-index: 1000;
             position: relative;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
 
         @keyframes slideDown {
@@ -444,7 +445,7 @@
         
         .write-panel-container {
             position: relative;
-            z-index: 100;
+            z-index: 1000;
         }
 
         .dropdown-item {
@@ -3343,29 +3344,7 @@
                 </div>
             </div>
             
-            <!-- All Users (for starting new chats) - Expandable -->
-            <div class="contacts-section" style="margin-top: 1rem;" id="allUsersSection">
-                <div class="section-label expandable" onclick="toggleAllUsers()">
-                    <span>Start New Chat</span>
-                    <svg class="expand-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 9l6 6 6-6"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="contacts" id="allUsersList" style="display: none;">
-                {% for user in all_users %}
-                <div class="contact user-item" data-username="{{ user }}" onclick="selectContact('{{ user }}')">
-                    <div class="contact-avatar">
-                        {{ user[0].upper() }}
-                        <div class="status-indicator" id="status-{{ user }}"></div>
-                    </div>
-                    <div class="contact-info">
-                        <div class="contact-name">{{ user }}</div>
-                        <div class="contact-status">Click to start chatting</div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+            <!-- To start a new chat, use Write → New Message -->
         </div>
 
         <!-- CHANNELS TAB CONTENT -->
