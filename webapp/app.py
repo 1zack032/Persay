@@ -55,8 +55,18 @@ except ImportError:
 
 # Initialize SocketIO with threading mode for production
 import os
-async_mode = 'threading' if os.environ.get('FLASK_DEBUG', 'true').lower() == 'false' else None
-socketio = SocketIO(app, cors_allowed_origins=config.SOCKETIO_CORS_ALLOWED_ORIGINS, async_mode=async_mode)
+# Always use threading in production for better performance
+is_production = os.environ.get('FLASK_ENV', 'production') == 'production' or os.environ.get('RENDER', False)
+async_mode = 'threading' if is_production else None
+socketio = SocketIO(
+    app, 
+    cors_allowed_origins=config.SOCKETIO_CORS_ALLOWED_ORIGINS, 
+    async_mode=async_mode,
+    ping_timeout=60,
+    ping_interval=25,
+    logger=False,
+    engineio_logger=False
+)
 
 
 # ============================================
