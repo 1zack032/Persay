@@ -230,11 +230,13 @@ class DataStore:
     def search_users(self, query: str, exclude_username: str, limit: int = 20) -> List[dict]:
         """Search users by username - optimized single query"""
         if USE_MONGODB:
-            # Use regex for case-insensitive search, limit results
+            # Use $and to combine conditions on same field
             users = list(self.users_col.find(
                 {
-                    'username': {'$regex': query, '$options': 'i'},
-                    'username': {'$ne': exclude_username}
+                    '$and': [
+                        {'username': {'$regex': query, '$options': 'i'}},
+                        {'username': {'$ne': exclude_username}}
+                    ]
                 },
                 {'username': 1, 'display_name': 1, 'profile_image': 1, '_id': 0}
             ).limit(limit))
