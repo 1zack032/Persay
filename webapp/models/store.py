@@ -98,20 +98,11 @@ class DataStore:
             self.notes_col = db['shared_notes']
             self.settings_col = db['chat_settings']
             
-            # Create indexes for faster queries
+            # Create minimal indexes (more are created in MongoDB Atlas)
             self.users_col.create_index('username', unique=True)
-            self.users_col.create_index([('username', 'text')])  # Text index for search
-            self.users_col.create_index('email', sparse=True)
-            self.users_col.create_index('phone', sparse=True)
             self.channels_col.create_index('name')
-            self.channels_col.create_index('owner')
-            self.channels_col.create_index('subscribers')
-            self.channels_col.create_index([('discoverable', 1), ('score', -1)])
             self.messages_col.create_index('room_id')
-            self.messages_col.create_index([('room_id', 1), ('timestamp', -1)])
             self.groups_col.create_index('invite_code')
-            self.groups_col.create_index('members')
-            self.posts_col.create_index([('channel_id', 1), ('created_at', -1)])
             
             print("✅ MongoDB collections initialized")
         else:
