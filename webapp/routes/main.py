@@ -12,28 +12,18 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/api/users/search')
 def search_users():
-    """Search for users by username"""
+    """Search for users by username - optimized"""
     if 'username' not in session:
         return jsonify({'error': 'Not authenticated'}), 401
     
     query = request.args.get('q', '').lower().strip()
     current_user = session['username']
     
-    if not query:
+    if not query or len(query) < 2:
         return jsonify({'users': []})
     
-    # Get all users except current user
-    all_usernames = store.get_all_usernames()
-    matched_users = []
-    
-    for username in all_usernames:
-        if username != current_user and query in username.lower():
-            user_data = store.get_user(username)
-            matched_users.append({
-                'username': username,
-                'display_name': user_data.get('display_name', username) if user_data else username,
-                'profile_picture': user_data.get('profile_picture') if user_data else None
-            })
+    # Use optimized search function
+    matched_users = store.search_users(query, current_user, limit=20)
     
     return jsonify({'users': matched_users})
 
@@ -66,16 +56,14 @@ def chat():
     
     username = session['username']
     
-    # Get list of all users except current user
-    all_users = [u for u in store.get_all_usernames() if u != username]
+    # Don't load all users - use lazy loading via search API
+    # This dramatically speeds up page load
     
-    # Get user's subscribed channels
-    my_channels = store.get_user_channels(username)
-    subscribed_channels = store.get_subscribed_channels(username)
-    all_my_channels = my_channels + subscribed_channels
+    # Get user's channels (combined query)
+    my_channels = store.get_all_user_channels(username)
     
     return render_template('chat.html', 
                          username=username,
-                         all_users=all_users,
-                         my_channels=all_my_channels)
+                         all_users=[],  # Load via API when needed
+                         my_channels=my_channels)
 

@@ -83,6 +83,11 @@ class DataStore:
     }
     
     def __init__(self):
+        # In-memory cache for frequently accessed data
+        self._username_cache = None
+        self._username_cache_time = 0
+        self._cache_ttl = 60  # Cache for 60 seconds
+        
         if USE_MONGODB:
             # MongoDB collections
             self.users_col = db['users']
@@ -95,9 +100,18 @@ class DataStore:
             
             # Create indexes for faster queries
             self.users_col.create_index('username', unique=True)
+            self.users_col.create_index([('username', 'text')])  # Text index for search
+            self.users_col.create_index('email', sparse=True)
+            self.users_col.create_index('phone', sparse=True)
             self.channels_col.create_index('name')
+            self.channels_col.create_index('owner')
+            self.channels_col.create_index('subscribers')
+            self.channels_col.create_index([('discoverable', 1), ('score', -1)])
             self.messages_col.create_index('room_id')
+            self.messages_col.create_index([('room_id', 1), ('timestamp', -1)])
             self.groups_col.create_index('invite_code')
+            self.groups_col.create_index('members')
+            self.posts_col.create_index([('channel_id', 1), ('created_at', -1)])
             
             print("✅ MongoDB collections initialized")
         else:
@@ -150,6 +164,9 @@ class DataStore:
         else:
             self.users[username] = user
         
+        # Invalidate username cache
+        self.invalidate_username_cache()
+        
         return user
     
     def get_user(self, username: str) -> Optional[dict]:
@@ -188,10 +205,58 @@ class DataStore:
             return username in self.users
     
     def get_all_usernames(self) -> List[str]:
+        """Get all usernames with caching for performance"""
+        import time
+        current_time = time.time()
+        
+        # Return cached if valid
+        if self._username_cache and (current_time - self._username_cache_time) < self._cache_ttl:
+            return self._username_cache
+        
         if USE_MONGODB:
-            return [u['username'] for u in self.users_col.find({}, {'username': 1, '_id': 0})]
+            usernames = [u['username'] for u in self.users_col.find({}, {'username': 1, '_id': 0})]
         else:
-            return list(self.users.keys())
+            usernames = list(self.users.keys())
+        
+        # Update cache
+        self._username_cache = usernames
+        self._username_cache_time = current_time
+        return usernames
+    
+    def invalidate_username_cache(self):
+        """Call this when users are added/deleted"""
+        self._username_cache = None
+    
+    def search_users(self, query: str, exclude_username: str, limit: int = 20) -> List[dict]:
+        """Search users by username - optimized single query"""
+        if USE_MONGODB:
+            # Use regex for case-insensitive search, limit results
+            users = list(self.users_col.find(
+                {
+                    'username': {'$regex': query, '$options': 'i'},
+                    'username': {'$ne': exclude_username}
+                },
+                {'username': 1, 'display_name': 1, 'profile_image': 1, '_id': 0}
+            ).limit(limit))
+            
+            return [{
+                'username': u['username'],
+                'display_name': u.get('display_name') or u['username'],
+                'profile_picture': u.get('profile_image')
+            } for u in users]
+        else:
+            # In-memory fallback
+            results = []
+            for username, user_data in self.users.items():
+                if username != exclude_username and query in username.lower():
+                    results.append({
+                        'username': username,
+                        'display_name': user_data.get('display_name') or username,
+                        'profile_picture': user_data.get('profile_image')
+                    })
+                    if len(results) >= limit:
+                        break
+            return results
     
     def change_user_password(self, username: str, current_password: str, new_password: str) -> bool:
         user = self.get_user(username)
@@ -635,6 +700,20 @@ class DataStore:
         else:
             return [c for c in self.channels.values() 
                     if username in c.get('subscribers', []) and c['owner'] != username]
+    
+    def get_all_user_channels(self, username: str) -> List[dict]:
+        """Get all channels user owns OR is subscribed to - single query"""
+        if USE_MONGODB:
+            return list(self.channels_col.find(
+                {'$or': [
+                    {'owner': username},
+                    {'subscribers': username}
+                ]},
+                {'_id': 0}
+            ).limit(50))  # Limit for performance
+        else:
+            return [c for c in self.channels.values() 
+                    if c['owner'] == username or username in c.get('subscribers', [])][:50]
     
     def subscribe_to_channel(self, channel_id: str, username: str, role: str = None) -> bool:
         if USE_MONGODB:
