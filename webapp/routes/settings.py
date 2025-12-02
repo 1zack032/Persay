@@ -252,3 +252,156 @@ def find_contact():
     else:
         return jsonify({'success': True, 'found': False})
 
+
+# ==========================================
+# PREMIUM SUBSCRIPTION
+# ==========================================
+
+@settings_bp.route('/premium')
+def premium_page():
+    """Premium subscription page with all features"""
+    from webapp.utils.premium_features import (
+        PREMIUM_FONTS,
+        FONT_CATEGORIES,
+        LIVE_EMOJIS,
+        EMOJI_ANIMATIONS_CSS,
+        CHAT_THEMES,
+        PREMIUM_FEATURES,
+        FEATURE_CATEGORIES,
+        PRICING_TIERS,
+        get_feature_count,
+        generate_google_fonts_url
+    )
+    
+    username = session.get('username')
+    user = store.get_user(username) if username else None
+    is_premium = user.get('premium', False) if user else False
+    
+    return render_template('premium.html',
+                         username=username,
+                         is_premium=is_premium,
+                         fonts=PREMIUM_FONTS,
+                         font_categories=FONT_CATEGORIES,
+                         live_emojis=LIVE_EMOJIS,
+                         emoji_css=EMOJI_ANIMATIONS_CSS,
+                         themes=CHAT_THEMES,
+                         features=PREMIUM_FEATURES,
+                         feature_categories=FEATURE_CATEGORIES,
+                         pricing=PRICING_TIERS,
+                         feature_count=get_feature_count(),
+                         google_fonts_url=generate_google_fonts_url())
+
+
+@settings_bp.route('/upgrade')
+def upgrade():
+    """Redirect to premium page"""
+    return redirect(url_for('settings.premium_page'))
+
+
+@settings_bp.route('/settings/theme', methods=['POST'])
+def set_theme():
+    """Set user's chat theme (premium only)"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    from webapp.utils.premium_features import CHAT_THEMES
+    
+    username = session['username']
+    user = store.get_user(username)
+    
+    theme_id = request.json.get('theme_id')
+    
+    if theme_id not in CHAT_THEMES:
+        return jsonify({'success': False, 'error': 'Invalid theme'}), 400
+    
+    theme = CHAT_THEMES[theme_id]
+    
+    # Check if premium theme requires subscription
+    if theme['premium'] and not user.get('premium', False):
+        return jsonify({'success': False, 'error': 'Premium subscription required'}), 403
+    
+    # Save theme preference
+    store.update_user_preferences(username, {'theme': theme_id})
+    
+    return jsonify({'success': True, 'theme': theme})
+
+
+@settings_bp.route('/settings/font', methods=['POST'])
+def set_font():
+    """Set user's chat font (premium only)"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    from webapp.utils.premium_features import PREMIUM_FONTS
+    
+    username = session['username']
+    user = store.get_user(username)
+    
+    font_id = request.json.get('font_id')
+    
+    if font_id not in PREMIUM_FONTS:
+        return jsonify({'success': False, 'error': 'Invalid font'}), 400
+    
+    font = PREMIUM_FONTS[font_id]
+    
+    # Check if premium font requires subscription
+    if font['premium'] and not user.get('premium', False):
+        return jsonify({'success': False, 'error': 'Premium subscription required'}), 403
+    
+    # Save font preference
+    store.update_user_preferences(username, {'font': font_id})
+    
+    return jsonify({'success': True, 'font': font})
+
+
+@settings_bp.route('/settings/message-style', methods=['POST'])
+def set_message_style():
+    """Set user's message bubble style (premium only)"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not logged in'}), 401
+    
+    from webapp.utils.premium_features import MESSAGE_STYLES
+    
+    username = session['username']
+    user = store.get_user(username)
+    
+    style_id = request.json.get('style_id')
+    
+    if style_id not in MESSAGE_STYLES:
+        return jsonify({'success': False, 'error': 'Invalid style'}), 400
+    
+    style = MESSAGE_STYLES[style_id]
+    
+    # Check if premium style requires subscription
+    if style['premium'] and not user.get('premium', False):
+        return jsonify({'success': False, 'error': 'Premium subscription required'}), 403
+    
+    # Save style preference
+    store.update_user_preferences(username, {'message_style': style_id})
+    
+    return jsonify({'success': True, 'style': style})
+
+
+@settings_bp.route('/api/premium/features')
+def get_premium_features_api():
+    """API endpoint to get all premium features"""
+    from webapp.utils.premium_features import (
+        PREMIUM_FONTS,
+        LIVE_EMOJIS,
+        STICKER_PACKS,
+        CHAT_THEMES,
+        MESSAGE_STYLES,
+        PREMIUM_FEATURES,
+        PRICING_TIERS
+    )
+    
+    return jsonify({
+        'fonts': PREMIUM_FONTS,
+        'emojis': LIVE_EMOJIS,
+        'stickers': STICKER_PACKS,
+        'themes': CHAT_THEMES,
+        'message_styles': MESSAGE_STYLES,
+        'features': PREMIUM_FEATURES,
+        'pricing': PRICING_TIERS
+    })
+

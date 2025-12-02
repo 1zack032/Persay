@@ -198,6 +198,36 @@ class DataStore:
                 self.users[username][k] = v
             return True
     
+    def update_user_preferences(self, username: str, prefs: dict) -> bool:
+        """Update user's premium preferences (theme, font, message style)"""
+        if USE_MONGODB:
+            result = self.users_col.update_one(
+                {'username': username},
+                {'$set': {'preferences': prefs}},
+                upsert=False
+            )
+            # Also update the preferences sub-document
+            for key, value in prefs.items():
+                self.users_col.update_one(
+                    {'username': username},
+                    {'$set': {f'preferences.{key}': value}}
+                )
+            return True
+        else:
+            if username not in self.users:
+                return False
+            if 'preferences' not in self.users[username]:
+                self.users[username]['preferences'] = {}
+            self.users[username]['preferences'].update(prefs)
+            return True
+    
+    def get_user_preferences(self, username: str) -> dict:
+        """Get user's premium preferences"""
+        user = self.get_user(username)
+        if not user:
+            return {}
+        return user.get('preferences', {})
+    
     def user_exists(self, username: str) -> bool:
         if USE_MONGODB:
             return self.users_col.count_documents({'username': username}) > 0

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menza Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="{{ google_fonts_url }}" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1025 50%, #0d0d1a 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 80px 20px 60px;
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.1), transparent);
+        }
+        
+        .premium-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            font-weight: 700;
+            font-size: 14px;
+            border-radius: 30px;
+            margin-bottom: 24px;
+        }
+        
+        .header h1 {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #d8b4fe, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+        
+        .header p {
+            font-size: 20px;
+            color: #a0a0a0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Pricing Cards */
+        .pricing-section {
+            padding: 40px 20px 80px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        
+        .pricing-card {
+            background: linear-gradient(145deg, rgba(30, 25, 50, 0.9), rgba(20, 15, 40, 0.95));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 24px;
+            padding: 32px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+        
+        .pricing-card.featured {
+            border-color: rgba(251, 191, 36, 0.5);
+            background: linear-gradient(145deg, rgba(40, 30, 60, 0.95), rgba(30, 20, 50, 0.98));
+        }
+        
+        .pricing-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 20px;
+        }
+        
+        .plan-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+        
+        .plan-price {
+            font-size: 48px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        
+        .plan-price span {
+            font-size: 18px;
+            font-weight: 400;
+            color: #888;
+        }
+        
+        .plan-savings {
+            color: #10b981;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        
+        .plan-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin-bottom: 24px;
+        }
+        
+        .plan-btn.primary {
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            color: #fff;
+        }
+        
+        .plan-btn.gold {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+        }
+        
+        .plan-btn:hover {
+            transform: scale(1.02);
+        }
+        
+        .plan-features {
+            text-align: left;
+            font-size: 14px;
+            color: #a0a0a0;
+        }
+        
+        .plan-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .plan-features li::before {
+            content: '✓';
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        /* Features Grid */
+        .features-section {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 48px;
+        }
+        
+        .category-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #d8b4fe;
+            margin: 40px 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .feature-card {
+            background: linear-gradient(145deg, rgba(30, 25, 50, 0.9), rgba(20, 15, 40, 0.95));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.2s;
+        }
+        
+        .feature-card:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+        
+        .feature-icon {
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+        
+        .feature-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        
+        .feature-desc {
+            font-size: 13px;
+            color: #888;
+            line-height: 1.5;
+        }
+        
+        /* Font Preview */
+        .fonts-section {
+            padding: 80px 20px;
+            background: rgba(139, 92, 246, 0.05);
+        }
+        
+        .fonts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .font-card {
+            background: linear-gradient(145deg, rgba(30, 25, 50, 0.9), rgba(20, 15, 40, 0.95));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+        }
+        
+        .font-preview {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 12px;
+            min-height: 40px;
+        }
+        
+        .font-name {
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .font-category {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(139, 92, 246, 0.2);
+            color: #d8b4fe;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+        
+        /* Emoji Preview */
+        .emoji-section {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .emoji-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+        }
+        
+        .emoji-card {
+            background: linear-gradient(145deg, rgba(30, 25, 50, 0.9), rgba(20, 15, 40, 0.95));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            width: 100px;
+        }
+        
+        .emoji-large {
+            font-size: 40px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .emoji-name {
+            font-size: 11px;
+            color: #888;
+        }
+        
+        /* Theme Preview */
+        .themes-section {
+            padding: 80px 20px;
+            background: rgba(139, 92, 246, 0.05);
+        }
+        
+        .themes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .theme-card {
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .theme-card:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.02);
+        }
+        
+        .theme-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        /* CTA */
+        .cta-section {
+            text-align: center;
+            padding: 100px 20px;
+        }
+        
+        .cta-section h2 {
+            font-size: 40px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+        
+        .cta-section p {
+            font-size: 18px;
+            color: #888;
+            margin-bottom: 32px;
+        }
+        
+        .cta-btn {
+            display: inline-block;
+            padding: 18px 48px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 14px;
+            transition: all 0.2s;
+        }
+        
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(251, 191, 36, 0.3);
+        }
+        
+        /* Back Link */
+        .back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #888;
+            text-decoration: none;
+            font-size: 14px;
+            z-index: 100;
+        }
+        
+        .back-link:hover {
+            color: #fff;
+        }
+        
+        {{ emoji_css }}
+        
+        @media (max-width: 768px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('main.home') }}" class="back-link">← Back to Menza</a>
+    
+    <!-- Header -->
+    <header class="header">
+        <div class="premium-badge">💎 PREMIUM</div>
+        <h1>Unlock the Full Menza Experience</h1>
+        <p>Custom fonts, animated emojis, chat themes, bot store access, and {{ feature_count }}+ premium features</p>
+    </header>
+    
+    <!-- Pricing -->
+    <section class="pricing-section">
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <div class="plan-name">Monthly</div>
+                <div class="plan-price">${{ pricing.monthly.price }}<span>/mo</span></div>
+                <div class="plan-savings">&nbsp;</div>
+                <a href="#" class="plan-btn primary">Get Started</a>
+                <ul class="plan-features">
+                    <li>All {{ feature_count }}+ premium features</li>
+                    <li>Cancel anytime</li>
+                    <li>Priority support</li>
+                </ul>
+            </div>
+            
+            <div class="pricing-card featured">
+                <div class="plan-name">Yearly</div>
+                <div class="plan-price">${{ pricing.yearly.price }}<span>/yr</span></div>
+                <div class="plan-savings">Save {{ pricing.yearly.savings }} (${{ "%.2f"|format(pricing.yearly.monthly_equivalent) }}/mo)</div>
+                <a href="#" class="plan-btn gold">Get Started</a>
+                <ul class="plan-features">
+                    <li>All {{ feature_count }}+ premium features</li>
+                    <li>Best value</li>
+                    <li>Priority support</li>
+                    <li>Early access to new features</li>
+                </ul>
+            </div>
+            
+            <div class="pricing-card">
+                <div class="plan-name">Lifetime</div>
+                <div class="plan-price">${{ pricing.lifetime.price }}</div>
+                <div class="plan-savings">{{ pricing.lifetime.savings }} - One-time payment</div>
+                <a href="#" class="plan-btn primary">Get Lifetime</a>
+                <ul class="plan-features">
+                    <li>All {{ feature_count }}+ premium features</li>
+                    <li>Pay once, own forever</li>
+                    <li>All future updates included</li>
+                    <li>VIP priority support</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Fonts Preview -->
+    <section class="fonts-section">
+        <h2 class="section-title">✨ Premium Fonts</h2>
+        <p class="section-subtitle">Express yourself with 10+ beautiful font styles</p>
+        
+        <div class="fonts-grid">
+            {% for font_id, font in fonts.items() %}
+            <div class="font-card">
+                <div class="font-preview" style="font-family: {{ font.family }};">{{ font.preview }}</div>
+                <div class="font-name">{{ font.name }}</div>
+                <span class="font-category">{{ font_categories[font.category].icon }} {{ font_categories[font.category].name }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    
+    <!-- Live Emojis -->
+    <section class="emoji-section">
+        <h2 class="section-title">🎉 Live Emojis</h2>
+        <p class="section-subtitle">Animated emojis that bring your reactions to life</p>
+        
+        <div class="emoji-grid">
+            {% for emoji_id, emoji in live_emojis.items() %}
+            <div class="emoji-card">
+                <span class="emoji-large live-emoji" style="animation-name: {{ emoji.animation }};">{{ emoji.static }}</span>
+                <div class="emoji-name">{{ emoji.name }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    
+    <!-- Themes Preview -->
+    <section class="themes-section">
+        <h2 class="section-title">🎨 Chat Themes</h2>
+        <p class="section-subtitle">Customize your chat experience with beautiful themes</p>
+        
+        <div class="themes-grid">
+            {% for theme_id, theme in themes.items() %}
+            <div class="theme-card" style="background: {{ theme.colors.bg }}; color: {{ theme.colors.text }};">
+                <div class="theme-name">{{ theme.name }}</div>
+                <div style="width: 30px; height: 4px; background: {{ theme.colors.accent }}; border-radius: 2px; margin-top: 8px;"></div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    
+    <!-- All Features -->
+    <section class="features-section">
+        <h2 class="section-title">🚀 All Premium Features</h2>
+        <p class="section-subtitle">Everything you get with Menza Premium</p>
+        
+        {% for cat_id, category in feature_categories.items() %}
+        <h3 class="category-title">{{ category.icon }} {{ category.name }}</h3>
+        <div class="features-grid">
+            {% for feat_id, feature in features.items() %}
+            {% if feature.category == cat_id %}
+            <div class="feature-card">
+                <div class="feature-icon">{{ feature.icon }}</div>
+                <div class="feature-name">{{ feature.name }}</div>
+                <div class="feature-desc">{{ feature.description }}</div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </section>
+    
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Ready to Go Premium?</h2>
+        <p>Join thousands of users enjoying the full Menza experience</p>
+        <a href="#" class="cta-btn">💎 Upgrade Now</a>
+    </section>
+</body>
+</html>
+
