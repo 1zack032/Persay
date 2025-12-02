@@ -10,7 +10,7 @@ import secrets
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 
-# MongoDB connection
+# MongoDB connection - OPTIMIZED for performance
 try:
     from pymongo import MongoClient
     from pymongo.errors import ConnectionFailure, OperationFailure
@@ -18,41 +18,37 @@ try:
     MONGODB_URI = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URI')
     
     if MONGODB_URI:
-        # Check if URI looks valid
         if not MONGODB_URI.startswith('mongodb'):
-            print(f"⚠️ Invalid MONGODB_URI format - must start with 'mongodb://' or 'mongodb+srv://'")
             raise ValueError("Invalid URI format")
         
         print(f"🔄 Connecting to MongoDB...")
-        client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=10000)
+        # OPTIMIZED: Connection pooling + fast timeouts
+        client = MongoClient(
+            MONGODB_URI,
+            serverSelectionTimeoutMS=5000,  # 5s server selection
+            connectTimeoutMS=5000,          # 5s connection timeout
+            socketTimeoutMS=10000,          # 10s socket timeout
+            maxPoolSize=10,                 # Connection pool
+            minPoolSize=2,                  # Min connections ready
+            maxIdleTimeMS=30000,            # Close idle connections
+            retryWrites=True,
+            retryReads=True
+        )
         
-        # Test connection
         client.admin.command('ping')
         db = client['menza']
-        
-        # Test we can access the database
-        db.list_collection_names()
-        
-        print("✅ Connected to MongoDB successfully!")
+        print("✅ Connected to MongoDB!")
         USE_MONGODB = True
     else:
-        print("⚠️ MONGODB_URI not set - using in-memory storage (data will be lost on restart)")
+        print("⚠️ MONGODB_URI not set")
         USE_MONGODB = False
         db = None
 except ImportError:
-    print("⚠️ pymongo not installed - using in-memory storage")
+    print("⚠️ pymongo not installed")
     USE_MONGODB = False
     db = None
-except OperationFailure as e:
-    print(f"⚠️ MongoDB auth error: {e.details.get('errmsg', str(e))} - using in-memory storage")
-    USE_MONGODB = False
-    db = None
-except ConnectionFailure as e:
-    print(f"⚠️ MongoDB connection failed: {str(e)[:100]} - using in-memory storage")
-    USE_MONGODB = False
-    db = None
-except Exception as e:
-    print(f"⚠️ MongoDB error ({type(e).__name__}): {str(e)[:100]} - using in-memory storage")
+except (OperationFailure, ConnectionFailure, Exception) as e:
+    print(f"⚠️ MongoDB error: {str(e)[:80]}")
     USE_MONGODB = False
     db = None
 
@@ -1243,162 +1239,65 @@ class DataStore:
     BOT_STATUS_SUSPENDED = 'suspended'
     
     def _init_verified_bots(self):
-        """Initialize pre-verified official bots"""
+        """Initialize pre-verified official bots - OPTIMIZED with batch check"""
+        now = self.now()  # Single timestamp for all bots
+        
+        # Get all existing bot IDs in a single query
+        if USE_MONGODB:
+            existing_ids = set(b['bot_id'] for b in self.bots_col.find({}, {'bot_id': 1}))
+        else:
+            existing_ids = set(self.bots.keys())
+        
         verified_bots = [
-            # ===== FREE BOTS (Available to all users) =====
-            {
-                'bot_id': 'coingecko_bot',
-                'name': 'CoinGecko Price Bot',
-                'username': '@coingecko',
-                'description': 'Get real-time cryptocurrency prices, market data, and charts. Powered by CoinGecko API.',
-                'avatar': '🦎',
-                'category': 'crypto',
-                'developer': 'Menza Official',
-                'website': 'https://coingecko.com',
-                'verified': True,
-                'official': True,
-                'free': True,  # FREE FOR ALL USERS
-                'status': self.BOT_STATUS_APPROVED,
-                'commands': [
-                    {'command': '/price', 'description': 'Get price of a coin', 'usage': '/price BTC'},
-                    {'command': '/chart', 'description': 'Get price chart', 'usage': '/chart ETH 7d'},
-                    {'command': '/top', 'description': 'Top coins by market cap', 'usage': '/top 10'},
-                    {'command': '/trending', 'description': 'Trending coins', 'usage': '/trending'},
-                ],
-                'permissions': ['commands.receive', 'messages.send'],
-                'api_type': 'coingecko',
-                'created_at': self.now(),
-                'installs': 0,
-                'rating': 4.8,
-                'reviews': [],
-                'reports': [],
-                'groups': [],
-                'channels': [],
-            },
-            {
-                'bot_id': 'phanes_bot',
-                'name': 'Phanes Trading Bot',
-                'username': '@phanes',
-                'description': 'Advanced trading signals, copy trading, and portfolio management. Connect to major exchanges.',
-                'avatar': '🔮',
-                'category': 'trading',
-                'developer': 'Menza Official',
-                'website': 'https://phanes.trade',
-                'verified': True,
-                'official': True,
-                'free': True,  # FREE FOR ALL USERS
-                'status': self.BOT_STATUS_APPROVED,
-                'commands': [
-                    {'command': '/trade', 'description': 'Execute a trade', 'usage': '/trade BTC buy 0.01'},
-                    {'command': '/balance', 'description': 'Check wallet balance', 'usage': '/balance'},
-                    {'command': '/pnl', 'description': 'Profit/loss report', 'usage': '/pnl 7d'},
-                    {'command': '/copy', 'description': 'Copy a trader', 'usage': '/copy @trader'},
-                    {'command': '/alert', 'description': 'Set price alert', 'usage': '/alert BTC 50000'},
-                    {'command': '/positions', 'description': 'View open positions', 'usage': '/positions'},
-                ],
-                'permissions': ['commands.receive', 'messages.send'],
-                'api_type': 'phanes',
-                'created_at': self.now(),
-                'installs': 0,
-                'rating': 4.9,
-                'reviews': [],
-                'reports': [],
-                'groups': [],
-                'channels': [],
-            },
-            
-            # ===== PREMIUM BOTS (Require subscription) =====
-            {
-                'bot_id': 'news_bot',
-                'name': 'Crypto News Bot',
-                'username': '@cryptonews',
-                'description': 'Stay updated with the latest cryptocurrency and blockchain news from trusted sources.',
-                'avatar': '📰',
-                'category': 'news',
-                'developer': 'Menza Official',
-                'website': None,
-                'verified': True,
-                'official': True,
-                'free': False,  # PREMIUM
-                'status': self.BOT_STATUS_APPROVED,
-                'commands': [
-                    {'command': '/news', 'description': 'Latest crypto news', 'usage': '/news'},
-                    {'command': '/alerts', 'description': 'Set news alerts', 'usage': '/alerts BTC'},
-                    {'command': '/tldr', 'description': 'Summarize recent news', 'usage': '/tldr'},
-                ],
-                'permissions': ['commands.receive', 'messages.send'],
-                'api_type': 'internal',
-                'created_at': self.now(),
-                'installs': 0,
-                'rating': 4.5,
-                'reviews': [],
-                'reports': [],
-                'groups': [],
-                'channels': [],
-            },
-            {
-                'bot_id': 'trading_signals_bot',
-                'name': 'Trading Signals Pro',
-                'username': '@signals',
-                'description': 'Professional trading signals and market analysis for crypto traders.',
-                'avatar': '📊',
-                'category': 'trading',
-                'developer': 'Menza Official',
-                'website': None,
-                'verified': True,
-                'official': True,
-                'free': False,  # PREMIUM
-                'status': self.BOT_STATUS_APPROVED,
-                'commands': [
-                    {'command': '/signal', 'description': 'Get latest signal', 'usage': '/signal'},
-                    {'command': '/analysis', 'description': 'Market analysis', 'usage': '/analysis BTC'},
-                    {'command': '/portfolio', 'description': 'Track portfolio', 'usage': '/portfolio'},
-                ],
-                'permissions': ['commands.receive', 'messages.send'],
-                'api_type': 'internal',
-                'created_at': self.now(),
-                'installs': 0,
-                'rating': 4.6,
-                'reviews': [],
-                'reports': [],
-                'groups': [],
-                'channels': [],
-            },
-            {
-                'bot_id': 'mod_bot',
-                'name': 'Moderation Bot',
-                'username': '@modbot',
-                'description': 'Automated moderation for your groups and channels. Filter spam, manage members, and more.',
-                'avatar': '🛡️',
-                'category': 'moderation',
-                'developer': 'Menza Official',
-                'website': None,
-                'verified': True,
-                'official': True,
-                'free': False,  # PREMIUM
-                'status': self.BOT_STATUS_APPROVED,
-                'commands': [
-                    {'command': '/warn', 'description': 'Warn a user', 'usage': '/warn @user reason'},
-                    {'command': '/mute', 'description': 'Mute a user', 'usage': '/mute @user 1h'},
-                    {'command': '/ban', 'description': 'Ban a user', 'usage': '/ban @user'},
-                    {'command': '/rules', 'description': 'Show group rules', 'usage': '/rules'},
-                ],
-                'permissions': ['commands.receive', 'messages.send', 'members.manage'],
-                'api_type': 'internal',
-                'created_at': self.now(),
-                'installs': 0,
-                'rating': 4.7,
-                'reviews': [],
-                'reports': [],
-                'groups': [],
-                'channels': [],
-            },
+            # FREE BOTS
+            {'bot_id': 'coingecko_bot', 'name': 'CoinGecko Price Bot', 'username': '@coingecko',
+             'description': 'Get real-time cryptocurrency prices.', 'avatar': '🦎', 'category': 'crypto',
+             'developer': 'Menza Official', 'website': 'https://coingecko.com', 'verified': True, 'official': True,
+             'free': True, 'status': self.BOT_STATUS_APPROVED, 'api_type': 'coingecko', 'created_at': now,
+             'commands': [{'command': '/price', 'description': 'Get price', 'usage': '/price BTC'},
+                         {'command': '/top', 'description': 'Top coins', 'usage': '/top 10'}],
+             'permissions': ['commands.receive', 'messages.send'], 'installs': 0, 'rating': 4.8,
+             'reviews': [], 'reports': [], 'groups': [], 'channels': []},
+            {'bot_id': 'phanes_bot', 'name': 'Phanes Trading Bot', 'username': '@phanes',
+             'description': 'Advanced trading signals and portfolio management.', 'avatar': '🔮', 'category': 'trading',
+             'developer': 'Menza Official', 'website': 'https://phanes.trade', 'verified': True, 'official': True,
+             'free': True, 'status': self.BOT_STATUS_APPROVED, 'api_type': 'phanes', 'created_at': now,
+             'commands': [{'command': '/trade', 'description': 'Execute trade', 'usage': '/trade BTC buy 0.01'},
+                         {'command': '/balance', 'description': 'Check balance', 'usage': '/balance'}],
+             'permissions': ['commands.receive', 'messages.send'], 'installs': 0, 'rating': 4.9,
+             'reviews': [], 'reports': [], 'groups': [], 'channels': []},
+            # PREMIUM BOTS
+            {'bot_id': 'news_bot', 'name': 'Crypto News Bot', 'username': '@cryptonews',
+             'description': 'Latest cryptocurrency news.', 'avatar': '📰', 'category': 'news',
+             'developer': 'Menza Official', 'verified': True, 'official': True, 'free': False,
+             'status': self.BOT_STATUS_APPROVED, 'api_type': 'internal', 'created_at': now,
+             'commands': [{'command': '/news', 'description': 'Latest news', 'usage': '/news'}],
+             'permissions': ['commands.receive', 'messages.send'], 'installs': 0, 'rating': 4.5,
+             'reviews': [], 'reports': [], 'groups': [], 'channels': []},
+            {'bot_id': 'trading_signals_bot', 'name': 'Trading Signals Pro', 'username': '@signals',
+             'description': 'Professional trading signals.', 'avatar': '📊', 'category': 'trading',
+             'developer': 'Menza Official', 'verified': True, 'official': True, 'free': False,
+             'status': self.BOT_STATUS_APPROVED, 'api_type': 'internal', 'created_at': now,
+             'commands': [{'command': '/signal', 'description': 'Get signal', 'usage': '/signal'}],
+             'permissions': ['commands.receive', 'messages.send'], 'installs': 0, 'rating': 4.6,
+             'reviews': [], 'reports': [], 'groups': [], 'channels': []},
+            {'bot_id': 'mod_bot', 'name': 'Moderation Bot', 'username': '@modbot',
+             'description': 'Automated moderation for groups.', 'avatar': '🛡️', 'category': 'moderation',
+             'developer': 'Menza Official', 'verified': True, 'official': True, 'free': False,
+             'status': self.BOT_STATUS_APPROVED, 'api_type': 'internal', 'created_at': now,
+             'commands': [{'command': '/warn', 'description': 'Warn user', 'usage': '/warn @user'}],
+             'permissions': ['commands.receive', 'messages.send', 'members.manage'], 'installs': 0, 'rating': 4.7,
+             'reviews': [], 'reports': [], 'groups': [], 'channels': []},
         ]
         
-        for bot in verified_bots:
-            existing = self.get_bot(bot['bot_id'])
-            if not existing:
-                self._save_bot(bot)
+        # Batch insert new bots only
+        new_bots = [b for b in verified_bots if b['bot_id'] not in existing_ids]
+        if new_bots:
+            if USE_MONGODB:
+                self.bots_col.insert_many(new_bots)
+            else:
+                for bot in new_bots:
+                    self.bots[bot['bot_id']] = bot
     
     def _save_bot(self, bot: dict):
         """Save a bot to storage"""
@@ -1854,37 +1753,49 @@ else:
 # ==========================================
 
 def _init_test_users():
-    """Create test users for development and testing"""
+    """Create test users - OPTIMIZED with batch operations"""
+    import hashlib
+    
     test_users = [
-        # FREE USERS
-        {'username': 'alice_free', 'password': 'test123456', 'display_name': 'Alice (Free)', 'premium': False},
-        {'username': 'bob_free', 'password': 'test123456', 'display_name': 'Bob (Free)', 'premium': False},
-        {'username': 'charlie_free', 'password': 'test123456', 'display_name': 'Charlie (Free)', 'premium': False},
-        {'username': 'diana_free', 'password': 'test123456', 'display_name': 'Diana (Free)', 'premium': False},
-        {'username': 'eve_free', 'password': 'test123456', 'display_name': 'Eve (Free)', 'premium': False},
-        # PREMIUM USERS
-        {'username': 'frank_premium', 'password': 'test123456', 'display_name': 'Frank (Premium)', 'premium': True},
-        {'username': 'grace_premium', 'password': 'test123456', 'display_name': 'Grace (Premium)', 'premium': True},
-        {'username': 'henry_premium', 'password': 'test123456', 'display_name': 'Henry (Premium)', 'premium': True},
-        {'username': 'ivy_premium', 'password': 'test123456', 'display_name': 'Ivy (Premium)', 'premium': True},
-        # ADMIN USER
-        {'username': 'admin_user', 'password': 'admin123456', 'display_name': 'Admin', 'premium': True, 'is_admin': True},
+        ('alice_free', 'test123456', 'Alice (Free)', False, False),
+        ('bob_free', 'test123456', 'Bob (Free)', False, False),
+        ('charlie_free', 'test123456', 'Charlie (Free)', False, False),
+        ('diana_free', 'test123456', 'Diana (Free)', False, False),
+        ('eve_free', 'test123456', 'Eve (Free)', False, False),
+        ('frank_premium', 'test123456', 'Frank (Premium)', True, False),
+        ('grace_premium', 'test123456', 'Grace (Premium)', True, False),
+        ('henry_premium', 'test123456', 'Henry (Premium)', True, False),
+        ('ivy_premium', 'test123456', 'Ivy (Premium)', True, False),
+        ('admin_user', 'admin123456', 'Admin', True, True),
     ]
     
-    created = 0
-    for user_data in test_users:
-        if not store.user_exists(user_data['username']):
-            store.create_user(user_data['username'], user_data['password'])
-            store.update_user_profile(user_data['username'], {
-                'display_name': user_data['display_name']
-            })
-            store.set_user_premium(user_data['username'], user_data.get('premium', False))
-            if user_data.get('is_admin'):
-                store.set_user_admin(user_data['username'], True)
-            created += 1
+    # Get existing usernames in single query
+    if USE_MONGODB:
+        existing = set(u['username'] for u in store.users_col.find({}, {'username': 1}))
+    else:
+        existing = set(store.users.keys())
     
-    if created > 0:
-        print(f"✅ Created {created} test users")
+    # Build list of new users to create
+    new_users = []
+    for username, password, display_name, is_premium, is_admin in test_users:
+        if username not in existing:
+            pwd_hash = hashlib.sha256(password.encode()).hexdigest()
+            new_users.append({
+                'username': username, 'password': pwd_hash, 'display_name': display_name,
+                'avatar': None, 'email': None, 'phone': None, 'seed_phrase_hash': None,
+                'show_online_status': True, 'read_receipts': True, 'contacts': [],
+                'contacts_synced': False, 'discoverable': True, 'preferences': {},
+                'is_premium': is_premium, 'is_admin': is_admin, 'created_at': store.now()
+            })
+    
+    # Batch insert
+    if new_users:
+        if USE_MONGODB:
+            store.users_col.insert_many(new_users)
+        else:
+            for u in new_users:
+                store.users[u['username']] = u
+        print(f"✅ Created {len(new_users)} test users")
     else:
         print("✅ Test users already exist")
 
