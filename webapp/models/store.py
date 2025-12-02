@@ -1847,3 +1847,46 @@ if USE_MONGODB:
     print("🗄️ Using MongoDB for persistent storage")
 else:
     print("⚠️ Using in-memory storage (data will be lost on restart)")
+
+
+# ==========================================
+# INITIALIZE TEST USERS
+# ==========================================
+
+def _init_test_users():
+    """Create test users for development and testing"""
+    test_users = [
+        # FREE USERS
+        {'username': 'alice_free', 'password': 'test123456', 'display_name': 'Alice (Free)', 'premium': False},
+        {'username': 'bob_free', 'password': 'test123456', 'display_name': 'Bob (Free)', 'premium': False},
+        {'username': 'charlie_free', 'password': 'test123456', 'display_name': 'Charlie (Free)', 'premium': False},
+        {'username': 'diana_free', 'password': 'test123456', 'display_name': 'Diana (Free)', 'premium': False},
+        {'username': 'eve_free', 'password': 'test123456', 'display_name': 'Eve (Free)', 'premium': False},
+        # PREMIUM USERS
+        {'username': 'frank_premium', 'password': 'test123456', 'display_name': 'Frank (Premium)', 'premium': True},
+        {'username': 'grace_premium', 'password': 'test123456', 'display_name': 'Grace (Premium)', 'premium': True},
+        {'username': 'henry_premium', 'password': 'test123456', 'display_name': 'Henry (Premium)', 'premium': True},
+        {'username': 'ivy_premium', 'password': 'test123456', 'display_name': 'Ivy (Premium)', 'premium': True},
+        # ADMIN USER
+        {'username': 'admin_user', 'password': 'admin123456', 'display_name': 'Admin', 'premium': True, 'is_admin': True},
+    ]
+    
+    created = 0
+    for user_data in test_users:
+        if not store.user_exists(user_data['username']):
+            store.create_user(user_data['username'], user_data['password'])
+            store.update_user_profile(user_data['username'], {
+                'display_name': user_data['display_name']
+            })
+            store.set_user_premium(user_data['username'], user_data.get('premium', False))
+            if user_data.get('is_admin'):
+                store.set_user_admin(user_data['username'], True)
+            created += 1
+    
+    if created > 0:
+        print(f"✅ Created {created} test users")
+    else:
+        print("✅ Test users already exist")
+
+# Initialize test users on startup
+_init_test_users()
