@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Store - Menza</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1025 50%, #0d0d1a 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(20, 15, 35, 0.95);
+            border-right: 1px solid rgba(139, 92, 246, 0.2);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #8b5cf6, #a855f7, #d946ef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-section {
+            padding: 20px;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            color: #a0a0a0;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(139, 92, 246, 0.15);
+            color: #fff;
+        }
+        
+        .nav-item.active {
+            border: 1px solid rgba(139, 92, 246, 0.4);
+        }
+        
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+        }
+        
+        .category-section {
+            padding: 20px;
+            border-top: 1px solid rgba(139, 92, 246, 0.1);
+        }
+        
+        .category-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666;
+            margin-bottom: 15px;
+            padding: 0 18px;
+        }
+        
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 18px;
+            border-radius: 10px;
+            color: #888;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+        
+        .category-item:hover, .category-item.active {
+            background: rgba(139, 92, 246, 0.1);
+            color: #d8b4fe;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #d8b4fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: rgba(30, 25, 50, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            padding: 12px 18px;
+            width: 350px;
+        }
+        
+        .search-bar svg {
+            width: 18px;
+            height: 18px;
+            stroke: #888;
+            margin-right: 12px;
+        }
+        
+        .search-bar input {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+        }
+        
+        /* Featured Section */
+        .featured-section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        /* Bot Cards */
+        .bot-card {
+            background: linear-gradient(145deg, rgba(30, 25, 50, 0.9), rgba(20, 15, 40, 0.95));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .bot-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 10px 40px rgba(139, 92, 246, 0.15);
+        }
+        
+        .bot-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .bot-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(217, 70, 239, 0.3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        
+        .bot-info {
+            flex: 1;
+        }
+        
+        .bot-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .verified-badge {
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            color: #fff;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .official-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .bot-username {
+            font-size: 13px;
+            color: #888;
+            margin-top: 2px;
+        }
+        
+        .bot-description {
+            font-size: 13px;
+            color: #a0a0a0;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .bot-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .bot-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #fbbf24;
+        }
+        
+        .bot-installs {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .bot-category-tag {
+            background: rgba(139, 92, 246, 0.2);
+            color: #d8b4fe;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-left: auto;
+        }
+        
+        /* All Bots Grid */
+        .bots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        
+        /* Developer CTA */
+        .developer-cta {
+            margin-top: 50px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(217, 70, 239, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .developer-cta h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+        
+        .developer-cta p {
+            color: #a0a0a0;
+            margin-bottom: 24px;
+            font-size: 15px;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+        
+        .cta-btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .cta-btn.primary {
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            color: #fff;
+        }
+        
+        .cta-btn.secondary {
+            background: rgba(139, 92, 246, 0.15);
+            color: #d8b4fe;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(139, 92, 246, 0.3);
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+        
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            stroke: #666;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            .main-content {
+                padding: 20px;
+            }
+            .page-header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .search-bar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">Menza</div>
+            
+            <nav class="nav-section">
+                <a href="{{ url_for('main.home') }}" class="nav-item">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Messages
+                </a>
+                <a href="{{ url_for('channels.discover') }}" class="nav-item">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
+                    Channels
+                </a>
+                <a href="{{ url_for('bots.bot_store') }}" class="nav-item active">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/></svg>
+                    Bot Store
+                </a>
+                <a href="{{ url_for('settings.settings') }}" class="nav-item">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                    Settings
+                </a>
+            </nav>
+            
+            <div class="category-section">
+                <div class="category-title">Categories</div>
+                <a href="{{ url_for('bots.bot_store') }}" class="category-item {% if not selected_category %}active{% endif %}">
+                    🎯 All Bots
+                </a>
+                {% for key, cat in categories.items() %}
+                <a href="{{ url_for('bots.bot_store', category=key) }}" class="category-item {% if selected_category == key %}active{% endif %}">
+                    {{ cat.icon }} {{ cat.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">🤖 Bot Store</h1>
+                <div class="search-bar">
+                    <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" placeholder="Search bots..." id="searchInput">
+                </div>
+            </div>
+            
+            <!-- Featured Bots -->
+            {% if featured_bots and not selected_category %}
+            <section class="featured-section">
+                <h2 class="section-title">⭐ Featured Bots</h2>
+                <div class="featured-grid">
+                    {% for bot in featured_bots %}
+                    <a href="{{ url_for('bots.bot_detail', bot_id=bot.bot_id) }}" class="bot-card">
+                        <div class="bot-header">
+                            <div class="bot-avatar">{{ bot.avatar }}</div>
+                            <div class="bot-info">
+                                <div class="bot-name">
+                                    {{ bot.name }}
+                                    {% if bot.official %}
+                                    <span class="official-badge">Official</span>
+                                    {% elif bot.verified %}
+                                    <span class="verified-badge">Verified</span>
+                                    {% endif %}
+                                </div>
+                                <div class="bot-username">{{ bot.username }}</div>
+                            </div>
+                        </div>
+                        <div class="bot-description">{{ bot.description }}</div>
+                        <div class="bot-meta">
+                            <span class="bot-rating">⭐ {{ bot.rating }}</span>
+                            <span class="bot-installs">📥 {{ bot.installs }} installs</span>
+                            <span class="bot-category-tag">{{ categories[bot.category].name }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+            
+            <!-- All Bots -->
+            <section>
+                <h2 class="section-title">
+                    {% if selected_category %}
+                    {{ categories[selected_category].icon }} {{ categories[selected_category].name }} Bots
+                    {% else %}
+                    📦 All Bots
+                    {% endif %}
+                </h2>
+                
+                {% if bots %}
+                <div class="bots-grid" id="botsGrid">
+                    {% for bot in bots %}
+                    <a href="{{ url_for('bots.bot_detail', bot_id=bot.bot_id) }}" class="bot-card" data-name="{{ bot.name|lower }}" data-desc="{{ bot.description|lower }}">
+                        <div class="bot-header">
+                            <div class="bot-avatar">{{ bot.avatar }}</div>
+                            <div class="bot-info">
+                                <div class="bot-name">
+                                    {{ bot.name }}
+                                    {% if bot.official %}
+                                    <span class="official-badge">Official</span>
+                                    {% elif bot.verified %}
+                                    <span class="verified-badge">Verified</span>
+                                    {% endif %}
+                                </div>
+                                <div class="bot-username">{{ bot.username }}</div>
+                            </div>
+                        </div>
+                        <div class="bot-description">{{ bot.description }}</div>
+                        <div class="bot-meta">
+                            <span class="bot-rating">⭐ {{ bot.rating }}</span>
+                            <span class="bot-installs">📥 {{ bot.installs }} installs</span>
+                            <span class="bot-category-tag">{{ categories[bot.category].name }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
+                    <p>No bots found in this category.</p>
+                </div>
+                {% endif %}
+            </section>
+            
+            <!-- Developer CTA -->
+            <div class="developer-cta">
+                <h3>🛠️ Build Your Own Bot</h3>
+                <p>Create custom bots for your groups and channels. Access our API to build powerful integrations.</p>
+                <div class="cta-buttons">
+                    <a href="{{ url_for('bots.developer_portal') }}" class="cta-btn primary">Developer Portal</a>
+                    <a href="{{ url_for('bots.developer_docs') }}" class="cta-btn secondary">View Documentation</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const botsGrid = document.getElementById('botsGrid');
+        
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const cards = botsGrid.querySelectorAll('.bot-card');
+            
+            cards.forEach(card => {
+                const name = card.dataset.name;
+                const desc = card.dataset.desc;
+                
+                if (name.includes(query) || desc.includes(query)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

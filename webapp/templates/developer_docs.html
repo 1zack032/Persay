@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - Menza Developers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1025 50%, #0d0d1a 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(20, 15, 35, 0.95);
+            border-right: 1px solid rgba(139, 92, 246, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 24px 0;
+        }
+        
+        .sidebar-header {
+            padding: 0 24px 24px;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #8b5cf6, #a855f7, #d946ef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .logo-sub {
+            font-size: 13px;
+            color: #888;
+        }
+        
+        .nav-section {
+            margin-bottom: 24px;
+        }
+        
+        .nav-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666;
+            padding: 0 24px;
+            margin-bottom: 12px;
+        }
+        
+        .nav-item {
+            display: block;
+            padding: 10px 24px;
+            color: #a0a0a0;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(139, 92, 246, 0.1);
+            color: #d8b4fe;
+        }
+        
+        .nav-item.active {
+            border-left: 2px solid #8b5cf6;
+        }
+        
+        /* Main Content */
+        .main {
+            flex: 1;
+            margin-left: 280px;
+            padding: 40px 60px;
+            max-width: 900px;
+        }
+        
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #d8b4fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+        
+        .intro {
+            font-size: 18px;
+            color: #a0a0a0;
+            line-height: 1.7;
+            margin-bottom: 40px;
+        }
+        
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+            margin: 48px 0 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        h2:first-of-type {
+            margin-top: 0;
+        }
+        
+        h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #d8b4fe;
+            margin: 32px 0 16px;
+        }
+        
+        p {
+            font-size: 15px;
+            color: #b0b0b0;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+        
+        /* Code Blocks */
+        .code-block {
+            background: rgba(20, 15, 35, 0.95);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .code-header {
+            background: rgba(139, 92, 246, 0.1);
+            padding: 10px 16px;
+            font-size: 12px;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .code-lang {
+            background: rgba(139, 92, 246, 0.2);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: #d8b4fe;
+        }
+        
+        pre {
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 0;
+        }
+        
+        code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .inline-code {
+            background: rgba(139, 92, 246, 0.15);
+            color: #d8b4fe;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        
+        .keyword { color: #c084fc; }
+        .string { color: #86efac; }
+        .function { color: #93c5fd; }
+        .comment { color: #666; }
+        .number { color: #fbbf24; }
+        
+        /* Endpoint Block */
+        .endpoint {
+            background: linear-gradient(145deg, rgba(30, 25, 50, 0.9), rgba(20, 15, 40, 0.95));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .method {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .method.post { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .method.get { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .method.delete { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        
+        .endpoint-url {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: #fff;
+        }
+        
+        .endpoint-desc {
+            font-size: 14px;
+            color: #a0a0a0;
+            margin-bottom: 20px;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+            font-size: 14px;
+        }
+        
+        th {
+            color: #888;
+            font-weight: 500;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        td {
+            color: #b0b0b0;
+        }
+        
+        td:first-child {
+            font-family: 'JetBrains Mono', monospace;
+            color: #d8b4fe;
+        }
+        
+        /* Callouts */
+        .callout {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        .callout.info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+        }
+        
+        .callout.warning {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fcd34d;
+        }
+        
+        .callout.danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        
+        .callout strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        /* Lists */
+        ul {
+            margin: 16px 0 16px 24px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            color: #b0b0b0;
+            font-size: 15px;
+        }
+        
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+            .main {
+                margin-left: 0;
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="{{ url_for('main.home') }}" class="logo">Menza</a>
+                <div class="logo-sub">Developer Documentation</div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-title">Getting Started</div>
+                <a href="#overview" class="nav-item active">Overview</a>
+                <a href="#authentication" class="nav-item">Authentication</a>
+                <a href="#quickstart" class="nav-item">Quick Start</a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-title">API Reference</div>
+                <a href="#send-message" class="nav-item">Send Message</a>
+                <a href="#webhooks" class="nav-item">Webhooks</a>
+                <a href="#commands" class="nav-item">Commands</a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-title">Integrations</div>
+                <a href="#coingecko" class="nav-item">CoinGecko API</a>
+                <a href="#custom-apis" class="nav-item">Custom APIs</a>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-title">Resources</div>
+                <a href="{{ url_for('bots.developer_portal') }}" class="nav-item">Developer Portal</a>
+                <a href="{{ url_for('bots.bot_store') }}" class="nav-item">Bot Store</a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main">
+            <h1>API Documentation</h1>
+            <p class="intro">
+                Build powerful bots and integrations for Menza. This documentation covers everything you need to create, deploy, and manage bots that interact with groups and channels.
+            </p>
+            
+            <h2 id="overview">Overview</h2>
+            <p>
+                Menza bots can respond to slash commands, send messages to groups and channels, and integrate with external APIs like CoinGecko for real-time data. All bot interactions are secured with API keys and follow strict rate limits.
+            </p>
+            
+            <h3>Base URL</h3>
+            <div class="code-block">
+                <pre><code>https://your-menza-instance.com/api/bot/</code></pre>
+            </div>
+            
+            <h3>Rate Limits</h3>
+            <p>To ensure fair usage, all bots are subject to the following rate limits:</p>
+            <ul>
+                <li><strong>60 requests per minute</strong> per bot</li>
+                <li><strong>100 messages per hour</strong> per group/channel</li>
+                <li>Exceeding limits returns <span class="inline-code">429 Too Many Requests</span></li>
+            </ul>
+            
+            <h2 id="authentication">Authentication</h2>
+            <p>
+                All API requests must include your bot's credentials in the headers. You receive these when you create a bot in the Developer Portal.
+            </p>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Required Headers</span>
+                    <span class="code-lang">HTTP</span>
+                </div>
+                <pre><code>X-Bot-ID: your_bot_id
+X-Bot-API-Key: your_64_character_api_key</code></pre>
+            </div>
+            
+            <div class="callout warning">
+                <strong>⚠️ Keep Your API Key Secret</strong>
+                Never expose your API key in client-side code or public repositories. If compromised, regenerate it immediately from the Developer Portal.
+            </div>
+            
+            <h2 id="quickstart">Quick Start</h2>
+            <p>Here's a complete example of a bot that responds to the <span class="inline-code">/hello</span> command:</p>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <span>bot.py</span>
+                    <span class="code-lang">Python</span>
+                </div>
+                <pre><code><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, request
+<span class="keyword">import</span> requests
+
+app = Flask(__name__)
+
+BOT_ID = <span class="string">"your_bot_id"</span>
+API_KEY = <span class="string">"your_api_key"</span>
+BASE_URL = <span class="string">"https://your-menza-instance.com"</span>
+
+<span class="keyword">def</span> <span class="function">send_message</span>(target_type, target_id, message):
+    <span class="string">"""Send a message to a group or channel"""</span>
+    response = requests.post(
+        f<span class="string">"{BASE_URL}/api/bot/send"</span>,
+        headers={
+            <span class="string">"X-Bot-ID"</span>: BOT_ID,
+            <span class="string">"X-Bot-API-Key"</span>: API_KEY
+        },
+        json={
+            <span class="string">"type"</span>: target_type,
+            <span class="string">"target_id"</span>: target_id,
+            <span class="string">"message"</span>: message
+        }
+    )
+    <span class="keyword">return</span> response.json()
+
+<span class="comment"># Webhook endpoint - Menza sends commands here</span>
+@app.route(<span class="string">"/webhook"</span>, methods=[<span class="string">"POST"</span>])
+<span class="keyword">def</span> <span class="function">handle_webhook</span>():
+    data = request.json
+    
+    <span class="keyword">if</span> data[<span class="string">"command"</span>] == <span class="string">"/hello"</span>:
+        user = data[<span class="string">"sender"</span>]
+        send_message(
+            data[<span class="string">"type"</span>],
+            data[<span class="string">"target_id"</span>],
+            f<span class="string">"👋 Hello, {user}!"</span>
+        )
+    
+    <span class="keyword">return</span> {<span class="string">"ok"</span>: <span class="keyword">True</span>}
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    app.run(port=<span class="number">5001</span>)</code></pre>
+            </div>
+            
+            <h2 id="send-message">Send Message</h2>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="endpoint-url">/api/bot/send</span>
+                </div>
+                <p class="endpoint-desc">Send a message to a group or channel where your bot is installed.</p>
+                
+                <h4 style="font-size: 14px; color: #888; margin-bottom: 12px;">Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>type</td>
+                        <td>string</td>
+                        <td>Either "group" or "channel"</td>
+                    </tr>
+                    <tr>
+                        <td>target_id</td>
+                        <td>string</td>
+                        <td>The group or channel ID</td>
+                    </tr>
+                    <tr>
+                        <td>message</td>
+                        <td>string</td>
+                        <td>Message content (max 4000 chars)</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <h3>Response</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Success Response</span>
+                    <span class="code-lang">JSON</span>
+                </div>
+                <pre><code>{
+    <span class="string">"success"</span>: <span class="keyword">true</span>,
+    <span class="string">"message_id"</span>: <span class="string">"abc123def456"</span>
+}</code></pre>
+            </div>
+            
+            <h2 id="webhooks">Webhooks</h2>
+            <p>
+                When users invoke your bot's commands, Menza sends a POST request to your webhook URL. Configure your webhook in the Developer Portal.
+            </p>
+            
+            <h3>Webhook Payload</h3>
+            <div class="code-block">
+                <div class="code-header">
+                    <span>Incoming webhook from Menza</span>
+                    <span class="code-lang">JSON</span>
+                </div>
+                <pre><code>{
+    <span class="string">"event"</span>: <span class="string">"command"</span>,
+    <span class="string">"command"</span>: <span class="string">"/price"</span>,
+    <span class="string">"args"</span>: [<span class="string">"BTC"</span>],
+    <span class="string">"sender"</span>: <span class="string">"alice"</span>,
+    <span class="string">"type"</span>: <span class="string">"group"</span>,
+    <span class="string">"target_id"</span>: <span class="string">"group_abc123"</span>,
+    <span class="string">"timestamp"</span>: <span class="string">"2025-01-15T10:30:00Z"</span>
+}</code></pre>
+            </div>
+            
+            <div class="callout info">
+                <strong>ℹ️ Webhook Security</strong>
+                Verify incoming webhooks by checking the <span class="inline-code">X-Menza-Signature</span> header against your API key.
+            </div>
+            
+            <h2 id="commands">Commands</h2>
+            <p>
+                Define commands when creating your bot. Commands must start with <span class="inline-code">/</span> and contain only lowercase letters, numbers, and underscores.
+            </p>
+            
+            <h3>Command Structure</h3>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>command</td>
+                    <td>The trigger (e.g., /price)</td>
+                </tr>
+                <tr>
+                    <td>description</td>
+                    <td>Shown in command list</td>
+                </tr>
+                <tr>
+                    <td>usage</td>
+                    <td>Example usage (e.g., /price BTC)</td>
+                </tr>
+            </table>
+            
+            <h2 id="coingecko">CoinGecko Integration</h2>
+            <p>
+                For cryptocurrency bots, you can integrate with the CoinGecko API to fetch real-time prices and market data.
+            </p>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <span>coingecko.py</span>
+                    <span class="code-lang">Python</span>
+                </div>
+                <pre><code><span class="keyword">import</span> requests
+
+<span class="keyword">def</span> <span class="function">get_crypto_price</span>(coin_id):
+    <span class="string">"""Get price from CoinGecko API"""</span>
+    url = f<span class="string">"https://api.coingecko.com/api/v3/simple/price"</span>
+    params = {
+        <span class="string">"ids"</span>: coin_id,
+        <span class="string">"vs_currencies"</span>: <span class="string">"usd"</span>,
+        <span class="string">"include_24hr_change"</span>: <span class="string">"true"</span>
+    }
+    
+    response = requests.get(url, params=params)
+    data = response.json()
+    
+    <span class="keyword">if</span> coin_id <span class="keyword">in</span> data:
+        price = data[coin_id][<span class="string">"usd"</span>]
+        change = data[coin_id][<span class="string">"usd_24h_change"</span>]
+        <span class="keyword">return</span> f<span class="string">"${price:,.2f} ({change:+.2f}%)"</span>
+    
+    <span class="keyword">return</span> <span class="string">"Coin not found"</span>
+
+<span class="comment"># Usage</span>
+print(get_crypto_price(<span class="string">"bitcoin"</span>))  <span class="comment"># $45,123.00 (+2.45%)</span></code></pre>
+            </div>
+            
+            <h2 id="custom-apis">Custom API Integration</h2>
+            <p>
+                You can integrate any external API with your Menza bot. Here's a pattern for handling multiple data sources:
+            </p>
+            
+            <div class="code-block">
+                <div class="code-header">
+                    <span>multi_api_bot.py</span>
+                    <span class="code-lang">Python</span>
+                </div>
+                <pre><code><span class="keyword">class</span> <span class="function">APIHandler</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self):
+        self.apis = {
+            <span class="string">"crypto"</span>: self.handle_crypto,
+            <span class="string">"news"</span>: self.handle_news,
+            <span class="string">"weather"</span>: self.handle_weather
+        }
+    
+    <span class="keyword">def</span> <span class="function">process</span>(self, api_type, query):
+        <span class="keyword">if</span> api_type <span class="keyword">in</span> self.apis:
+            <span class="keyword">return</span> self.apis[api_type](query)
+        <span class="keyword">return</span> <span class="string">"Unknown API type"</span>
+    
+    <span class="keyword">def</span> <span class="function">handle_crypto</span>(self, coin):
+        <span class="comment"># Call CoinGecko</span>
+        <span class="keyword">return</span> get_crypto_price(coin)
+    
+    <span class="keyword">def</span> <span class="function">handle_news</span>(self, topic):
+        <span class="comment"># Call news API</span>
+        <span class="keyword">return</span> fetch_news(topic)
+    
+    <span class="keyword">def</span> <span class="function">handle_weather</span>(self, location):
+        <span class="comment"># Call weather API</span>
+        <span class="keyword">return</span> get_weather(location)</code></pre>
+            </div>
+            
+            <div class="callout danger">
+                <strong>🚫 Prohibited API Uses</strong>
+                Do not use external APIs to scrape user data, bypass rate limits, or access content that violates Menza's terms of service.
+            </div>
+            
+            <h2>Need Help?</h2>
+            <p>
+                If you have questions or run into issues:
+            </p>
+            <ul>
+                <li>Check the <a href="{{ url_for('bots.developer_portal') }}" style="color: #d8b4fe;">Developer Portal</a> for guidelines</li>
+                <li>Report bugs via the bot reporting feature</li>
+                <li>Review example bots in the Bot Store</li>
+            </ul>
+        </main>
+    </div>
+    
+    <script>
+        // Active nav highlight
+        const navItems = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('h2[id], h3[id]');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === '#' + current) {
+                    item.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ bot.name }} - Menza Bot Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1025 50%, #0d0d1a 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #a0a0a0;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 30px;
+            transition: color 0.2s;
+        }
+        
+        .back-link:hover {
+            color: #d8b4fe;
+        }
+        
+        .back-link svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+        }
+        
+        .bot-hero {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            background: linear-gradient(145deg, rgba(30, 25, 50, 0.9), rgba(20, 15, 40, 0.95));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+        }
+        
+        .bot-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(217, 70, 239, 0.4));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 56px;
+            flex-shrink: 0;
+        }
+        
+        .bot-hero-info {
+            flex: 1;
+        }
+        
+        .bot-name-large {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .verified-badge {
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            color: #fff;
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .official-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .bot-username-large {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+        
+        .bot-description-large {
+            font-size: 15px;
+            color: #b0b0b0;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        
+        .bot-meta-row {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .meta-item.rating {
+            color: #fbbf24;
+        }
+        
+        .bot-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-width: 200px;
+        }
+        
+        .add-btn {
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            color: #fff;
+        }
+        
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(139, 92, 246, 0.4);
+        }
+        
+        .report-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            background: transparent;
+            color: #f87171;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .report-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        /* Content Sections */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+        
+        .section {
+            background: linear-gradient(145deg, rgba(30, 25, 50, 0.9), rgba(20, 15, 40, 0.95));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Commands List */
+        .command-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .command-item {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .command-name {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 15px;
+            color: #d8b4fe;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        
+        .command-desc {
+            font-size: 13px;
+            color: #a0a0a0;
+            margin-bottom: 8px;
+        }
+        
+        .command-usage {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            color: #666;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        
+        /* Permissions */
+        .permissions-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .permission-tag {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        /* Reviews */
+        .review-item {
+            border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+            padding: 16px 0;
+        }
+        
+        .review-item:last-child {
+            border-bottom: none;
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .review-user {
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .review-rating {
+            color: #fbbf24;
+            font-size: 13px;
+        }
+        
+        .review-text {
+            font-size: 14px;
+            color: #a0a0a0;
+            line-height: 1.5;
+        }
+        
+        .write-review-btn {
+            width: 100%;
+            padding: 12px;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px dashed rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
+            color: #d8b4fe;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .write-review-btn:hover {
+            background: rgba(139, 92, 246, 0.25);
+        }
+        
+        /* Info Items */
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+            font-size: 14px;
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #888;
+        }
+        
+        .info-value {
+            color: #fff;
+        }
+        
+        .info-value a {
+            color: #d8b4fe;
+            text-decoration: none;
+        }
+        
+        .info-value a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: linear-gradient(145deg, rgba(30, 25, 50, 0.98), rgba(20, 15, 40, 0.98));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        
+        .target-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .target-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+        }
+        
+        .target-name {
+            font-size: 14px;
+            color: #fff;
+        }
+        
+        .target-add-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .target-add-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .target-add-btn.added {
+            background: #10b981;
+        }
+        
+        .modal-close {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 10px;
+            color: #a0a0a0;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+        
+        .empty-targets {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+        }
+        
+        @media (max-width: 768px) {
+            .bot-hero {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .bot-actions {
+                width: 100%;
+            }
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('bots.bot_store') }}" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Bot Store
+        </a>
+        
+        <!-- Bot Hero -->
+        <div class="bot-hero">
+            <div class="bot-avatar-large">{{ bot.avatar }}</div>
+            <div class="bot-hero-info">
+                <h1 class="bot-name-large">
+                    {{ bot.name }}
+                    {% if bot.official %}
+                    <span class="official-badge">Official</span>
+                    {% elif bot.verified %}
+                    <span class="verified-badge">Verified</span>
+                    {% endif %}
+                </h1>
+                <div class="bot-username-large">{{ bot.username }}</div>
+                <p class="bot-description-large">{{ bot.description }}</p>
+                <div class="bot-meta-row">
+                    <span class="meta-item rating">⭐ {{ bot.rating }} rating</span>
+                    <span class="meta-item">📥 {{ bot.installs }} installs</span>
+                    <span class="meta-item">👤 by {{ bot.developer }}</span>
+                </div>
+            </div>
+            <div class="bot-actions">
+                <button class="add-btn" onclick="openAddModal()">➕ Add to Group/Channel</button>
+                <button class="report-btn" onclick="openReportModal()">🚩 Report Bot</button>
+            </div>
+        </div>
+        
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Left Column -->
+            <div>
+                <!-- Commands -->
+                <div class="section">
+                    <h2 class="section-title">⚡ Commands</h2>
+                    <div class="command-list">
+                        {% for cmd in bot.commands %}
+                        <div class="command-item">
+                            <div class="command-name">{{ cmd.command }}</div>
+                            <div class="command-desc">{{ cmd.description }}</div>
+                            <div class="command-usage">{{ cmd.usage }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Permissions -->
+                <div class="section">
+                    <h2 class="section-title">🔒 Permissions Required</h2>
+                    <div class="permissions-list">
+                        {% for perm in bot.permissions %}
+                        <span class="permission-tag">
+                            {% if perm == 'read_messages' %}📖{% elif perm == 'send_messages' %}✉️{% elif perm == 'manage_members' %}👥{% else %}✓{% endif %}
+                            {{ perm|replace('_', ' ')|title }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Reviews -->
+                <div class="section">
+                    <h2 class="section-title">💬 Reviews</h2>
+                    {% if bot.reviews %}
+                    {% for review in bot.reviews[-5:] %}
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span class="review-user">@{{ review.username }}</span>
+                            <span class="review-rating">{% for _ in range(review.rating) %}⭐{% endfor %}</span>
+                        </div>
+                        {% if review.review %}
+                        <p class="review-text">{{ review.review }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p style="color: #888; text-align: center; padding: 20px;">No reviews yet.</p>
+                    {% endif %}
+                    <button class="write-review-btn" onclick="openReviewModal()">✍️ Write a Review</button>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div>
+                <!-- Bot Info -->
+                <div class="section">
+                    <h2 class="section-title">ℹ️ Information</h2>
+                    <div class="info-item">
+                        <span class="info-label">Category</span>
+                        <span class="info-value">{{ bot.category|title }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Developer</span>
+                        <span class="info-value">{{ bot.developer }}</span>
+                    </div>
+                    {% if bot.website %}
+                    <div class="info-item">
+                        <span class="info-label">Website</span>
+                        <span class="info-value"><a href="{{ bot.website }}" target="_blank">Visit ↗</a></span>
+                    </div>
+                    {% endif %}
+                    <div class="info-item">
+                        <span class="info-label">Added</span>
+                        <span class="info-value">{{ bot.created_at[:10] }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Status</span>
+                        <span class="info-value" style="color: #10b981;">✓ Verified</span>
+                    </div>
+                </div>
+                
+                <!-- Security Notice -->
+                <div class="section" style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05)); border-color: rgba(16, 185, 129, 0.3);">
+                    <h2 class="section-title" style="color: #10b981;">🛡️ Security</h2>
+                    <p style="font-size: 13px; color: #a0a0a0; line-height: 1.6;">
+                        This bot has been reviewed and approved by Menza. It complies with our security and privacy guidelines. 
+                        {% if bot.official %}
+                        <br><br><strong style="color: #10b981;">This is an official Menza bot.</strong>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add to Group/Channel Modal -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal">
+            <h3 class="modal-title">Add {{ bot.name }} to...</h3>
+            
+            <div class="target-list">
+                {% if user_groups %}
+                <p style="font-size: 12px; color: #888; margin-bottom: 10px;">Groups</p>
+                {% for group in user_groups %}
+                <div class="target-item">
+                    <span class="target-name">{{ group.name }}</span>
+                    <button class="target-add-btn" onclick="addBot('group', '{{ group.id }}', this)">Add</button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                
+                {% if user_channels %}
+                <p style="font-size: 12px; color: #888; margin: 15px 0 10px 0;">Channels</p>
+                {% for channel in user_channels %}
+                <div class="target-item">
+                    <span class="target-name">{{ channel.name }}</span>
+                    <button class="target-add-btn" onclick="addBot('channel', '{{ channel.id }}', this)">Add</button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                
+                {% if not user_groups and not user_channels %}
+                <div class="empty-targets">
+                    <p>You don't have any groups or channels where you're an admin.</p>
+                    <p style="margin-top: 10px; font-size: 13px;">Create a group or channel first, then add bots to it.</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <button class="modal-close" onclick="closeModal('addModal')">Close</button>
+        </div>
+    </div>
+    
+    <!-- Report Modal -->
+    <div class="modal-overlay" id="reportModal">
+        <div class="modal">
+            <h3 class="modal-title">🚩 Report {{ bot.name }}</h3>
+            <p style="color: #a0a0a0; font-size: 14px; margin-bottom: 20px;">
+                If this bot violates our policies, please let us know. We'll review your report within 24 hours.
+            </p>
+            <select id="reportReason" style="width: 100%; padding: 12px; background: rgba(30, 25, 50, 0.8); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 10px; color: #fff; font-size: 14px; margin-bottom: 16px;">
+                <option value="">Select a reason...</option>
+                <option value="spam">Sends spam or unwanted messages</option>
+                <option value="malicious">Malicious behavior or security risk</option>
+                <option value="impersonation">Impersonating another bot or service</option>
+                <option value="scam">Scam or fraudulent activity</option>
+                <option value="inappropriate">Inappropriate content</option>
+                <option value="other">Other</option>
+            </select>
+            <textarea id="reportDetails" placeholder="Additional details (optional)..." style="width: 100%; padding: 12px; background: rgba(30, 25, 50, 0.8); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 10px; color: #fff; font-size: 14px; min-height: 100px; resize: vertical; margin-bottom: 16px;"></textarea>
+            <button class="add-btn" onclick="submitReport()" style="width: 100%;">Submit Report</button>
+            <button class="modal-close" onclick="closeModal('reportModal')">Cancel</button>
+        </div>
+    </div>
+    
+    <!-- Review Modal -->
+    <div class="modal-overlay" id="reviewModal">
+        <div class="modal">
+            <h3 class="modal-title">✍️ Write a Review</h3>
+            <div style="margin-bottom: 20px;">
+                <label style="color: #a0a0a0; font-size: 14px; display: block; margin-bottom: 8px;">Rating</label>
+                <div id="ratingStars" style="display: flex; gap: 8px; font-size: 28px; cursor: pointer;">
+                    <span onclick="setRating(1)" data-star="1">☆</span>
+                    <span onclick="setRating(2)" data-star="2">☆</span>
+                    <span onclick="setRating(3)" data-star="3">☆</span>
+                    <span onclick="setRating(4)" data-star="4">☆</span>
+                    <span onclick="setRating(5)" data-star="5">☆</span>
+                </div>
+            </div>
+            <textarea id="reviewText" placeholder="Write your review..." style="width: 100%; padding: 12px; background: rgba(30, 25, 50, 0.8); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 10px; color: #fff; font-size: 14px; min-height: 100px; resize: vertical; margin-bottom: 16px;"></textarea>
+            <button class="add-btn" onclick="submitReview()" style="width: 100%;">Submit Review</button>
+            <button class="modal-close" onclick="closeModal('reviewModal')">Cancel</button>
+        </div>
+    </div>
+    
+    <script>
+        const botId = '{{ bot.bot_id }}';
+        let selectedRating = 0;
+        
+        function openAddModal() {
+            document.getElementById('addModal').classList.add('active');
+        }
+        
+        function openReportModal() {
+            document.getElementById('reportModal').classList.add('active');
+        }
+        
+        function openReviewModal() {
+            document.getElementById('reviewModal').classList.add('active');
+        }
+        
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+        
+        async function addBot(type, targetId, btn) {
+            try {
+                const res = await fetch(`/bots/${botId}/add`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({type, target_id: targetId})
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    btn.textContent = 'Added ✓';
+                    btn.classList.add('added');
+                    btn.disabled = true;
+                } else {
+                    alert(data.error || 'Failed to add bot');
+                }
+            } catch (e) {
+                alert('Error adding bot');
+            }
+        }
+        
+        async function submitReport() {
+            const reason = document.getElementById('reportReason').value;
+            const details = document.getElementById('reportDetails').value;
+            
+            if (!reason) {
+                alert('Please select a reason');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`/bots/${botId}/report`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({reason: reason + (details ? ': ' + details : '')})
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    alert('Report submitted. Thank you for helping keep Menza safe.');
+                    closeModal('reportModal');
+                } else {
+                    alert(data.error);
+                }
+            } catch (e) {
+                alert('Error submitting report');
+            }
+        }
+        
+        function setRating(rating) {
+            selectedRating = rating;
+            const stars = document.querySelectorAll('#ratingStars span');
+            stars.forEach((star, i) => {
+                star.textContent = i < rating ? '★' : '☆';
+                star.style.color = i < rating ? '#fbbf24' : '#666';
+            });
+        }
+        
+        async function submitReview() {
+            if (selectedRating === 0) {
+                alert('Please select a rating');
+                return;
+            }
+            
+            const review = document.getElementById('reviewText').value;
+            
+            try {
+                const res = await fetch(`/bots/${botId}/rate`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({rating: selectedRating, review})
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    alert('Review submitted!');
+                    closeModal('reviewModal');
+                    location.reload();
+                } else {
+                    alert(data.error);
+                }
+            } catch (e) {
+                alert('Error submitting review');
+            }
+        }
+        
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

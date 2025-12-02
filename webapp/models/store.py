@@ -97,14 +97,19 @@ class DataStore:
             self.posts_col = db['posts']
             self.notes_col = db['shared_notes']
             self.settings_col = db['chat_settings']
+            self.bots_col = db['bots']
             
             # Create minimal indexes (more are created in MongoDB Atlas)
             self.users_col.create_index('username', unique=True)
             self.channels_col.create_index('name')
             self.messages_col.create_index('room_id')
             self.groups_col.create_index('invite_code')
+            self.bots_col.create_index('bot_id', unique=True)
             
             print("✅ MongoDB collections initialized")
+            
+            # Initialize pre-verified bots
+            self._init_verified_bots()
         else:
             # Fallback to in-memory storage
             self.users: Dict[str, dict] = {}
@@ -114,6 +119,10 @@ class DataStore:
             self.channel_posts: Dict[str, dict] = {}
             self.shared_notes: Dict[str, dict] = {}
             self.chat_settings: Dict[str, dict] = {}
+            self.bots: Dict[str, dict] = {}
+            
+            # Initialize pre-verified bots
+            self._init_verified_bots()
         
         # Always in-memory (doesn't need persistence)
         self.online_users: Dict[str, str] = {}
@@ -1072,6 +1081,444 @@ class DataStore:
                 self.channel_posts[post_id]['comments'].append(comment)
                 return comment
             return None
+    
+    # ==========================================
+    # BOT METHODS
+    # ==========================================
+    
+    # Bot categories
+    BOT_CATEGORIES = {
+        'trading': {'name': 'Trading & Finance', 'icon': '📈'},
+        'crypto': {'name': 'Cryptocurrency', 'icon': '₿'},
+        'news': {'name': 'News & Updates', 'icon': '📰'},
+        'utilities': {'name': 'Utilities', 'icon': '🔧'},
+        'entertainment': {'name': 'Entertainment', 'icon': '🎮'},
+        'productivity': {'name': 'Productivity', 'icon': '📊'},
+        'moderation': {'name': 'Moderation', 'icon': '🛡️'},
+    }
+    
+    # Bot status constants
+    BOT_STATUS_PENDING = 'pending'
+    BOT_STATUS_APPROVED = 'approved'
+    BOT_STATUS_REJECTED = 'rejected'
+    BOT_STATUS_SUSPENDED = 'suspended'
+    
+    def _init_verified_bots(self):
+        """Initialize pre-verified official bots"""
+        verified_bots = [
+            {
+                'bot_id': 'coingecko_bot',
+                'name': 'CoinGecko Price Bot',
+                'username': '@coingecko',
+                'description': 'Get real-time cryptocurrency prices, market data, and charts. Powered by CoinGecko API.',
+                'avatar': '🦎',
+                'category': 'crypto',
+                'developer': 'Menza Official',
+                'website': 'https://coingecko.com',
+                'verified': True,
+                'official': True,
+                'status': self.BOT_STATUS_APPROVED,
+                'commands': [
+                    {'command': '/price', 'description': 'Get price of a coin', 'usage': '/price BTC'},
+                    {'command': '/chart', 'description': 'Get price chart', 'usage': '/chart ETH 7d'},
+                    {'command': '/top', 'description': 'Top coins by market cap', 'usage': '/top 10'},
+                    {'command': '/trending', 'description': 'Trending coins', 'usage': '/trending'},
+                ],
+                'permissions': ['read_messages', 'send_messages'],
+                'api_type': 'coingecko',
+                'created_at': self.now(),
+                'installs': 0,
+                'rating': 4.8,
+            },
+            {
+                'bot_id': 'news_bot',
+                'name': 'Crypto News Bot',
+                'username': '@cryptonews',
+                'description': 'Stay updated with the latest cryptocurrency and blockchain news from trusted sources.',
+                'avatar': '📰',
+                'category': 'news',
+                'developer': 'Menza Official',
+                'website': None,
+                'verified': True,
+                'official': True,
+                'status': self.BOT_STATUS_APPROVED,
+                'commands': [
+                    {'command': '/news', 'description': 'Latest crypto news', 'usage': '/news'},
+                    {'command': '/alerts', 'description': 'Set news alerts', 'usage': '/alerts BTC'},
+                    {'command': '/tldr', 'description': 'Summarize recent news', 'usage': '/tldr'},
+                ],
+                'permissions': ['read_messages', 'send_messages'],
+                'api_type': 'internal',
+                'created_at': self.now(),
+                'installs': 0,
+                'rating': 4.5,
+            },
+            {
+                'bot_id': 'trading_signals_bot',
+                'name': 'Trading Signals Bot',
+                'username': '@signals',
+                'description': 'Professional trading signals and market analysis for crypto traders.',
+                'avatar': '📊',
+                'category': 'trading',
+                'developer': 'Menza Official',
+                'website': None,
+                'verified': True,
+                'official': True,
+                'status': self.BOT_STATUS_APPROVED,
+                'commands': [
+                    {'command': '/signal', 'description': 'Get latest signal', 'usage': '/signal'},
+                    {'command': '/analysis', 'description': 'Market analysis', 'usage': '/analysis BTC'},
+                    {'command': '/portfolio', 'description': 'Track portfolio', 'usage': '/portfolio'},
+                ],
+                'permissions': ['read_messages', 'send_messages'],
+                'api_type': 'internal',
+                'created_at': self.now(),
+                'installs': 0,
+                'rating': 4.6,
+            },
+            {
+                'bot_id': 'mod_bot',
+                'name': 'Moderation Bot',
+                'username': '@modbot',
+                'description': 'Automated moderation for your groups and channels. Filter spam, manage members, and more.',
+                'avatar': '🛡️',
+                'category': 'moderation',
+                'developer': 'Menza Official',
+                'website': None,
+                'verified': True,
+                'official': True,
+                'status': self.BOT_STATUS_APPROVED,
+                'commands': [
+                    {'command': '/warn', 'description': 'Warn a user', 'usage': '/warn @user reason'},
+                    {'command': '/mute', 'description': 'Mute a user', 'usage': '/mute @user 1h'},
+                    {'command': '/ban', 'description': 'Ban a user', 'usage': '/ban @user'},
+                    {'command': '/rules', 'description': 'Show group rules', 'usage': '/rules'},
+                ],
+                'permissions': ['read_messages', 'send_messages', 'manage_members'],
+                'api_type': 'internal',
+                'created_at': self.now(),
+                'installs': 0,
+                'rating': 4.7,
+            },
+        ]
+        
+        for bot in verified_bots:
+            existing = self.get_bot(bot['bot_id'])
+            if not existing:
+                self._save_bot(bot)
+    
+    def _save_bot(self, bot: dict):
+        """Save a bot to storage"""
+        if USE_MONGODB:
+            self.bots_col.update_one(
+                {'bot_id': bot['bot_id']},
+                {'$set': bot},
+                upsert=True
+            )
+        else:
+            self.bots[bot['bot_id']] = bot
+    
+    def get_bot(self, bot_id: str) -> Optional[dict]:
+        """Get a bot by ID"""
+        if USE_MONGODB:
+            return self.bots_col.find_one({'bot_id': bot_id}, {'_id': 0})
+        else:
+            return self.bots.get(bot_id)
+    
+    def get_bot_by_username(self, username: str) -> Optional[dict]:
+        """Get a bot by username"""
+        if USE_MONGODB:
+            return self.bots_col.find_one({'username': username}, {'_id': 0})
+        else:
+            for bot in self.bots.values():
+                if bot.get('username') == username:
+                    return bot
+            return None
+    
+    def get_all_bots(self, status: str = None, category: str = None) -> List[dict]:
+        """Get all bots, optionally filtered"""
+        if USE_MONGODB:
+            query = {}
+            if status:
+                query['status'] = status
+            if category:
+                query['category'] = category
+            return list(self.bots_col.find(query, {'_id': 0}))
+        else:
+            bots = list(self.bots.values())
+            if status:
+                bots = [b for b in bots if b.get('status') == status]
+            if category:
+                bots = [b for b in bots if b.get('category') == category]
+            return bots
+    
+    def get_approved_bots(self, category: str = None) -> List[dict]:
+        """Get all approved bots for the bot store"""
+        return self.get_all_bots(status=self.BOT_STATUS_APPROVED, category=category)
+    
+    def get_featured_bots(self, limit: int = 6) -> List[dict]:
+        """Get featured/popular bots"""
+        bots = self.get_approved_bots()
+        # Sort by installs and rating
+        bots.sort(key=lambda x: (x.get('official', False), x.get('installs', 0), x.get('rating', 0)), reverse=True)
+        return bots[:limit]
+    
+    def create_bot(self, data: dict, developer_username: str) -> dict:
+        """Create a new bot (pending approval)"""
+        bot_id = f"bot_{self.generate_id()}"
+        api_key = secrets.token_hex(32)  # 64 character API key
+        
+        bot = {
+            'bot_id': bot_id,
+            'name': data.get('name', 'Unnamed Bot'),
+            'username': data.get('username', f'@{bot_id}'),
+            'description': data.get('description', ''),
+            'avatar': data.get('avatar', '🤖'),
+            'category': data.get('category', 'utilities'),
+            'developer': developer_username,
+            'developer_email': data.get('developer_email'),
+            'website': data.get('website'),
+            'privacy_policy': data.get('privacy_policy'),
+            'terms_of_service': data.get('terms_of_service'),
+            'verified': False,
+            'official': False,
+            'status': self.BOT_STATUS_PENDING,
+            'commands': data.get('commands', []),
+            'permissions': data.get('permissions', ['read_messages', 'send_messages']),
+            'webhook_url': data.get('webhook_url'),
+            'api_key': api_key,
+            'api_type': 'webhook',
+            'allowed_domains': data.get('allowed_domains', []),
+            'created_at': self.now(),
+            'installs': 0,
+            'rating': 0,
+            'reviews': [],
+            'groups': [],  # Groups this bot is added to
+            'channels': [],  # Channels this bot is added to
+        }
+        
+        self._save_bot(bot)
+        return bot
+    
+    def update_bot(self, bot_id: str, data: dict, by_user: str) -> bool:
+        """Update bot settings (only by developer or admin)"""
+        bot = self.get_bot(bot_id)
+        if not bot:
+            return False
+        
+        # Only developer can update
+        if bot['developer'] != by_user:
+            return False
+        
+        # Allowed fields to update
+        allowed_fields = [
+            'name', 'description', 'avatar', 'category', 'commands',
+            'webhook_url', 'website', 'privacy_policy', 'terms_of_service'
+        ]
+        
+        for field in allowed_fields:
+            if field in data:
+                bot[field] = data[field]
+        
+        bot['updated_at'] = self.now()
+        self._save_bot(bot)
+        return True
+    
+    def approve_bot(self, bot_id: str, by_admin: str) -> bool:
+        """Approve a bot (admin only)"""
+        bot = self.get_bot(bot_id)
+        if not bot:
+            return False
+        
+        bot['status'] = self.BOT_STATUS_APPROVED
+        bot['approved_by'] = by_admin
+        bot['approved_at'] = self.now()
+        self._save_bot(bot)
+        return True
+    
+    def reject_bot(self, bot_id: str, by_admin: str, reason: str = None) -> bool:
+        """Reject a bot (admin only)"""
+        bot = self.get_bot(bot_id)
+        if not bot:
+            return False
+        
+        bot['status'] = self.BOT_STATUS_REJECTED
+        bot['rejected_by'] = by_admin
+        bot['rejected_at'] = self.now()
+        bot['rejection_reason'] = reason
+        self._save_bot(bot)
+        return True
+    
+    def suspend_bot(self, bot_id: str, by_admin: str, reason: str = None) -> bool:
+        """Suspend a bot for policy violations"""
+        bot = self.get_bot(bot_id)
+        if not bot:
+            return False
+        
+        bot['status'] = self.BOT_STATUS_SUSPENDED
+        bot['suspended_by'] = by_admin
+        bot['suspended_at'] = self.now()
+        bot['suspension_reason'] = reason
+        self._save_bot(bot)
+        return True
+    
+    def add_bot_to_group(self, bot_id: str, group_id: str, added_by: str) -> bool:
+        """Add a bot to a group"""
+        bot = self.get_bot(bot_id)
+        group = self.get_group(group_id)
+        
+        if not bot or not group:
+            return False
+        
+        if bot['status'] != self.BOT_STATUS_APPROVED:
+            return False
+        
+        # Check if user can add bots to this group (must be admin/owner)
+        if added_by not in group.get('admins', []) and added_by != group.get('owner'):
+            return False
+        
+        if group_id not in bot.get('groups', []):
+            bot['groups'] = bot.get('groups', []) + [group_id]
+            bot['installs'] = bot.get('installs', 0) + 1
+            self._save_bot(bot)
+        
+        # Add bot to group's bot list
+        if USE_MONGODB:
+            self.groups_col.update_one(
+                {'id': group_id},
+                {'$addToSet': {'bots': bot_id}}
+            )
+        else:
+            if 'bots' not in group:
+                group['bots'] = []
+            if bot_id not in group['bots']:
+                group['bots'].append(bot_id)
+        
+        return True
+    
+    def remove_bot_from_group(self, bot_id: str, group_id: str, removed_by: str) -> bool:
+        """Remove a bot from a group"""
+        bot = self.get_bot(bot_id)
+        group = self.get_group(group_id)
+        
+        if not bot or not group:
+            return False
+        
+        if group_id in bot.get('groups', []):
+            bot['groups'].remove(group_id)
+            self._save_bot(bot)
+        
+        if USE_MONGODB:
+            self.groups_col.update_one(
+                {'id': group_id},
+                {'$pull': {'bots': bot_id}}
+            )
+        else:
+            if bot_id in group.get('bots', []):
+                group['bots'].remove(bot_id)
+        
+        return True
+    
+    def add_bot_to_channel(self, bot_id: str, channel_id: str, added_by: str) -> bool:
+        """Add a bot to a channel"""
+        bot = self.get_bot(bot_id)
+        channel = self.get_channel(channel_id)
+        
+        if not bot or not channel:
+            return False
+        
+        if bot['status'] != self.BOT_STATUS_APPROVED:
+            return False
+        
+        # Check if user can add bots (must be admin)
+        if self.get_member_role(channel_id, added_by) != self.ROLE_ADMIN:
+            return False
+        
+        if channel_id not in bot.get('channels', []):
+            bot['channels'] = bot.get('channels', []) + [channel_id]
+            bot['installs'] = bot.get('installs', 0) + 1
+            self._save_bot(bot)
+        
+        if USE_MONGODB:
+            self.channels_col.update_one(
+                {'id': channel_id},
+                {'$addToSet': {'bots': bot_id}}
+            )
+        else:
+            if 'bots' not in channel:
+                channel['bots'] = []
+            if bot_id not in channel['bots']:
+                channel['bots'].append(bot_id)
+        
+        return True
+    
+    def get_group_bots(self, group_id: str) -> List[dict]:
+        """Get all bots in a group"""
+        group = self.get_group(group_id)
+        if not group:
+            return []
+        
+        bot_ids = group.get('bots', [])
+        return [self.get_bot(bid) for bid in bot_ids if self.get_bot(bid)]
+    
+    def get_channel_bots(self, channel_id: str) -> List[dict]:
+        """Get all bots in a channel"""
+        channel = self.get_channel(channel_id)
+        if not channel:
+            return []
+        
+        bot_ids = channel.get('bots', [])
+        return [self.get_bot(bid) for bid in bot_ids if self.get_bot(bid)]
+    
+    def rate_bot(self, bot_id: str, username: str, rating: int, review: str = None) -> bool:
+        """Rate a bot (1-5 stars)"""
+        bot = self.get_bot(bot_id)
+        if not bot or rating < 1 or rating > 5:
+            return False
+        
+        review_data = {
+            'username': username,
+            'rating': rating,
+            'review': review,
+            'created_at': self.now()
+        }
+        
+        reviews = bot.get('reviews', [])
+        # Remove existing review from same user
+        reviews = [r for r in reviews if r['username'] != username]
+        reviews.append(review_data)
+        
+        # Calculate average rating
+        avg_rating = sum(r['rating'] for r in reviews) / len(reviews)
+        
+        bot['reviews'] = reviews
+        bot['rating'] = round(avg_rating, 1)
+        self._save_bot(bot)
+        return True
+    
+    def report_bot(self, bot_id: str, reporter: str, reason: str) -> bool:
+        """Report a bot for policy violations"""
+        bot = self.get_bot(bot_id)
+        if not bot:
+            return False
+        
+        reports = bot.get('reports', [])
+        reports.append({
+            'reporter': reporter,
+            'reason': reason,
+            'created_at': self.now()
+        })
+        
+        bot['reports'] = reports
+        self._save_bot(bot)
+        return True
+    
+    def verify_bot_api_key(self, bot_id: str, api_key: str) -> bool:
+        """Verify a bot's API key"""
+        bot = self.get_bot(bot_id)
+        if not bot:
+            return False
+        return bot.get('api_key') == api_key
 
 
 # Global store instance

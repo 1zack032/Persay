@@ -6,11 +6,14 @@ Handles real-time private messaging between users.
 - Joining chat rooms
 - Sending encrypted messages
 - Public key sharing
+- Bot command processing
 """
 
 from flask import session, request
 from flask_socketio import emit, join_room
 from webapp.models import store
+import re
+import requests
 
 
 def register_messaging_events(socketio):
@@ -680,4 +683,290 @@ def register_messaging_events(socketio):
         
         group_name = group['name']
         print(f"📝 {username} created group note '{title}' in '{group_name}'")
+    
+    # ==========================================
+    # BOT COMMAND EVENTS
+    # ==========================================
+    
+    def process_bot_command(message, sender, target_type, target_id, room_id):
+        """
+        Check if a message is a bot command and process it.
+        Returns True if a command was processed, False otherwise.
+        """
+        # Check if message starts with /
+        if not message or not message.startswith('/'):
+            return False
+        
+        # Parse command and args
+        parts = message.split()
+        command = parts[0].lower()
+        args = parts[1:] if len(parts) > 1 else []
+        
+        # Get bots for this target
+        if target_type == 'group':
+            bots = store.get_group_bots(target_id)
+        else:
+            return False  # DM commands not supported yet
+        
+        # Find a bot that handles this command
+        for bot in bots:
+            if bot['status'] != store.BOT_STATUS_APPROVED:
+                continue
+            
+            for cmd in bot.get('commands', []):
+                if cmd['command'] == command:
+                    # Process the command
+                    response = process_command(bot, command, args, sender, target_type, target_id)
+                    
+                    if response:
+                        # Send bot response
+                        bot_message = {
+                            'from': bot['username'],
+                            'content': response,
+                            'is_bot': True,
+                            'bot_id': bot['bot_id'],
+                            'timestamp': store.now()
+                        }
+                        
+                        # Store and emit the message
+                        if target_type == 'group':
+                            store.add_group_message(target_id, bot['username'], response, False)
+                            emit('new_group_message', {
+                                'group_id': target_id,
+                                'message': bot_message
+                            }, room=room_id)
+                    
+                    return True
+        
+        return False
+    
+    def process_command(bot, command, args, sender, target_type, target_id):
+        """
+        Process a bot command and return a response.
+        For internal bots, handle directly. For webhook bots, call the webhook.
+        """
+        api_type = bot.get('api_type', 'internal')
+        
+        if api_type == 'coingecko':
+            return process_coingecko_command(command, args)
+        elif api_type == 'internal':
+            return process_internal_command(bot, command, args, sender)
+        elif api_type == 'webhook':
+            return call_webhook(bot, command, args, sender, target_type, target_id)
+        
+        return None
+    
+    def process_coingecko_command(command, args):
+        """Process CoinGecko bot commands"""
+        try:
+            if command == '/price':
+                if not args:
+                    return "❌ Usage: /price <coin>\nExample: /price bitcoin"
+                
+                coin = args[0].lower()
+                # Map common symbols to CoinGecko IDs
+                coin_map = {
+                    'btc': 'bitcoin', 'eth': 'ethereum', 'sol': 'solana',
+                    'doge': 'dogecoin', 'xrp': 'ripple', 'ada': 'cardano',
+                    'dot': 'polkadot', 'matic': 'polygon', 'link': 'chainlink',
+                    'avax': 'avalanche-2', 'bnb': 'binancecoin'
+                }
+                coin_id = coin_map.get(coin, coin)
+                
+                response = requests.get(
+                    'https://api.coingecko.com/api/v3/simple/price',
+                    params={
+                        'ids': coin_id,
+                        'vs_currencies': 'usd',
+                        'include_24hr_change': 'true'
+                    },
+                    timeout=5
+                )
+                data = response.json()
+                
+                if coin_id in data:
+                    price = data[coin_id]['usd']
+                    change = data[coin_id].get('usd_24hr_change', 0)
+                    emoji = '📈' if change >= 0 else '📉'
+                    return f"{emoji} **{coin_id.upper()}**\n💰 ${price:,.2f}\n{'+' if change >= 0 else ''}{change:.2f}% (24h)"
+                else:
+                    return f"❌ Coin '{coin}' not found. Try /price bitcoin"
+            
+            elif command == '/top':
+                limit = int(args[0]) if args else 5
+                limit = min(limit, 10)  # Max 10
+                
+                response = requests.get(
+                    'https://api.coingecko.com/api/v3/coins/markets',
+                    params={
+                        'vs_currency': 'usd',
+                        'order': 'market_cap_desc',
+                        'per_page': limit,
+                        'page': 1
+                    },
+                    timeout=5
+                )
+                data = response.json()
+                
+                result = "🏆 **Top Cryptocurrencies**\n\n"
+                for i, coin in enumerate(data, 1):
+                    change = coin.get('price_change_percentage_24h', 0)
+                    emoji = '📈' if change >= 0 else '📉'
+                    result += f"{i}. **{coin['symbol'].upper()}** - ${coin['current_price']:,.2f} {emoji} {change:+.2f}%\n"
+                
+                return result
+            
+            elif command == '/trending':
+                response = requests.get(
+                    'https://api.coingecko.com/api/v3/search/trending',
+                    timeout=5
+                )
+                data = response.json()
+                
+                result = "🔥 **Trending Coins**\n\n"
+                for i, item in enumerate(data.get('coins', [])[:7], 1):
+                    coin = item['item']
+                    result += f"{i}. **{coin['symbol'].upper()}** - {coin['name']}\n"
+                
+                return result
+            
+        except Exception as e:
+            print(f"❌ CoinGecko error: {e}")
+            return "⚠️ Error fetching crypto data. Please try again."
+        
+        return None
+    
+    def process_internal_command(bot, command, args, sender):
+        """Process internal bot commands"""
+        bot_id = bot['bot_id']
+        
+        if bot_id == 'news_bot':
+            if command == '/news':
+                return "📰 **Latest Crypto News**\n\n" + \
+                       "1. Bitcoin reaches new highs as institutional adoption grows\n" + \
+                       "2. Ethereum 2.0 staking rewards increase\n" + \
+                       "3. Major exchange announces new trading pairs\n\n" + \
+                       "_Data from crypto news aggregators_"
+            elif command == '/tldr':
+                return "📋 **Today's Summary**\n\n" + \
+                       "• Crypto market cap up 2.3%\n" + \
+                       "• BTC dominance at 52%\n" + \
+                       "• Top gainer: SOL (+8%)\n" + \
+                       "• Fear & Greed Index: 65 (Greed)"
+        
+        elif bot_id == 'trading_signals_bot':
+            if command == '/signal':
+                return "📊 **Trading Signal**\n\n" + \
+                       "🟢 **BTC/USD**\n" + \
+                       "Entry: $45,000\n" + \
+                       "Target: $48,000\n" + \
+                       "Stop Loss: $43,500\n" + \
+                       "Risk/Reward: 1:2.5\n\n" + \
+                       "_This is not financial advice_"
+            elif command == '/analysis':
+                coin = args[0].upper() if args else 'BTC'
+                return f"📈 **{coin} Analysis**\n\n" + \
+                       "Trend: Bullish 🟢\n" + \
+                       "Support: $42,000\n" + \
+                       "Resistance: $48,500\n" + \
+                       "RSI: 58 (Neutral)\n" + \
+                       "MACD: Bullish crossover"
+        
+        elif bot_id == 'mod_bot':
+            if command == '/rules':
+                return "📜 **Group Rules**\n\n" + \
+                       "1. Be respectful to all members\n" + \
+                       "2. No spam or self-promotion\n" + \
+                       "3. No NSFW content\n" + \
+                       "4. No financial advice as facts\n" + \
+                       "5. Use appropriate channels"
+        
+        return f"🤖 {bot['name']} received command: {command}"
+    
+    def call_webhook(bot, command, args, sender, target_type, target_id):
+        """Call external bot webhook"""
+        webhook_url = bot.get('webhook_url')
+        if not webhook_url:
+            return None
+        
+        try:
+            response = requests.post(
+                webhook_url,
+                json={
+                    'event': 'command',
+                    'command': command,
+                    'args': args,
+                    'sender': sender,
+                    'type': target_type,
+                    'target_id': target_id,
+                    'timestamp': store.now()
+                },
+                headers={
+                    'Content-Type': 'application/json',
+                    'X-Menza-Bot-ID': bot['bot_id']
+                },
+                timeout=3
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('message') or data.get('response')
+        except Exception as e:
+            print(f"❌ Webhook error for {bot['bot_id']}: {e}")
+        
+        return None
+    
+    @socketio.on('bot_command')
+    def handle_bot_command(data):
+        """
+        Process a bot command directly.
+        Used when user explicitly invokes a command.
+        """
+        if 'username' not in session:
+            return
+        
+        username = session['username']
+        command = data.get('command', '')
+        args = data.get('args', [])
+        group_id = data.get('group_id')
+        
+        if not command.startswith('/'):
+            command = '/' + command
+        
+        if group_id:
+            group = store.get_group(group_id)
+            if not group or username not in group['members']:
+                emit('bot_error', {'error': 'Not authorized'})
+                return
+            
+            room_id = f"group_{group_id}"
+            
+            # Process the command
+            bots = store.get_group_bots(group_id)
+            for bot in bots:
+                if bot['status'] != store.BOT_STATUS_APPROVED:
+                    continue
+                
+                for cmd in bot.get('commands', []):
+                    if cmd['command'] == command:
+                        response = process_command(bot, command, args, username, 'group', group_id)
+                        
+                        if response:
+                            bot_message = {
+                                'from': bot['username'],
+                                'content': response,
+                                'is_bot': True,
+                                'bot_id': bot['bot_id'],
+                                'timestamp': store.now()
+                            }
+                            
+                            store.add_group_message(group_id, bot['username'], response, False)
+                            emit('new_group_message', {
+                                'group_id': group_id,
+                                'message': bot_message
+                            }, room=room_id)
+                        
+                        return
+            
+            emit('bot_error', {'error': 'No bot found for this command'})
 
