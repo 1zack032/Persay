@@ -1,6 +1,5 @@
 """
-💾 Data Store - MongoDB Backend
-PRODUCTION BUILD
+💾 Data Store - MongoDB Backend (Optimized)
 """
 
 import os
@@ -8,51 +7,56 @@ import secrets
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 
-# No-op decorator for production
 def timed_db_op(func):
     return func
 
-# MongoDB connection - OPTIMIZED for performance
-try:
-    from pymongo import MongoClient
-    from pymongo.errors import ConnectionFailure, OperationFailure
+# MongoDB connection with aggressive optimization
+USE_MONGODB = False
+db = None
+client = None
+
+def _connect_mongodb():
+    """Connect to MongoDB with optimized settings"""
+    global USE_MONGODB, db, client
     
-    MONGODB_URI = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URI')
-    
-    if MONGODB_URI:
-        if not MONGODB_URI.startswith('mongodb'):
-            raise ValueError("Invalid URI format")
+    try:
+        from pymongo import MongoClient
         
-        print(f"🔄 Connecting to MongoDB...")
-        # OPTIMIZED: Connection pooling + fast timeouts
+        uri = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URI')
+        if not uri:
+            print("⚠️ No MONGODB_URI - using memory", flush=True)
+            return False
+        
+        # Very aggressive timeouts for speed
         client = MongoClient(
-            MONGODB_URI,
-            serverSelectionTimeoutMS=5000,  # 5s server selection
-            connectTimeoutMS=5000,          # 5s connection timeout
-            socketTimeoutMS=10000,          # 10s socket timeout
-            maxPoolSize=10,                 # Connection pool
-            minPoolSize=2,                  # Min connections ready
-            maxIdleTimeMS=30000,            # Close idle connections
+            uri,
+            serverSelectionTimeoutMS=3000,   # 3s max to find server
+            connectTimeoutMS=3000,            # 3s max to connect
+            socketTimeoutMS=5000,             # 5s max per operation
+            maxPoolSize=5,                    # Small pool
+            minPoolSize=1,
+            maxIdleTimeMS=10000,
             retryWrites=True,
-            retryReads=True
+            retryReads=True,
+            w='majority',
+            journal=False,                    # Faster writes
+            directConnection=False
         )
         
+        # Quick ping test
         client.admin.command('ping')
         db = client['menza']
-        print("✅ Connected to MongoDB!")
         USE_MONGODB = True
-    else:
-        print("⚠️ MONGODB_URI not set")
+        print("✅ MongoDB connected", flush=True)
+        return True
+        
+    except Exception as e:
+        print(f"⚠️ MongoDB failed: {str(e)[:60]} - using memory", flush=True)
         USE_MONGODB = False
-        db = None
-except ImportError:
-    print("⚠️ pymongo not installed")
-    USE_MONGODB = False
-    db = None
-except (OperationFailure, ConnectionFailure, Exception) as e:
-    print(f"⚠️ MongoDB error: {str(e)[:80]}")
-    USE_MONGODB = False
-    db = None
+        return False
+
+# Try to connect
+_connect_mongodb()
 
 
 class DataStore:
@@ -1870,7 +1874,7 @@ else:
 _initialized = False
 
 def ensure_initialized():
-    """Initialize test users lazily - called on first request"""
+    """Initialize test users on first request"""
     global _initialized
     if _initialized:
         return
@@ -1887,28 +1891,40 @@ def ensure_initialized():
     
     try:
         if USE_MONGODB:
-            existing = set(u['username'] for u in store.users_col.find({}, {'username': 1}).limit(100))
-        else:
-            existing = set(store.users.keys())
-        
-        new_users = []
-        for username, password, display_name, is_premium, is_admin in test_users:
-            if username not in existing:
-                pwd_hash = hashlib.sha256(password.encode()).hexdigest()
-                new_users.append({
-                    'username': username, 'password': pwd_hash, 'display_name': display_name,
-                    'avatar': None, 'email': None, 'phone': None, 'seed_phrase_hash': None,
-                    'show_online_status': True, 'read_receipts': True, 'contacts': [],
-                    'contacts_synced': False, 'discoverable': True, 'preferences': {},
-                    'is_premium': is_premium, 'is_admin': is_admin, 'created_at': store.now()
-                })
-        
-        if new_users:
-            if USE_MONGODB:
+            # Check existing users in batch
+            existing = set(u['username'] for u in store.users_col.find(
+                {'username': {'$in': [t[0] for t in test_users]}},
+                {'username': 1}
+            ))
+            
+            new_users = []
+            for username, password, display_name, is_premium, is_admin in test_users:
+                if username not in existing:
+                    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
+                    new_users.append({
+                        'username': username, 'password': pwd_hash, 'display_name': display_name,
+                        'avatar': None, 'email': None, 'phone': None, 'seed_phrase_hash': None,
+                        'show_online_status': True, 'read_receipts': True, 'contacts': [],
+                        'contacts_synced': False, 'discoverable': True, 'preferences': {},
+                        'is_premium': is_premium, 'is_admin': is_admin, 'premium': is_premium,
+                        'created_at': store.now()
+                    })
+            
+            if new_users:
                 store.users_col.insert_many(new_users)
-            else:
-                for u in new_users:
-                    store.users[u['username']] = u
-            print(f"✅ Created {len(new_users)} test users", flush=True)
+        else:
+            # In-memory
+            for username, password, display_name, is_premium, is_admin in test_users:
+                if username not in store.users:
+                    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
+                    store.users[username] = {
+                        'username': username, 'password': pwd_hash, 'display_name': display_name,
+                        'avatar': None, 'email': None, 'phone': None, 'seed_phrase_hash': None,
+                        'show_online_status': True, 'read_receipts': True, 'contacts': [],
+                        'contacts_synced': False, 'discoverable': True, 'preferences': {},
+                        'is_premium': is_premium, 'is_admin': is_admin, 'premium': is_premium,
+                        'created_at': store.now()
+                    }
+        print("✅ Users ready", flush=True)
     except Exception as e:
-        print(f"⚠️ Test user init error (non-fatal): {e}", flush=True)
+        print(f"⚠️ User init: {e}", flush=True)

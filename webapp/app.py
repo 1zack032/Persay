@@ -29,13 +29,10 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
 
 @app.before_request
 def before_request():
-    """Minimal before request"""
-    # Skip lazy init for static files
-    if request.path.startswith('/static'):
-        return
-    # Lazy init test users on first real request
-    from webapp.models.store import ensure_initialized
-    ensure_initialized()
+    """Initialize users on first request"""
+    if not request.path.startswith('/static') and not request.path.startswith('/health'):
+        from webapp.models.store import ensure_initialized
+        ensure_initialized()
 
 @app.after_request
 def after_request(response):
