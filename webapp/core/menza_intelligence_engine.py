@@ -702,10 +702,10 @@ class MenzaIntelligenceEngine:
     CODENAME = "Phoenix"
     
     def __init__(self):
-        # Initialize all components
+        # Initialize components with REDUCED sizes for memory efficiency
         self.predictor = PredictiveUserModel()
-        self.cache = SmartCache(l1_size=1000, l2_size=10000)
-        self.message_queue = PriorityMessageQueue(max_size=10000)
+        self.cache = SmartCache(l1_size=100, l2_size=500)  # Reduced from 1000/10000
+        self.message_queue = PriorityMessageQueue(max_size=500)  # Reduced from 10000
         self.rate_limiter = AdaptiveRateLimiter()
         self.connection_optimizer = ConnectionOptimizer()
         
@@ -714,7 +714,7 @@ class MenzaIntelligenceEngine:
         self._request_count = 0
         self._optimization_savings_ms = 0
         
-        print(f"🧠 Menza Intelligence Engine v{self.VERSION} ({self.CODENAME}) initialized")
+        print(f"🧠 MIE v{self.VERSION} ready", flush=True)
     
     # ==========================================
     # HIGH-LEVEL API

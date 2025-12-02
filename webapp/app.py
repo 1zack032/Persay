@@ -86,8 +86,14 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # 1 year for static files
 
 @app.before_request
 def before_request_timing():
-    """Track request start time"""
+    """Track request start time and ensure lazy init"""
     g.start_time = time.time()
+    
+    # Lazy initialization on first real request
+    if not request.path.startswith('/static') and not request.path.startswith('/health'):
+        from webapp.models.store import ensure_initialized
+        ensure_initialized()
+    
     if DEBUG_TIMING and not request.path.startswith('/static'):
         print(f"📥 START {request.method} {request.path}", flush=True)
 

@@ -110,6 +110,7 @@ class DataStore:
         self._username_cache = None
         self._username_cache_time = 0
         self._cache_ttl = 60  # Cache for 60 seconds
+        self._bots_initialized = False  # Lazy bot init flag
         
         if USE_MONGODB:
             # MongoDB collections
@@ -122,17 +123,8 @@ class DataStore:
             self.settings_col = db['chat_settings']
             self.bots_col = db['bots']
             
-            # Create minimal indexes (more are created in MongoDB Atlas)
-            self.users_col.create_index('username', unique=True)
-            self.channels_col.create_index('name')
-            self.messages_col.create_index('room_id')
-            self.groups_col.create_index('invite_code')
-            self.bots_col.create_index('bot_id', unique=True)
-            
-            print("✅ MongoDB collections initialized")
-            
-            # Initialize pre-verified bots
-            self._init_verified_bots()
+            # Skip index creation on init (indexes should be in MongoDB Atlas)
+            print("✅ MongoDB collections ready", flush=True)
         else:
             # Fallback to in-memory storage
             self.users: Dict[str, dict] = {}
@@ -143,12 +135,19 @@ class DataStore:
             self.shared_notes: Dict[str, dict] = {}
             self.chat_settings: Dict[str, dict] = {}
             self.bots: Dict[str, dict] = {}
-            
-            # Initialize pre-verified bots
-            self._init_verified_bots()
         
         # Always in-memory (doesn't need persistence)
         self.online_users: Dict[str, str] = {}
+    
+    def _ensure_bots_initialized(self):
+        """Lazy bot initialization - called on first bot access"""
+        if self._bots_initialized:
+            return
+        self._bots_initialized = True
+        try:
+            self._init_verified_bots()
+        except Exception as e:
+            print(f"⚠️ Bot init error (non-fatal): {e}", flush=True)
     
     # ==========================================
     # UTILITY METHODS
@@ -1379,6 +1378,7 @@ class DataStore:
     
     def get_bot(self, bot_id: str) -> Optional[dict]:
         """Get a bot by ID"""
+        self._ensure_bots_initialized()
         if USE_MONGODB:
             return self.bots_col.find_one({'bot_id': bot_id}, {'_id': 0})
         else:
@@ -1396,6 +1396,7 @@ class DataStore:
     
     def get_all_bots(self, status: str = None, category: str = None) -> List[dict]:
         """Get all bots, optionally filtered"""
+        self._ensure_bots_initialized()
         if USE_MONGODB:
             query = {}
             if status:
@@ -1883,61 +1884,56 @@ class DataStore:
 store = DataStore()
 
 if USE_MONGODB:
-    print("🗄️ Using MongoDB for persistent storage")
+    print("🗄️ Using MongoDB for persistent storage", flush=True)
 else:
-    print("⚠️ Using in-memory storage (data will be lost on restart)")
+    print("⚠️ Using in-memory storage (data will be lost on restart)", flush=True)
 
 
 # ==========================================
-# INITIALIZE TEST USERS
+# LAZY INITIALIZATION (runs on first request, not import)
 # ==========================================
+_initialized = False
 
-def _init_test_users():
-    """Create test users - OPTIMIZED with batch operations"""
+def ensure_initialized():
+    """Initialize test users lazily - called on first request"""
+    global _initialized
+    if _initialized:
+        return
+    _initialized = True
+    
     import hashlib
     
     test_users = [
         ('alice_free', 'test123456', 'Alice (Free)', False, False),
         ('bob_free', 'test123456', 'Bob (Free)', False, False),
-        ('charlie_free', 'test123456', 'Charlie (Free)', False, False),
-        ('diana_free', 'test123456', 'Diana (Free)', False, False),
-        ('eve_free', 'test123456', 'Eve (Free)', False, False),
         ('frank_premium', 'test123456', 'Frank (Premium)', True, False),
-        ('grace_premium', 'test123456', 'Grace (Premium)', True, False),
-        ('henry_premium', 'test123456', 'Henry (Premium)', True, False),
-        ('ivy_premium', 'test123456', 'Ivy (Premium)', True, False),
         ('admin_user', 'admin123456', 'Admin', True, True),
     ]
     
-    # Get existing usernames in single query
-    if USE_MONGODB:
-        existing = set(u['username'] for u in store.users_col.find({}, {'username': 1}))
-    else:
-        existing = set(store.users.keys())
-    
-    # Build list of new users to create
-    new_users = []
-    for username, password, display_name, is_premium, is_admin in test_users:
-        if username not in existing:
-            pwd_hash = hashlib.sha256(password.encode()).hexdigest()
-            new_users.append({
-                'username': username, 'password': pwd_hash, 'display_name': display_name,
-                'avatar': None, 'email': None, 'phone': None, 'seed_phrase_hash': None,
-                'show_online_status': True, 'read_receipts': True, 'contacts': [],
-                'contacts_synced': False, 'discoverable': True, 'preferences': {},
-                'is_premium': is_premium, 'is_admin': is_admin, 'created_at': store.now()
-            })
-    
-    # Batch insert
-    if new_users:
+    try:
         if USE_MONGODB:
-            store.users_col.insert_many(new_users)
+            existing = set(u['username'] for u in store.users_col.find({}, {'username': 1}).limit(100))
         else:
-            for u in new_users:
-                store.users[u['username']] = u
-        print(f"✅ Created {len(new_users)} test users")
-    else:
-        print("✅ Test users already exist")
-
-# Initialize test users on startup
-_init_test_users()
+            existing = set(store.users.keys())
+        
+        new_users = []
+        for username, password, display_name, is_premium, is_admin in test_users:
+            if username not in existing:
+                pwd_hash = hashlib.sha256(password.encode()).hexdigest()
+                new_users.append({
+                    'username': username, 'password': pwd_hash, 'display_name': display_name,
+                    'avatar': None, 'email': None, 'phone': None, 'seed_phrase_hash': None,
+                    'show_online_status': True, 'read_receipts': True, 'contacts': [],
+                    'contacts_synced': False, 'discoverable': True, 'preferences': {},
+                    'is_premium': is_premium, 'is_admin': is_admin, 'created_at': store.now()
+                })
+        
+        if new_users:
+            if USE_MONGODB:
+                store.users_col.insert_many(new_users)
+            else:
+                for u in new_users:
+                    store.users[u['username']] = u
+            print(f"✅ Created {len(new_users)} test users", flush=True)
+    except Exception as e:
+        print(f"⚠️ Test user init error (non-fatal): {e}", flush=True)
