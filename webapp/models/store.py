@@ -201,18 +201,13 @@ class DataStore:
     def update_user_preferences(self, username: str, prefs: dict) -> bool:
         """Update user's premium preferences (theme, font, message style)"""
         if USE_MONGODB:
+            # Single update with dot notation for nested fields - efficient
+            update_ops = {f'preferences.{key}': value for key, value in prefs.items()}
             result = self.users_col.update_one(
                 {'username': username},
-                {'$set': {'preferences': prefs}},
-                upsert=False
+                {'$set': update_ops}
             )
-            # Also update the preferences sub-document
-            for key, value in prefs.items():
-                self.users_col.update_one(
-                    {'username': username},
-                    {'$set': {f'preferences.{key}': value}}
-                )
-            return True
+            return result.matched_count > 0
         else:
             if username not in self.users:
                 return False
@@ -559,6 +554,23 @@ class DataStore:
             to_delete = [nid for nid, n in self.shared_notes.items() if n['room_id'] == room_id]
             for nid in to_delete:
                 del self.shared_notes[nid]
+    
+    def add_pending_member(self, note_id: str, username: str) -> bool:
+        """Add a user to the pending members list for a shared note"""
+        if USE_MONGODB:
+            result = self.notes_col.update_one(
+                {'id': note_id},
+                {'$addToSet': {'pending_members': username}}
+            )
+            return result.modified_count > 0 or result.matched_count > 0
+        else:
+            if note_id not in self.shared_notes:
+                return False
+            if 'pending_members' not in self.shared_notes[note_id]:
+                self.shared_notes[note_id]['pending_members'] = []
+            if username not in self.shared_notes[note_id]['pending_members']:
+                self.shared_notes[note_id]['pending_members'].append(username)
+            return True
     
     # ==========================================
     # GROUP METHODS
