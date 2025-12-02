@@ -1,14 +1,42 @@
 """
 💾 Data Store - MongoDB Backend (Optimized)
+With performance monitoring for bottleneck detection.
 """
 
 import os
 import secrets
+import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
+from functools import wraps
+
 
 def timed_db_op(func):
-    return func
+    """Decorator to track database operation timing"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        try:
+            result = func(*args, **kwargs)
+            duration_ms = (time.time() - start) * 1000
+            
+            # Log slow operations
+            if duration_ms > 100:
+                print(f"🐢 DB SLOW: {func.__name__} took {duration_ms:.0f}ms", flush=True)
+            
+            # Record in performance monitor
+            try:
+                from webapp.core.performance_monitor import perf
+                perf.record(f"db.{func.__name__}", duration_ms)
+            except:
+                pass
+            
+            return result
+        except Exception as e:
+            duration_ms = (time.time() - start) * 1000
+            print(f"❌ DB ERROR: {func.__name__} failed after {duration_ms:.0f}ms: {e}", flush=True)
+            raise
+    return wrapper
 
 # MongoDB connection with aggressive optimization
 USE_MONGODB = False
@@ -19,6 +47,8 @@ def _connect_mongodb():
     """Connect to MongoDB with optimized settings"""
     global USE_MONGODB, db, client
     
+    start_time = time.time()
+    
     try:
         from pymongo import MongoClient
         
@@ -27,31 +57,44 @@ def _connect_mongodb():
             print("⚠️ No MONGODB_URI - using memory", flush=True)
             return False
         
-        # Very aggressive timeouts for speed
+        print("🔄 Connecting to MongoDB...", flush=True)
+        
+        # Aggressive timeouts for speed
         client = MongoClient(
             uri,
-            serverSelectionTimeoutMS=3000,   # 3s max to find server
-            connectTimeoutMS=3000,            # 3s max to connect
-            socketTimeoutMS=5000,             # 5s max per operation
-            maxPoolSize=5,                    # Small pool
+            serverSelectionTimeoutMS=5000,   # 5s max to find server
+            connectTimeoutMS=5000,            # 5s max to connect
+            socketTimeoutMS=10000,            # 10s max per operation
+            maxPoolSize=10,                   # Connection pool
             minPoolSize=1,
-            maxIdleTimeMS=10000,
+            maxIdleTimeMS=30000,
             retryWrites=True,
             retryReads=True,
-            w='majority',
-            journal=False,                    # Faster writes
-            directConnection=False
+            w=1,                              # Faster writes (don't wait for majority)
+            journal=False,
+            appName='Menza'
         )
         
         # Quick ping test
+        ping_start = time.time()
         client.admin.command('ping')
+        ping_ms = (time.time() - ping_start) * 1000
+        
         db = client['menza']
         USE_MONGODB = True
-        print("✅ MongoDB connected", flush=True)
+        
+        total_ms = (time.time() - start_time) * 1000
+        print(f"✅ MongoDB connected (ping: {ping_ms:.0f}ms, total: {total_ms:.0f}ms)", flush=True)
+        
+        # Log if ping is slow
+        if ping_ms > 100:
+            print(f"⚠️ MongoDB ping is slow ({ping_ms:.0f}ms) - check region matching!", flush=True)
+        
         return True
         
     except Exception as e:
-        print(f"⚠️ MongoDB failed: {str(e)[:60]} - using memory", flush=True)
+        total_ms = (time.time() - start_time) * 1000
+        print(f"⚠️ MongoDB failed after {total_ms:.0f}ms: {str(e)[:60]}", flush=True)
         USE_MONGODB = False
         return False
 
@@ -252,9 +295,11 @@ class DataStore:
             return {}
         return user.get('preferences', {})
     
+    @timed_db_op
     def user_exists(self, username: str) -> bool:
         if USE_MONGODB:
-            return self.users_col.count_documents({'username': username}) > 0
+            # Use find_one with projection - MUCH faster than count_documents
+            return self.users_col.find_one({'username': username}, {'_id': 1}) is not None
         else:
             return username in self.users
     
@@ -281,6 +326,7 @@ class DataStore:
         """Call this when users are added/deleted"""
         self._username_cache = None
     
+    @timed_db_op
     def search_users(self, query: str, exclude_username: str, limit: int = 20) -> List[dict]:
         """Search users by username - optimized single query"""
         if USE_MONGODB:
@@ -455,6 +501,7 @@ class DataStore:
                 self.messages[room_id] = []
             return True
     
+    @timed_db_op
     def get_chat_partners(self, username: str) -> List[dict]:
         """Get chat partners - OPTIMIZED: batch user lookups to avoid N+1"""
         if USE_MONGODB:
@@ -831,6 +878,7 @@ class DataStore:
         else:
             return list(self.channels.values())
     
+    @timed_db_op
     def get_user_channels(self, username: str) -> List[dict]:
         if USE_MONGODB:
             return list(self.channels_col.find({'owner': username}, {'_id': 0}))
@@ -1019,6 +1067,7 @@ class DataStore:
         else:
             return {cid for cid in channel_ids if username in self.channels.get(cid, {}).get('likes', [])}
     
+    @timed_db_op
     def get_discoverable_channels(self, exclude_user: str = None, limit: int = 50) -> List[dict]:
         if USE_MONGODB:
             query = {'discoverable': True}
