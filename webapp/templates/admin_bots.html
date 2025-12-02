@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Admin - Menza</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1025 50%, #0d0d1a 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #d8b4fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stats-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(145deg, rgba(30, 25, 50, 0.9), rgba(20, 15, 40, 0.95));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .stat-card.pending .stat-value { color: #fbbf24; }
+        .stat-card.approved .stat-value { color: #10b981; }
+        .stat-card.reported .stat-value { color: #ef4444; }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            padding-bottom: 16px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 10px;
+            color: #a0a0a0;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover, .tab.active {
+            background: rgba(139, 92, 246, 0.2);
+            color: #fff;
+        }
+        
+        .tab .count {
+            background: rgba(139, 92, 246, 0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        
+        /* Bot List */
+        .bot-list {
+            display: none;
+        }
+        
+        .bot-list.active {
+            display: block;
+        }
+        
+        .bot-item {
+            background: linear-gradient(145deg, rgba(30, 25, 50, 0.9), rgba(20, 15, 40, 0.95));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .bot-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(217, 70, 239, 0.3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        
+        .bot-info {
+            flex: 1;
+        }
+        
+        .bot-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        
+        .bot-username {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+        
+        .bot-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .bot-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .action-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        
+        .action-btn.review {
+            background: rgba(139, 92, 246, 0.2);
+            color: #d8b4fe;
+        }
+        
+        .action-btn.approve {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        
+        .action-btn.reject {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .action-btn.suspend {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-badge.pending { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .status-badge.approved { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .status-badge.rejected { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .status-badge.suspended { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
+        
+        .reports-badge {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+        
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            stroke: #666;
+            margin-bottom: 20px;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #888;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        
+        .back-link:hover {
+            color: #d8b4fe;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('main.home') }}" class="back-link">← Back to Messages</a>
+        
+        <div class="header">
+            <h1>🛡️ Bot Administration</h1>
+        </div>
+        
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card pending">
+                <div class="stat-value">{{ pending_bots|length }}</div>
+                <div class="stat-label">Pending Review</div>
+            </div>
+            <div class="stat-card approved">
+                <div class="stat-value">{{ approved_bots|length }}</div>
+                <div class="stat-label">Approved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ total_bots }}</div>
+                <div class="stat-label">Total Bots</div>
+            </div>
+            <div class="stat-card reported">
+                <div class="stat-value">{{ reported_bots|length }}</div>
+                <div class="stat-label">Reported</div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('pending')">
+                ⏳ Pending <span class="count">{{ pending_bots|length }}</span>
+            </button>
+            <button class="tab" onclick="showTab('approved')">
+                ✅ Approved <span class="count">{{ approved_bots|length }}</span>
+            </button>
+            <button class="tab" onclick="showTab('rejected')">
+                ❌ Rejected <span class="count">{{ rejected_bots|length }}</span>
+            </button>
+            <button class="tab" onclick="showTab('suspended')">
+                ⚠️ Suspended <span class="count">{{ suspended_bots|length }}</span>
+            </button>
+            <button class="tab" onclick="showTab('reported')">
+                🚩 Reported <span class="count">{{ reported_bots|length }}</span>
+            </button>
+        </div>
+        
+        <!-- Pending Bots -->
+        <div class="bot-list active" id="pending-list">
+            {% if pending_bots %}
+            {% for bot in pending_bots %}
+            <div class="bot-item">
+                <div class="bot-avatar">{{ bot.avatar }}</div>
+                <div class="bot-info">
+                    <div class="bot-name">{{ bot.name }}</div>
+                    <div class="bot-username">{{ bot.username }} • by {{ bot.developer }}</div>
+                    <div class="bot-meta">
+                        <span>📅 {{ bot.created_at[:10] }}</span>
+                        <span>📝 {{ bot.commands|length }} commands</span>
+                        <span>🏷️ {{ bot.category }}</span>
+                    </div>
+                </div>
+                <div class="bot-actions">
+                    <a href="{{ url_for('bots.admin_review_bot', bot_id=bot.bot_id) }}" class="action-btn review">Review</a>
+                    <form action="{{ url_for('bots.admin_approve_bot', bot_id=bot.bot_id) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="action-btn approve">Approve</button>
+                    </form>
+                    <form action="{{ url_for('bots.admin_reject_bot', bot_id=bot.bot_id) }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="reason" value="Does not meet guidelines">
+                        <button type="submit" class="action-btn reject">Reject</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <p>No pending bots to review.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Approved Bots -->
+        <div class="bot-list" id="approved-list">
+            {% if approved_bots %}
+            {% for bot in approved_bots %}
+            <div class="bot-item">
+                <div class="bot-avatar">{{ bot.avatar }}</div>
+                <div class="bot-info">
+                    <div class="bot-name">{{ bot.name }}</div>
+                    <div class="bot-username">{{ bot.username }} • by {{ bot.developer }}</div>
+                    <div class="bot-meta">
+                        <span>📥 {{ bot.installs }} installs</span>
+                        <span>⭐ {{ bot.rating }}</span>
+                        {% if bot.reports|length > 0 %}
+                        <span class="reports-badge">{{ bot.reports|length }} reports</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="status-badge approved">✓ Approved</span>
+                <div class="bot-actions">
+                    <form action="{{ url_for('bots.admin_suspend_bot', bot_id=bot.bot_id) }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="reason" value="Policy violation">
+                        <button type="submit" class="action-btn suspend">Suspend</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <p>No approved bots yet.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Rejected Bots -->
+        <div class="bot-list" id="rejected-list">
+            {% if rejected_bots %}
+            {% for bot in rejected_bots %}
+            <div class="bot-item">
+                <div class="bot-avatar">{{ bot.avatar }}</div>
+                <div class="bot-info">
+                    <div class="bot-name">{{ bot.name }}</div>
+                    <div class="bot-username">{{ bot.username }} • by {{ bot.developer }}</div>
+                    <div class="bot-meta">
+                        <span>Reason: {{ bot.rejection_reason or 'N/A' }}</span>
+                    </div>
+                </div>
+                <span class="status-badge rejected">✕ Rejected</span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <p>No rejected bots.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Suspended Bots -->
+        <div class="bot-list" id="suspended-list">
+            {% if suspended_bots %}
+            {% for bot in suspended_bots %}
+            <div class="bot-item">
+                <div class="bot-avatar">{{ bot.avatar }}</div>
+                <div class="bot-info">
+                    <div class="bot-name">{{ bot.name }}</div>
+                    <div class="bot-username">{{ bot.username }} • by {{ bot.developer }}</div>
+                    <div class="bot-meta">
+                        <span>Reason: {{ bot.suspension_reason or 'N/A' }}</span>
+                    </div>
+                </div>
+                <span class="status-badge suspended">⚠️ Suspended</span>
+                <div class="bot-actions">
+                    <form action="{{ url_for('bots.admin_reinstate_bot', bot_id=bot.bot_id) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="action-btn approve">Reinstate</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <p>No suspended bots.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Reported Bots -->
+        <div class="bot-list" id="reported-list">
+            {% if reported_bots %}
+            {% for bot in reported_bots %}
+            <div class="bot-item">
+                <div class="bot-avatar">{{ bot.avatar }}</div>
+                <div class="bot-info">
+                    <div class="bot-name">{{ bot.name }}</div>
+                    <div class="bot-username">{{ bot.username }} • by {{ bot.developer }}</div>
+                    <div class="bot-meta">
+                        <span class="reports-badge">{{ bot.reports|length }} reports</span>
+                    </div>
+                </div>
+                <a href="{{ url_for('bots.admin_review_bot', bot_id=bot.bot_id) }}" class="action-btn review">Review Reports</a>
+                <div class="bot-actions">
+                    <form action="{{ url_for('bots.admin_suspend_bot', bot_id=bot.bot_id) }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="reason" value="Multiple reports">
+                        <button type="submit" class="action-btn suspend">Suspend</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <p>No reported bots.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        function showTab(tab) {
+            // Hide all lists
+            document.querySelectorAll('.bot-list').forEach(list => {
+                list.classList.remove('active');
+            });
+            
+            // Deactivate all tabs
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            
+            // Show selected list
+            document.getElementById(tab + '-list').classList.add('active');
+            
+            // Activate tab
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
+

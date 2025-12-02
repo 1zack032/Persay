@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Bot - Menza Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1025 50%, #0d0d1a 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #888;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        
+        .back-link:hover {
+            color: #d8b4fe;
+        }
+        
+        .header {
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        
+        .bot-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(217, 70, 239, 0.3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        .header-info h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        
+        .header-info .username {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+        
+        .header-info .meta {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .section {
+            background: linear-gradient(145deg, rgba(30, 25, 50, 0.9), rgba(20, 15, 40, 0.95));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Security Scan */
+        .scan-result {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .scan-result.passed {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .scan-result.failed {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .scan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .scan-score {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .scan-score.high { color: #10b981; }
+        .scan-score.medium { color: #fbbf24; }
+        .scan-score.low { color: #ef4444; }
+        
+        .scan-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .scan-status.passed {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        
+        .scan-status.failed {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .scan-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .scan-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        
+        .scan-item.error { color: #fca5a5; }
+        .scan-item.warning { color: #fcd34d; }
+        .scan-item.info { color: #93c5fd; }
+        
+        /* Permissions */
+        .permissions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+        }
+        
+        .permission-item {
+            padding: 14px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+        }
+        
+        .permission-item.high-risk {
+            border-color: rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .permission-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        
+        .permission-desc {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .risk-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+        
+        .risk-badge.low { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .risk-badge.medium { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .risk-badge.high { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        
+        /* Commands */
+        .command-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .command-item {
+            padding: 14px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+        }
+        
+        .command-name {
+            font-family: 'Monaco', monospace;
+            font-size: 14px;
+            color: #d8b4fe;
+            margin-bottom: 4px;
+        }
+        
+        .command-desc {
+            font-size: 13px;
+            color: #888;
+        }
+        
+        /* Reports */
+        .report-item {
+            padding: 16px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .report-user {
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .report-date {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .report-reason {
+            font-size: 14px;
+            color: #fca5a5;
+        }
+        
+        /* Webhook */
+        .webhook-url {
+            font-family: 'Monaco', monospace;
+            font-size: 13px;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            color: #d8b4fe;
+            word-break: break-all;
+        }
+        
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 40px;
+        }
+        
+        .action-btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-btn.approve {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+        }
+        
+        .action-btn.reject {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .reject-form {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+        }
+        
+        .reject-form.active {
+            display: block;
+        }
+        
+        .reject-form textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            min-height: 100px;
+            resize: vertical;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('bots.admin_bots') }}" class="back-link">← Back to Admin</a>
+        
+        <div class="header">
+            <div class="bot-avatar">{{ bot.avatar }}</div>
+            <div class="header-info">
+                <h1>{{ bot.name }}</h1>
+                <div class="username">{{ bot.username }}</div>
+                <div class="meta">
+                    Submitted by {{ bot.developer }} • {{ bot.created_at[:10] }} • Version {{ bot.version or '1.0.0' }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Security Scan -->
+        <div class="section">
+            <h2 class="section-title">🔒 Security Scan</h2>
+            
+            <div class="scan-result {% if scan_result.passed %}passed{% else %}failed{% endif %}">
+                <div class="scan-header">
+                    <span class="scan-score {% if scan_result.score >= 80 %}high{% elif scan_result.score >= 60 %}medium{% else %}low{% endif %}">
+                        {{ scan_result.score }}/100
+                    </span>
+                    <span class="scan-status {% if scan_result.passed %}passed{% else %}failed{% endif %}">
+                        {% if scan_result.passed %}✓ Passed{% else %}✕ Failed{% endif %}
+                    </span>
+                </div>
+                
+                <div class="scan-items">
+                    {% if scan_result.errors %}
+                    {% for error in scan_result.errors %}
+                    <div class="scan-item error">❌ {{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                    
+                    {% if scan_result.warnings %}
+                    {% for warning in scan_result.warnings %}
+                    <div class="scan-item warning">⚠️ {{ warning }}</div>
+                    {% endfor %}
+                    {% endif %}
+                    
+                    {% if scan_result.recommendations %}
+                    {% for rec in scan_result.recommendations %}
+                    <div class="scan-item info">💡 {{ rec }}</div>
+                    {% endfor %}
+                    {% endif %}
+                    
+                    {% if not scan_result.errors and not scan_result.warnings %}
+                    <div class="scan-item" style="color: #10b981;">✓ No issues found</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <p style="font-size: 13px; color: #888;">
+                Risk Level: <span class="risk-badge {{ risk_level }}">{{ risk_level|upper }}</span>
+            </p>
+        </div>
+        
+        <!-- Permissions -->
+        <div class="section">
+            <h2 class="section-title">🔐 Requested Permissions</h2>
+            
+            <div class="permissions-grid">
+                {% for perm in permission_details %}
+                <div class="permission-item {% if perm.risk == 'high' %}high-risk{% endif %}">
+                    <div class="permission-name">
+                        {{ perm.name }}
+                        <span class="risk-badge {{ perm.risk }}">{{ perm.risk }}</span>
+                    </div>
+                    <div class="permission-desc">{{ perm.description }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Commands -->
+        <div class="section">
+            <h2 class="section-title">⚡ Commands ({{ bot.commands|length }})</h2>
+            
+            <div class="command-list">
+                {% for cmd in bot.commands %}
+                <div class="command-item">
+                    <div class="command-name">{{ cmd.command }}</div>
+                    <div class="command-desc">{{ cmd.description or 'No description' }} — {{ cmd.usage or '' }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Webhook -->
+        <div class="section">
+            <h2 class="section-title">🔗 Webhook Configuration</h2>
+            
+            {% if bot.webhook_url %}
+            <div class="webhook-url">{{ bot.webhook_url }}</div>
+            {% else %}
+            <p style="color: #888;">No webhook URL configured</p>
+            {% endif %}
+        </div>
+        
+        <!-- Reports (if any) -->
+        {% if bot.reports %}
+        <div class="section">
+            <h2 class="section-title">🚩 Reports ({{ bot.reports|length }})</h2>
+            
+            {% for report in bot.reports %}
+            <div class="report-item">
+                <div class="report-header">
+                    <span class="report-user">@{{ report.reporter }}</span>
+                    <span class="report-date">{{ report.created_at[:10] }}</span>
+                </div>
+                <div class="report-reason">{{ report.reason }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Description -->
+        <div class="section">
+            <h2 class="section-title">📝 Description</h2>
+            <p style="color: #b0b0b0; line-height: 1.6;">{{ bot.description or 'No description provided.' }}</p>
+        </div>
+        
+        <!-- Actions -->
+        <div class="actions">
+            <form action="{{ url_for('bots.admin_approve_bot', bot_id=bot.bot_id) }}" method="POST" style="display:inline;">
+                <button type="submit" class="action-btn approve">✓ Approve Bot</button>
+            </form>
+            <button type="button" class="action-btn reject" onclick="toggleRejectForm()">✕ Reject Bot</button>
+        </div>
+        
+        <div class="reject-form" id="rejectForm">
+            <form action="{{ url_for('bots.admin_reject_bot', bot_id=bot.bot_id) }}" method="POST">
+                <textarea name="reason" placeholder="Reason for rejection..."></textarea>
+                <button type="submit" class="action-btn reject">Confirm Rejection</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function toggleRejectForm() {
+            document.getElementById('rejectForm').classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
+

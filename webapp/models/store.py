@@ -1514,11 +1514,122 @@ class DataStore:
         return True
     
     def verify_bot_api_key(self, bot_id: str, api_key: str) -> bool:
-        """Verify a bot's API key"""
+        """Verify a bot's API key (legacy - use hashed version)"""
         bot = self.get_bot(bot_id)
         if not bot:
             return False
         return bot.get('api_key') == api_key
+    
+    def create_bot_secure(self, data: dict, developer_username: str, api_key_hash: str) -> dict:
+        """
+        Create a new bot with secure API key handling.
+        The API key is hashed - raw key is never stored.
+        """
+        bot_id = f"bot_{self.generate_id()}"
+        
+        bot = {
+            'bot_id': bot_id,
+            'name': data.get('name', 'Unnamed Bot'),
+            'username': data.get('username', f'@{bot_id}'),
+            'description': data.get('description', ''),
+            'avatar': data.get('avatar', '🤖'),
+            'category': data.get('category', 'utilities'),
+            'developer': developer_username,
+            'developer_email': data.get('developer_email'),
+            'website': data.get('website'),
+            'privacy_policy': data.get('privacy_policy'),
+            'terms_of_service': data.get('terms_of_service'),
+            'verified': False,
+            'official': False,
+            'status': self.BOT_STATUS_PENDING,
+            'commands': data.get('commands', []),
+            'permissions': data.get('permissions', ['commands.receive', 'messages.send']),
+            'webhook_url': data.get('webhook_url'),
+            'api_key_hash': api_key_hash,  # Store hash, not raw key
+            'api_type': 'webhook',
+            'allowed_domains': data.get('allowed_domains', []),
+            'created_at': self.now(),
+            'version': data.get('version', '1.0.0'),
+            'installs': 0,
+            'rating': 0,
+            'reviews': [],
+            'reports': [],
+            'groups': [],
+            'channels': [],
+            'version_history': [],
+            'security_scan': data.get('security_scan', {}),
+        }
+        
+        self._save_bot(bot)
+        return bot
+    
+    def update_bot_api_key(self, bot_id: str, new_api_key_hash: str) -> bool:
+        """Update a bot's API key hash"""
+        bot = self.get_bot(bot_id)
+        if not bot:
+            return False
+        
+        bot['api_key_hash'] = new_api_key_hash
+        bot['api_key_updated_at'] = self.now()
+        self._save_bot(bot)
+        return True
+    
+    def add_bot_version_history(self, bot_id: str, version_snapshot: dict) -> bool:
+        """Add a version snapshot to bot's history"""
+        bot = self.get_bot(bot_id)
+        if not bot:
+            return False
+        
+        history = bot.get('version_history', [])
+        history.append(version_snapshot)
+        
+        # Keep only last 10 versions
+        if len(history) > 10:
+            history = history[-10:]
+        
+        bot['version_history'] = history
+        self._save_bot(bot)
+        return True
+    
+    def get_all_groups(self) -> List[dict]:
+        """Get all groups"""
+        if USE_MONGODB:
+            return list(self.groups_col.find({}, {'_id': 0}))
+        else:
+            return list(self.groups.values())
+    
+    def set_user_premium(self, username: str, is_premium: bool) -> bool:
+        """Set user's premium status"""
+        user = self.get_user(username)
+        if not user:
+            return False
+        
+        user['premium'] = is_premium
+        user['premium_updated_at'] = self.now()
+        
+        if USE_MONGODB:
+            self.users_col.update_one(
+                {'username': username},
+                {'$set': {'premium': is_premium, 'premium_updated_at': user['premium_updated_at']}}
+            )
+        
+        return True
+    
+    def set_user_admin(self, username: str, is_admin: bool) -> bool:
+        """Set user's admin status"""
+        user = self.get_user(username)
+        if not user:
+            return False
+        
+        user['is_admin'] = is_admin
+        
+        if USE_MONGODB:
+            self.users_col.update_one(
+                {'username': username},
+                {'$set': {'is_admin': is_admin}}
+            )
+        
+        return True
 
 
 # Global store instance

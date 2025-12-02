@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Created - Menza</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1025 50%, #0d0d1a 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 600px;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 24px;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+        
+        .subtitle {
+            color: #888;
+            font-size: 16px;
+            margin-bottom: 40px;
+        }
+        
+        .bot-card {
+            background: linear-gradient(145deg, rgba(30, 25, 50, 0.9), rgba(20, 15, 40, 0.95));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+        
+        .bot-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .bot-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(217, 70, 239, 0.3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+        
+        .bot-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .bot-username {
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .api-key-section {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .api-key-warning {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fbbf24;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .api-key-label {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+        
+        .api-key-value {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 16px;
+            border-radius: 10px;
+            color: #10b981;
+            word-break: break-all;
+            margin-bottom: 12px;
+        }
+        
+        .copy-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .copy-btn.copied {
+            background: #10b981;
+        }
+        
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .info-box p {
+            font-size: 13px;
+            color: #93c5fd;
+            line-height: 1.5;
+        }
+        
+        .next-steps {
+            margin-top: 32px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            text-align: left;
+            margin-bottom: 16px;
+        }
+        
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(139, 92, 246, 0.2);
+            color: #d8b4fe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        
+        .step-content h4 {
+            font-size: 15px;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        
+        .step-content p {
+            font-size: 13px;
+            color: #888;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .action-btn.primary {
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            color: #fff;
+        }
+        
+        .action-btn.secondary {
+            background: rgba(139, 92, 246, 0.15);
+            color: #d8b4fe;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✓</div>
+        
+        <h1>Bot Created Successfully!</h1>
+        <p class="subtitle">Your bot has been submitted for review.</p>
+        
+        <div class="bot-card">
+            <div class="bot-header">
+                <div class="bot-avatar">{{ bot.avatar }}</div>
+                <div>
+                    <div class="bot-name">{{ bot.name }}</div>
+                    <div class="bot-username">{{ bot.username }}</div>
+                </div>
+            </div>
+            
+            <div class="api-key-section">
+                <div class="api-key-warning">
+                    ⚠️ Save this API key - it will only be shown ONCE!
+                </div>
+                
+                <div class="api-key-label">Your API Key:</div>
+                <div class="api-key-value" id="apiKey">{{ api_key }}</div>
+                
+                <button class="copy-btn" onclick="copyApiKey()">📋 Copy API Key</button>
+            </div>
+            
+            <div class="info-box">
+                <p>
+                    <strong>Important:</strong> Store this API key securely. You'll need it to authenticate your bot's API requests. 
+                    If you lose it, you can regenerate a new one from your bot settings (but it will invalidate the old key).
+                </p>
+            </div>
+        </div>
+        
+        <div class="next-steps">
+            <h3 style="font-size: 18px; color: #fff; margin-bottom: 20px;">Next Steps</h3>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Wait for Approval</h4>
+                    <p>Our team will review your bot within 24-48 hours.</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Set Up Your Webhook</h4>
+                    <p>Configure your server to receive webhook events at your specified URL.</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Test Your Bot</h4>
+                    <p>Once approved, add your bot to a group and test your commands.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <a href="{{ url_for('bots.my_bots') }}" class="action-btn primary">View My Bots</a>
+            <a href="{{ url_for('bots.developer_docs') }}" class="action-btn secondary">Read Documentation</a>
+        </div>
+    </div>
+    
+    <script>
+        function copyApiKey() {
+            const key = document.getElementById('apiKey').textContent;
+            navigator.clipboard.writeText(key).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = '📋 Copy API Key';
+                    btn.classList.remove('copied');
+                }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>
+

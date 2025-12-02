@@ -12,6 +12,11 @@ Handles real-time private messaging between users.
 from flask import session, request
 from flask_socketio import emit, join_room
 from webapp.models import store
+from webapp.utils.bot_security import (
+    BotResponseCache,
+    BotAnalytics,
+    generate_webhook_headers
+)
 import re
 import requests
 
@@ -745,6 +750,13 @@ def register_messaging_events(socketio):
         Process a bot command and return a response.
         For internal bots, handle directly. For webhook bots, call the webhook.
         """
+        # Track command usage
+        BotAnalytics.track_event(bot['bot_id'], 'command', {
+            'command': command,
+            'user': sender,
+            'args': args
+        })
+        
         api_type = bot.get('api_type', 'internal')
         
         if api_type == 'coingecko':
@@ -757,7 +769,7 @@ def register_messaging_events(socketio):
         return None
     
     def process_coingecko_command(command, args):
-        """Process CoinGecko bot commands"""
+        """Process CoinGecko bot commands with caching"""
         try:
             if command == '/price':
                 if not args:
@@ -773,16 +785,25 @@ def register_messaging_events(socketio):
                 }
                 coin_id = coin_map.get(coin, coin)
                 
-                response = requests.get(
-                    'https://api.coingecko.com/api/v3/simple/price',
-                    params={
-                        'ids': coin_id,
-                        'vs_currencies': 'usd',
-                        'include_24hr_change': 'true'
-                    },
-                    timeout=5
-                )
-                data = response.json()
+                # Check cache first
+                cache_key = f"coingecko_price_{coin_id}"
+                cached = BotResponseCache.get(cache_key)
+                
+                if cached:
+                    data = cached
+                else:
+                    response = requests.get(
+                        'https://api.coingecko.com/api/v3/simple/price',
+                        params={
+                            'ids': coin_id,
+                            'vs_currencies': 'usd',
+                            'include_24hr_change': 'true'
+                        },
+                        timeout=5
+                    )
+                    data = response.json()
+                    # Cache for 30 seconds
+                    BotResponseCache.set(cache_key, data, 'coingecko_price')
                 
                 if coin_id in data:
                     price = data[coin_id]['usd']
@@ -796,17 +817,26 @@ def register_messaging_events(socketio):
                 limit = int(args[0]) if args else 5
                 limit = min(limit, 10)  # Max 10
                 
-                response = requests.get(
-                    'https://api.coingecko.com/api/v3/coins/markets',
-                    params={
-                        'vs_currency': 'usd',
-                        'order': 'market_cap_desc',
-                        'per_page': limit,
-                        'page': 1
-                    },
-                    timeout=5
-                )
-                data = response.json()
+                # Check cache
+                cache_key = f"coingecko_top_{limit}"
+                cached = BotResponseCache.get(cache_key)
+                
+                if cached:
+                    data = cached
+                else:
+                    response = requests.get(
+                        'https://api.coingecko.com/api/v3/coins/markets',
+                        params={
+                            'vs_currency': 'usd',
+                            'order': 'market_cap_desc',
+                            'per_page': limit,
+                            'page': 1
+                        },
+                        timeout=5
+                    )
+                    data = response.json()
+                    # Cache for 60 seconds
+                    BotResponseCache.set(cache_key, data, 'default')
                 
                 result = "🏆 **Top Cryptocurrencies**\n\n"
                 for i, coin in enumerate(data, 1):
@@ -817,11 +847,20 @@ def register_messaging_events(socketio):
                 return result
             
             elif command == '/trending':
-                response = requests.get(
-                    'https://api.coingecko.com/api/v3/search/trending',
-                    timeout=5
-                )
-                data = response.json()
+                # Check cache
+                cache_key = "coingecko_trending"
+                cached = BotResponseCache.get(cache_key)
+                
+                if cached:
+                    data = cached
+                else:
+                    response = requests.get(
+                        'https://api.coingecko.com/api/v3/search/trending',
+                        timeout=5
+                    )
+                    data = response.json()
+                    # Cache for 5 minutes
+                    BotResponseCache.set(cache_key, data, 'coingecko_trending')
                 
                 result = "🔥 **Trending Coins**\n\n"
                 for i, item in enumerate(data.get('coins', [])[:7], 1):
@@ -884,27 +923,38 @@ def register_messaging_events(socketio):
         return f"🤖 {bot['name']} received command: {command}"
     
     def call_webhook(bot, command, args, sender, target_type, target_id):
-        """Call external bot webhook"""
+        """Call external bot webhook with secure signature"""
         webhook_url = bot.get('webhook_url')
         if not webhook_url:
             return None
         
         try:
+            # Build payload
+            payload = {
+                'event': 'command',
+                'command': command,
+                'args': args,
+                'sender': sender,
+                'type': target_type,
+                'target_id': target_id,
+                'timestamp': store.now()
+            }
+            
+            # Generate secure headers with HMAC signature
+            # Use the raw API key if available, otherwise the hash (for verification on their end)
+            api_key = bot.get('api_key') or bot.get('api_key_hash', '')
+            headers = generate_webhook_headers(bot['bot_id'], payload, api_key)
+            
+            # Track webhook call
+            BotAnalytics.track_event(bot['bot_id'], 'webhook_call', {
+                'command': command,
+                'sender': sender
+            })
+            
             response = requests.post(
                 webhook_url,
-                json={
-                    'event': 'command',
-                    'command': command,
-                    'args': args,
-                    'sender': sender,
-                    'type': target_type,
-                    'target_id': target_id,
-                    'timestamp': store.now()
-                },
-                headers={
-                    'Content-Type': 'application/json',
-                    'X-Menza-Bot-ID': bot['bot_id']
-                },
+                json=payload,
+                headers=headers,
                 timeout=3
             )
             
@@ -913,6 +963,9 @@ def register_messaging_events(socketio):
                 return data.get('message') or data.get('response')
         except Exception as e:
             print(f"❌ Webhook error for {bot['bot_id']}: {e}")
+            BotAnalytics.track_event(bot['bot_id'], 'webhook_error', {
+                'error': str(e)
+            })
         
         return None
     
