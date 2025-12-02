@@ -882,6 +882,56 @@ class DataStore:
             'all': channels
         }
     
+    def get_all_categories(self) -> List[dict]:
+        """Get all available interest categories"""
+        return [
+            {'id': cat_id, 'name': cat_id.title(), **data}
+            for cat_id, data in self.INTEREST_CATEGORIES.items()
+        ]
+    
+    def get_channels_by_category(self, category: str, limit: int = 20) -> List[dict]:
+        """Get discoverable channels that match a category"""
+        channels = self.get_discoverable_channels(limit=100)
+        # Filter by category
+        matching = [c for c in channels if category.lower() in c.get('categories', [])]
+        return matching[:limit]
+    
+    def search_channels_by_interest(self, query: str, limit: int = 20) -> dict:
+        """Search channels by interest/keyword"""
+        query_lower = query.lower()
+        channels = self.get_discoverable_channels(limit=100)
+        
+        exact_matches = []
+        category_matches = []
+        suggestions = []
+        related_categories = []
+        
+        # Find matching categories
+        for cat_id, cat_data in self.INTEREST_CATEGORIES.items():
+            if query_lower in cat_id or any(query_lower in kw for kw in cat_data['keywords']):
+                related_categories.append({'id': cat_id, 'name': cat_id.title(), **cat_data})
+        
+        for channel in channels:
+            name_lower = channel['name'].lower()
+            desc_lower = channel.get('description', '').lower()
+            
+            # Exact name match
+            if query_lower in name_lower:
+                exact_matches.append(channel)
+            # Category match
+            elif any(query_lower in cat for cat in channel.get('categories', [])):
+                category_matches.append(channel)
+            # Description match
+            elif query_lower in desc_lower:
+                suggestions.append(channel)
+        
+        return {
+            'exact_matches': exact_matches[:limit],
+            'category_matches': category_matches[:limit],
+            'suggestions': suggestions[:limit],
+            'related_categories': related_categories
+        }
+    
     def get_channel_members_with_roles(self, channel_id: str) -> List[dict]:
         channel = self.get_channel(channel_id)
         if not channel:
