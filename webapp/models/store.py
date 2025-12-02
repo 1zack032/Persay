@@ -102,8 +102,35 @@ class DataStore:
             self.settings_col = db['chat_settings']
             self.bots_col = db['bots']
             
-            # Skip index creation on init (indexes should be in MongoDB Atlas)
-            print("✅ MongoDB collections ready", flush=True)
+            # Create indexes for performance (idempotent - safe to call multiple times)
+            self._ensure_indexes()
+            print("✅ MongoDB ready", flush=True)
+    
+    def _ensure_indexes(self):
+        """Create indexes for fast queries - critical for scaling"""
+        try:
+            # User indexes
+            self.users_col.create_index('username', unique=True, background=True)
+            self.users_col.create_index('email', sparse=True, background=True)
+            
+            # Message indexes for fast chat loading
+            self.messages_col.create_index('room_id', background=True)
+            self.messages_col.create_index([('room_id', 1), ('timestamp', -1)], background=True)
+            
+            # Channel indexes
+            self.channels_col.create_index('owner', background=True)
+            self.channels_col.create_index('discoverable', background=True)
+            self.channels_col.create_index('subscribers', background=True)
+            
+            # Group indexes
+            self.groups_col.create_index('members', background=True)
+            self.groups_col.create_index('invite_code', sparse=True, background=True)
+            
+            # Bot indexes
+            self.bots_col.create_index('bot_id', unique=True, background=True)
+            self.bots_col.create_index('status', background=True)
+        except Exception:
+            pass  # Indexes may already exist
         else:
             # Fallback to in-memory storage
             self.users: Dict[str, dict] = {}

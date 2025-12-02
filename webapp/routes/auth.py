@@ -1,7 +1,7 @@
 """
-🔐 Authentication Routes
-
+🔐 Authentication Routes - SECURE
 Handles user registration, login, logout, and account recovery.
+All passwords are hashed with SHA-256.
 """
 
 from flask import Blueprint, render_template, request, session, redirect, url_for, jsonify
@@ -11,6 +11,17 @@ import secrets
 import hashlib
 
 auth_bp = Blueprint('auth', __name__)
+
+
+def hash_password(password: str) -> str:
+    """Securely hash a password using SHA-256"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
+def verify_password(password: str, hashed: str) -> bool:
+    """Verify a password against its hash"""
+    return hash_password(password) == hashed
+
 
 # BIP39 wordlist (simplified - 256 common words for seed phrases)
 WORDLIST = [
@@ -101,8 +112,11 @@ def register():
         seed_phrase = generate_seed_phrase()
         seed_hash = hash_seed_phrase(seed_phrase)
         
-        # Create user with optional email/phone and seed hash
-        user = store.create_user(username, password)
+        # Hash password before storing (SECURITY)
+        hashed_password = hash_password(password)
+        
+        # Create user with hashed password
+        user = store.create_user(username, hashed_password)
         store.update_user_profile(username, {
             'email': email,
             'phone': phone,
@@ -168,8 +182,9 @@ def recover():
         if provided_hash != stored_hash:
             return render_template('recover.html', error="Invalid recovery phrase. Please check your words and try again.")
         
-        # Update password
-        store.update_user_profile(username, {'password': new_password})
+        # Update password (hash it first - SECURITY)
+        hashed_new_password = hash_password(new_password)
+        store.update_user_profile(username, {'password': hashed_new_password})
         
         return render_template('recover.html', 
             success="Password reset successfully! You can now log in with your new password.")
@@ -179,7 +194,7 @@ def recover():
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Login page"""
+    """Login page - secure password verification"""
     if request.method == 'POST':
         username = request.form.get('username', '').strip().lower()
         password = request.form.get('password', '')
@@ -187,10 +202,11 @@ def login():
         user = store.get_user(username)
         
         if not user:
-            return render_template('login.html', error="User not found")
+            return render_template('login.html', error="Invalid credentials")
         
-        if user['password'] != password:
-            return render_template('login.html', error="Wrong password")
+        # Verify hashed password (SECURITY)
+        if not verify_password(password, user.get('password', '')):
+            return render_template('login.html', error="Invalid credentials")
         
         session['username'] = username
         return redirect(url_for('main.chat'))

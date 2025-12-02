@@ -1,23 +1,28 @@
 """
 🔐 Menza - Encrypted Messaging Application
-PRODUCTION BUILD - Stripped for performance
+PRODUCTION BUILD - Security Hardened
 """
 
-from flask import Flask, jsonify, session, request, g
+from flask import Flask, jsonify, session, request
 from flask_socketio import SocketIO
 import os
 
 from webapp.config import get_config
 
 # ============================================
-# APP INITIALIZATION - MINIMAL
+# APP INITIALIZATION
 # ============================================
 
 app = Flask(__name__)
 config = get_config()
 app.config.from_object(config)
 
-# Compression
+# Security: Use secure session cookies
+app.config['SESSION_COOKIE_SECURE'] = os.environ.get('RENDER', False)  # HTTPS only in production
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent XSS
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
+
+# Compression for faster responses
 try:
     from flask_compress import Compress
     Compress(app)
@@ -29,14 +34,21 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
 
 @app.before_request
 def before_request():
-    """Initialize users on first request"""
-    if not request.path.startswith('/static') and not request.path.startswith('/health'):
-        from webapp.models.store import ensure_initialized
-        ensure_initialized()
+    """Initialize on first request"""
+    if request.path.startswith('/static') or request.path == '/health':
+        return
+    from webapp.models.store import ensure_initialized
+    ensure_initialized()
 
 @app.after_request
 def after_request(response):
-    """Cache static files"""
+    """Add security headers and cache control"""
+    # Security headers
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    
+    # Cache static files
     if response.content_type and ('javascript' in response.content_type or 
                                    'css' in response.content_type or
                                    'image' in response.content_type):
