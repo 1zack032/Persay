@@ -1,32 +1,18 @@
 """
-📺 Channel Routes - MIE Optimized
-
-Channel creation, viewing, posting, subscription management,
-discoverability settings, and search.
-Uses Menza Intelligence Engine for caching.
+📺 Channel Routes - PRODUCTION (simplified)
 """
 
 from flask import Blueprint, render_template, request, session, redirect, url_for, jsonify
 from webapp.models import store
 from webapp.config import Config
 from webapp.core import get_engine
-import time
-import os
 
 channels_bp = Blueprint('channels', __name__)
-
-# Debug timing
-DEBUG_ROUTES = os.environ.get('DEBUG_ROUTES', 'true').lower() == 'true'
-def log_step(label, start):
-    if DEBUG_ROUTES:
-        print(f"  📍 {label}: {(time.time()-start)*1000:.0f}ms", flush=True)
 
 
 @channels_bp.route('/channels')
 def channels_page():
-    """Channel discovery - MIE cached"""
-    route_start = time.time()
-    
+    """Channel discovery page"""
     if 'username' not in session:
         return redirect(url_for('auth.login'))
     
@@ -34,49 +20,40 @@ def channels_page():
     engine = get_engine()
     discover_filter = request.args.get('filter', 'trending')
     period = request.args.get('period', 'daily')
-    log_step("Init", route_start)
     
-    # Cache key for discover data (shared across users, refreshed often)
+    # Get discover channels (cached)
     discover_key = f"discover_channels:{discover_filter}"
     discover_data = engine.get_cached(discover_key)
-    log_step("Cache check (discover)", route_start)
     
     if not discover_data:
         discover_data = store.get_discover_channels_rotated(username=username)
-        log_step("DB: get_discover_channels_rotated", route_start)
         engine.set_cached(discover_key, discover_data, ttl=60)
     
-    # User-specific data (shorter cache)
+    # Get user channels (cached)
     user_key = f"user_channels_page:{username}"
     user_data = engine.get_cached(user_key)
-    log_step("Cache check (user)", route_start)
     
     if not user_data:
         my_channels = store.get_user_channels(username)
-        log_step("DB: get_user_channels", route_start)
         subscribed = store.get_subscribed_channels(username)
-        log_step("DB: get_subscribed_channels", route_start)
-        # Roles are already in channel.members dict - no extra queries needed
         for channel in subscribed:
             channel['user_role'] = channel.get('members', {}).get(username, 'viewer')
         user_data = {'my_channels': my_channels, 'subscribed': subscribed}
         engine.set_cached(user_key, user_data, ttl=120)
     
-    # Select channels based on filter
+    # Get channels for display
     filter_map = {'most_liked': 'most_liked', 'most_viewed': 'most_viewed', 'new': 'new'}
     discover_channels = discover_data.get(filter_map.get(discover_filter, 'trending'), [])
     
-    # BATCH: Get all liked channels in one query (N+1 prevention)
+    # Batch get liked status
     channel_ids = [ch['id'] for ch in discover_channels]
     liked_channels = store.get_liked_channels_batch(channel_ids, username)
-    log_step("DB: get_liked_channels_batch", route_start)
     
     for channel in discover_channels:
         channel['liked_by_user'] = channel['id'] in liked_channels
         channel['like_count'] = len(channel.get('likes', []))
     
-    log_step("Before render_template", route_start)
-    result = render_template('channels.html',
+    return render_template('channels.html',
                          username=username,
                          my_channels=user_data['my_channels'],
                          subscribed_channels=user_data['subscribed'],
@@ -84,13 +61,11 @@ def channels_page():
                          discover_filter=discover_filter,
                          period=period,
                          trending_channels=discover_data.get('trending', [])[:5])
-    log_step("After render_template", route_start)
-    return result
 
 
 @channels_bp.route('/channels/search')
 def search_channels():
-    """Search for channels by name, interest, or category"""
+    """Search for channels"""
     if 'username' not in session:
         return redirect(url_for('auth.login'))
     
@@ -98,20 +73,14 @@ def search_channels():
     category = request.args.get('category', '').strip()
     username = session['username']
     
-    # If searching by category
     if category:
         results = store.get_channels_by_category(category, limit=20)
-        # BATCH: Get liked status in one query
         liked = store.get_liked_channels_batch([ch['id'] for ch in results], username)
         for ch in results:
             ch['liked_by_user'] = ch['id'] in liked
         
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({
-                'results': results,
-                'category': category,
-                'count': len(results)
-            })
+            return jsonify({'results': results, 'category': category, 'count': len(results)})
         
         return render_template('channels_search.html',
                              username=username,
@@ -120,31 +89,25 @@ def search_channels():
                              results=results,
                              categories=store.get_all_categories())
     
-    # Interest-based search
     if len(query) < 1:
         search_results = {'exact_matches': [], 'category_matches': [], 'suggestions': [], 'related_categories': []}
     else:
         search_results = store.search_channels_by_interest(query, limit=20)
-        
-        # BATCH: Get all channel IDs and liked status in one query
         all_ids = [ch['id'] for key in ['exact_matches', 'category_matches', 'suggestions'] for ch in search_results[key]]
         liked = store.get_liked_channels_batch(all_ids, username)
         for key in ['exact_matches', 'category_matches', 'suggestions']:
             for ch in search_results[key]:
                 ch['liked_by_user'] = ch['id'] in liked
     
-    # If AJAX request, return JSON
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({
             'exact_matches': search_results['exact_matches'],
             'category_matches': search_results['category_matches'],
             'suggestions': search_results['suggestions'],
             'related_categories': search_results['related_categories'],
-            'query': query,
-            'total_count': len(search_results['exact_matches']) + len(search_results['category_matches']) + len(search_results['suggestions'])
+            'query': query
         })
     
-    # Otherwise render full page
     all_results = search_results['exact_matches'] + search_results['category_matches'] + search_results['suggestions']
     return render_template('channels_search.html',
                          username=username,
@@ -156,96 +119,60 @@ def search_channels():
 
 @channels_bp.route('/channels/categories')
 def get_categories():
-    """Get all interest categories"""
     if 'username' not in session:
         return jsonify({'error': 'Not logged in'}), 401
-    
-    categories = store.get_all_categories()
-    return jsonify({'categories': categories})
+    return jsonify({'categories': store.get_all_categories()})
 
 
 @channels_bp.route('/api/channels/search')
 def api_search_channels():
-    """API endpoint to search channels - OPTIMIZED: single pass, no N+1"""
+    """API search"""
     if 'username' not in session:
         return jsonify({'error': 'Not logged in'}), 401
     
     query = request.args.get('q', '').strip().lower()
     username = session['username']
-    include_subscription = request.args.get('include_subscription', 'false') == 'true'
     
     if not query or len(query) < 2:
         return jsonify({'channels': []})
     
-    engine = get_engine()
-    cache_key = f"channel_search:{query}:{username}"
-    cached = engine.get_cached(cache_key)
-    if cached:
-        return jsonify({'channels': cached})
-    
-    # Get user's channels in a single batch (combined in get_all_user_channels)
     user_channel_ids = set(ch['id'] for ch in store.get_all_user_channels(username))
-    
-    # Search channels - use store's optimized search
     search_results = store.search_channels(query, discoverable_only=False, limit=50)
     
-    matched_channels = []
+    matched = []
     for channel in search_results:
         is_member = channel['id'] in user_channel_ids
-        
-        # Only include if discoverable OR user is member
         if channel.get('discoverable') or is_member:
-            matched_channels.append({
+            matched.append({
                 'id': channel['id'],
                 'name': channel['name'],
                 'description': channel.get('description', ''),
                 'branding': channel.get('branding', {}),
-                'subscribers': len(channel.get('subscribers', [])),  # Just count, not full list
+                'subscribers': len(channel.get('subscribers', [])),
                 'discoverable': channel.get('discoverable', False),
-                'likes': len(channel.get('likes', [])),
-                'views': channel.get('views', 0),
-                'is_subscribed': is_member if include_subscription else None
+                'is_subscribed': is_member
             })
     
-    # Sort: subscribed first, then by subscriber count
-    matched_channels.sort(key=lambda x: (
-        -(1 if x.get('is_subscribed') else 0),
-        -x.get('subscribers', 0)
-    ))
-    
-    result = matched_channels[:20]
-    engine.set_cached(cache_key, result, ttl=30)
-    
-    return jsonify({'channels': result})
+    matched.sort(key=lambda x: (-1 if x.get('is_subscribed') else 0, -x.get('subscribers', 0)))
+    return jsonify({'channels': matched[:20]})
 
 
 @channels_bp.route('/channel/<channel_id>/like', methods=['POST'])
 def like_channel(channel_id):
-    """Like a channel"""
     if 'username' not in session:
-        return jsonify({'success': False, 'error': 'Not logged in'}), 401
-    
-    username = session['username']
-    result = store.like_channel(channel_id, username)
-    
-    return jsonify(result)
+        return jsonify({'success': False}), 401
+    return jsonify(store.like_channel(channel_id, session['username']))
 
 
 @channels_bp.route('/channel/<channel_id>/unlike', methods=['POST'])
 def unlike_channel(channel_id):
-    """Unlike a channel"""
     if 'username' not in session:
-        return jsonify({'success': False, 'error': 'Not logged in'}), 401
-    
-    username = session['username']
-    result = store.unlike_channel(channel_id, username)
-    
-    return jsonify(result)
+        return jsonify({'success': False}), 401
+    return jsonify(store.unlike_channel(channel_id, session['username']))
 
 
 @channels_bp.route('/channel/create', methods=['GET', 'POST'])
 def create_channel():
-    """Create a new channel"""
     if 'username' not in session:
         return redirect(url_for('auth.login'))
     
@@ -256,26 +183,21 @@ def create_channel():
         avatar_emoji = request.form.get('avatar_emoji', Config.DEFAULT_AVATAR_EMOJI)
         avatar_type = request.form.get('avatar_type', 'emoji')
         avatar_image_data = request.form.get('avatar_image_data', '')
-        discoverable = request.form.get('discoverable') == 'on'  # Checkbox
+        discoverable = request.form.get('discoverable') == 'on'
         invited_members_json = request.form.get('invited_members', '[]')
         
-        # Parse invited members
         import json
         try:
             invited_members = json.loads(invited_members_json)
         except:
             invited_members = []
         
-        # Validation
         if len(name) < Config.MIN_CHANNEL_NAME_LENGTH:
-            return render_template('channel_create.html', 
-                error=f"Channel name must be at least {Config.MIN_CHANNEL_NAME_LENGTH} characters")
+            return render_template('channel_create.html', error=f"Channel name must be at least {Config.MIN_CHANNEL_NAME_LENGTH} characters")
         
         if store.channel_name_exists(name):
-            return render_template('channel_create.html',
-                error="A channel with this name already exists")
+            return render_template('channel_create.html', error="A channel with this name already exists")
         
-        # Create channel
         channel = store.create_channel(
             name=name,
             description=description,
@@ -287,16 +209,11 @@ def create_channel():
             avatar_image=avatar_image_data if avatar_type == 'image' else None
         )
         
-        # Add invited members with their roles
         for member in invited_members:
             username = member.get('username', '').strip()
             role = member.get('role', 'viewer')
-            
-            # Validate role
             if role not in ['admin', 'mod', 'viewer']:
                 role = 'viewer'
-            
-            # Only add if user exists
             if username and store.user_exists(username):
                 store.subscribe_to_channel(channel['id'], username, role)
         
@@ -307,7 +224,6 @@ def create_channel():
 
 @channels_bp.route('/channel/<channel_id>')
 def view_channel(channel_id):
-    """View a channel and its posts"""
     if 'username' not in session:
         return redirect(url_for('auth.login'))
     
@@ -317,20 +233,13 @@ def view_channel(channel_id):
     
     username = session['username']
     is_owner = channel['owner'] == username
-    
-    # Get user's role and permissions
     user_role = store.get_member_role(channel_id, username)
     can_post = store.can_post_in_channel(channel_id, username)
     can_manage = store.can_manage_channel(channel_id, username)
-    
-    # Get all members with roles for display
     members_with_roles = store.get_channel_members_with_roles(channel_id)
-    
-    # Get user's channels for sidebar
     my_channels = store.get_user_channels(username)
     subscribed_channels = store.get_subscribed_channels(username)
     
-    # Increment view count (only for non-owners and subscribers)
     if not is_owner:
         store.increment_channel_views(channel_id)
     
@@ -350,7 +259,6 @@ def view_channel(channel_id):
 
 @channels_bp.route('/channel/<channel_id>/settings', methods=['GET', 'POST'])
 def channel_settings(channel_id):
-    """Channel settings page (admins only)"""
     if 'username' not in session:
         return redirect(url_for('auth.login'))
     
@@ -359,8 +267,6 @@ def channel_settings(channel_id):
         return redirect(url_for('channels.channels_page'))
     
     username = session['username']
-    
-    # Only admins can access settings
     if not store.can_manage_channel(channel_id, username):
         return redirect(url_for('channels.view_channel', channel_id=channel_id))
     
@@ -368,33 +274,16 @@ def channel_settings(channel_id):
         action = request.form.get('action')
         
         if action == 'toggle_discoverable':
-            current = channel.get('discoverable', True)
-            store.set_channel_discoverable(channel_id, not current)
-        
-        elif action == 'update_branding':
-            accent_color = request.form.get('accent_color', channel['branding']['accent_color'])
-            avatar_emoji = request.form.get('avatar_emoji', channel['branding']['avatar_emoji'])
-            channel['branding']['accent_color'] = accent_color
-            channel['branding']['avatar_emoji'] = avatar_emoji
-        
-        elif action == 'update_description':
-            description = request.form.get('description', '').strip()
-            channel['description'] = description
-        
+            store.set_channel_discoverable(channel_id, not channel.get('discoverable', True))
         elif action == 'update_member_role':
             member_username = request.form.get('member_username', '').strip()
             new_role = request.form.get('new_role', 'viewer')
-            
-            # Validate role
             if new_role in ['admin', 'mod', 'viewer']:
                 store.set_member_role(channel_id, member_username, new_role, username)
         
         return redirect(url_for('channels.channel_settings', channel_id=channel_id))
     
-    # Get all members with their roles
     members_with_roles = store.get_channel_members_with_roles(channel_id)
-    
-    # Get posts for statistics
     posts = store.get_channel_posts(channel_id)
     total_likes = sum(len(p.get('likes', [])) for p in posts)
     
@@ -408,58 +297,35 @@ def channel_settings(channel_id):
 
 @channels_bp.route('/channel/<channel_id>/post', methods=['POST'])
 def create_post(channel_id):
-    """Create a new post in a channel"""
     if 'username' not in session:
         return redirect(url_for('auth.login'))
     
     channel = store.get_channel(channel_id)
-    if not channel:
-        return redirect(url_for('channels.channels_page'))
-    
-    username = session['username']
-    
-    # Only admins and moderators can post
-    if not store.can_post_in_channel(channel_id, username):
+    if not channel or not store.can_post_in_channel(channel_id, session['username']):
         return redirect(url_for('channels.view_channel', channel_id=channel_id))
     
     content = request.form.get('content', '').strip()
     linked_post_id = request.form.get('linked_post', None) or None
     
     if content:
-        # Import socketio here to avoid circular imports
         from webapp.app import socketio
-        
-        post = store.create_post(
-            channel_id=channel_id,
-            author=session['username'],
-            content=content,
-            linked_post=linked_post_id
-        )
-        
-        # Notify subscribers via WebSocket
-        socketio.emit('new_channel_post', {
-            'channel_id': channel_id,
-            'post': post
-        }, room=f'channel_{channel_id}')
+        post = store.create_post(channel_id=channel_id, author=session['username'], content=content, linked_post=linked_post_id)
+        socketio.emit('new_channel_post', {'channel_id': channel_id, 'post': post}, room=f'channel_{channel_id}')
     
     return redirect(url_for('channels.view_channel', channel_id=channel_id))
 
 
 @channels_bp.route('/channel/<channel_id>/subscribe', methods=['POST'])
 def subscribe_channel(channel_id):
-    """Subscribe to a channel"""
     if 'username' not in session:
         return redirect(url_for('auth.login'))
-    
     store.subscribe_to_channel(channel_id, session['username'])
     return redirect(url_for('channels.view_channel', channel_id=channel_id))
 
 
 @channels_bp.route('/channel/<channel_id>/unsubscribe', methods=['POST'])
 def unsubscribe_channel(channel_id):
-    """Unsubscribe from a channel"""
     if 'username' not in session:
         return redirect(url_for('auth.login'))
-    
     store.unsubscribe_from_channel(channel_id, session['username'])
     return redirect(url_for('channels.view_channel', channel_id=channel_id))

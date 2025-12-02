@@ -1,41 +1,16 @@
 """
 💾 Data Store - MongoDB Backend
-
-Persistent data storage using MongoDB.
-All data persists across server restarts.
+PRODUCTION BUILD
 """
 
 import os
 import secrets
-import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
-from functools import wraps
 
-# ============================================
-# 🔍 DEBUG TIMING FOR DATABASE OPS
-# ============================================
-DEBUG_DB = os.environ.get('DEBUG_DB', 'true').lower() == 'true'
-SLOW_QUERY_THRESHOLD_MS = 200  # Log queries slower than this
-
+# No-op decorator for production
 def timed_db_op(func):
-    """Decorator to time database operations"""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if not DEBUG_DB:
-            return func(*args, **kwargs)
-        start = time.time()
-        try:
-            result = func(*args, **kwargs)
-            elapsed = (time.time() - start) * 1000
-            if elapsed > SLOW_QUERY_THRESHOLD_MS:
-                print(f"🐢 SLOW DB: {func.__name__} took {elapsed:.0f}ms", flush=True)
-            return result
-        except Exception as e:
-            elapsed = (time.time() - start) * 1000
-            print(f"❌ DB ERROR: {func.__name__} failed after {elapsed:.0f}ms: {e}", flush=True)
-            raise
-    return wrapper
+    return func
 
 # MongoDB connection - OPTIMIZED for performance
 try:
