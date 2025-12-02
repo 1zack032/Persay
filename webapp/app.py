@@ -32,16 +32,35 @@ To add a new feature:
 3. Register in the respective __init__.py
 """
 
-from flask import Flask, jsonify, session
+from flask import Flask, jsonify, session, request, g
 from flask_socketio import SocketIO
 import traceback
 import sys
+import time
+import os
 
 from webapp.config import get_config
 
+# ============================================
+# 🔍 DEBUG LOGGING - Find slowdowns
+# ============================================
+DEBUG_TIMING = os.environ.get('DEBUG_TIMING', 'true').lower() == 'true'
+
+def log_timing(label, start_time):
+    """Log timing if debug is enabled"""
+    if DEBUG_TIMING:
+        elapsed = (time.time() - start_time) * 1000
+        symbol = "🐢" if elapsed > 500 else "⚡" if elapsed < 100 else "⏱️"
+        print(f"{symbol} [{label}] {elapsed:.1f}ms", flush=True)
+
+print("🔄 Starting app initialization...", flush=True)
+init_start = time.time()
+
 # Initialize Menza Intelligence Engine
 from webapp.core import initialize_engine, get_engine
+mie_start = time.time()
 mie = initialize_engine()
+log_timing("MIE Init", mie_start)
 
 # ============================================
 # APP INITIALIZATION
@@ -65,8 +84,21 @@ except ImportError:
 # Add caching headers for static files
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # 1 year for static files
 
+@app.before_request
+def before_request_timing():
+    """Track request start time"""
+    g.start_time = time.time()
+    if DEBUG_TIMING and not request.path.startswith('/static'):
+        print(f"📥 START {request.method} {request.path}", flush=True)
+
 @app.after_request
 def add_cache_headers(response):
+    # Log request timing
+    if DEBUG_TIMING and hasattr(g, 'start_time') and not request.path.startswith('/static'):
+        elapsed = (time.time() - g.start_time) * 1000
+        symbol = "🐢" if elapsed > 1000 else "⚠️" if elapsed > 500 else "✅"
+        print(f"{symbol} END {request.method} {request.path} → {response.status_code} in {elapsed:.0f}ms", flush=True)
+    
     # Cache static assets aggressively
     if 'static' in response.headers.get('Content-Location', '') or \
        response.content_type and ('javascript' in response.content_type or 
@@ -115,6 +147,39 @@ def engine_health():
         'health': engine.get_health_status()
     })
 
+@app.route('/health')
+def health_check():
+    """Quick health check - minimal processing"""
+    return jsonify({'status': 'ok', 'timestamp': time.time()})
+
+@app.route('/api/debug/timing')
+def debug_timing():
+    """Debug endpoint to test database connectivity"""
+    from webapp.models import store
+    results = {}
+    
+    # Test MongoDB ping
+    start = time.time()
+    try:
+        from webapp.models.store import USE_MONGODB, db
+        if USE_MONGODB and db:
+            db.command('ping')
+            results['mongodb_ping'] = f"{(time.time()-start)*1000:.0f}ms"
+        else:
+            results['mongodb_ping'] = 'Not connected'
+    except Exception as e:
+        results['mongodb_ping'] = f"Error: {str(e)[:50]}"
+    
+    # Test a simple user query
+    start = time.time()
+    try:
+        user = store.get_user('test')  # Non-existent user
+        results['user_query'] = f"{(time.time()-start)*1000:.0f}ms"
+    except Exception as e:
+        results['user_query'] = f"Error: {str(e)[:50]}"
+    
+    return jsonify(results)
+
 @app.route('/investors')
 def investor_dashboard():
     """Investor dashboard showing MIE performance"""
@@ -144,15 +209,20 @@ socketio = SocketIO(
 def initialize_app():
     """Initialize all routes and socket events"""
     
+    routes_start = time.time()
     # Register HTTP routes
     from webapp.routes import register_routes
     register_routes(app)
+    log_timing("Routes registration", routes_start)
     
+    sockets_start = time.time()
     # Register WebSocket events
     from webapp.sockets import register_socket_events
     register_socket_events(socketio)
+    log_timing("Sockets registration", sockets_start)
     
-    print(f"✅ {config.APP_NAME} v{config.APP_VERSION} initialized")
+    log_timing("Total app init", init_start)
+    print(f"✅ {config.APP_NAME} v{config.APP_VERSION} initialized", flush=True)
 
 
 # Initialize on import

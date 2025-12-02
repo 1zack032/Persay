@@ -7,8 +7,35 @@ All data persists across server restarts.
 
 import os
 import secrets
+import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
+from functools import wraps
+
+# ============================================
+# 🔍 DEBUG TIMING FOR DATABASE OPS
+# ============================================
+DEBUG_DB = os.environ.get('DEBUG_DB', 'true').lower() == 'true'
+SLOW_QUERY_THRESHOLD_MS = 200  # Log queries slower than this
+
+def timed_db_op(func):
+    """Decorator to time database operations"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not DEBUG_DB:
+            return func(*args, **kwargs)
+        start = time.time()
+        try:
+            result = func(*args, **kwargs)
+            elapsed = (time.time() - start) * 1000
+            if elapsed > SLOW_QUERY_THRESHOLD_MS:
+                print(f"🐢 SLOW DB: {func.__name__} took {elapsed:.0f}ms", flush=True)
+            return result
+        except Exception as e:
+            elapsed = (time.time() - start) * 1000
+            print(f"❌ DB ERROR: {func.__name__} failed after {elapsed:.0f}ms: {e}", flush=True)
+            raise
+    return wrapper
 
 # MongoDB connection - OPTIMIZED for performance
 try:
@@ -165,6 +192,7 @@ class DataStore:
         
         return user
     
+    @timed_db_op
     def get_user(self, username: str) -> Optional[dict]:
         if USE_MONGODB:
             user = self.users_col.find_one({'username': username}, {'_id': 0})
@@ -384,6 +412,7 @@ class DataStore:
         
         return message
     
+    @timed_db_op
     def get_messages(self, room_id: str) -> List[dict]:
         if USE_MONGODB:
             messages = list(self.messages_col.find(
@@ -772,6 +801,7 @@ class DataStore:
                     break
         return detected
     
+    @timed_db_op
     def get_channel(self, channel_id: str) -> Optional[dict]:
         if USE_MONGODB:
             return self.channels_col.find_one({'id': channel_id}, {'_id': 0})
@@ -802,6 +832,7 @@ class DataStore:
         else:
             return [c for c in self.channels.values() if c['owner'] == username]
     
+    @timed_db_op
     def get_subscribed_channels(self, username: str) -> List[dict]:
         if USE_MONGODB:
             return list(self.channels_col.find(
@@ -812,6 +843,7 @@ class DataStore:
             return [c for c in self.channels.values() 
                     if username in c.get('subscribers', []) and c['owner'] != username]
     
+    @timed_db_op
     def get_all_user_channels(self, username: str) -> List[dict]:
         """Get all channels user owns OR is subscribed to - single query"""
         if USE_MONGODB:
@@ -1025,6 +1057,7 @@ class DataStore:
         channels.sort(key=lambda x: len(x.get('likes', [])), reverse=True)
         return channels[:limit]
     
+    @timed_db_op
     def get_discover_channels_rotated(self, username: str = None) -> dict:
         channels = self.get_discoverable_channels(exclude_user=username, limit=50)
         return {
