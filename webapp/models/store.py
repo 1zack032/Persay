@@ -938,15 +938,27 @@ class DataStore:
     def has_liked_channel(self, channel_id: str, username: str) -> bool:
         """Check if user liked channel - OPTIMIZED: projection query"""
         if USE_MONGODB:
-            # Only fetch what we need
             result = self.channels_col.find_one(
                 {'id': channel_id, 'likes': username},
-                {'_id': 1}  # Just check existence
+                {'_id': 1}
             )
             return result is not None
         else:
             ch = self.channels.get(channel_id)
             return ch and username in ch.get('likes', [])
+    
+    def get_liked_channels_batch(self, channel_ids: List[str], username: str) -> set:
+        """Get which channels user has liked - BATCH query for N+1 prevention"""
+        if not channel_ids:
+            return set()
+        if USE_MONGODB:
+            liked = self.channels_col.find(
+                {'id': {'$in': channel_ids}, 'likes': username},
+                {'id': 1}
+            )
+            return {ch['id'] for ch in liked}
+        else:
+            return {cid for cid in channel_ids if username in self.channels.get(cid, {}).get('likes', [])}
     
     def get_discoverable_channels(self, exclude_user: str = None, limit: int = 50) -> List[dict]:
         if USE_MONGODB:

@@ -49,9 +49,12 @@ def channels_page():
     filter_map = {'most_liked': 'most_liked', 'most_viewed': 'most_viewed', 'new': 'new'}
     discover_channels = discover_data.get(filter_map.get(discover_filter, 'trending'), [])
     
-    # Add like status (quick lookup)
+    # BATCH: Get all liked channels in one query (N+1 prevention)
+    channel_ids = [ch['id'] for ch in discover_channels]
+    liked_channels = store.get_liked_channels_batch(channel_ids, username)
+    
     for channel in discover_channels:
-        channel['liked_by_user'] = store.has_liked_channel(channel['id'], username)
+        channel['liked_by_user'] = channel['id'] in liked_channels
         channel['like_count'] = len(channel.get('likes', []))
     
     return render_template('channels.html',
@@ -77,8 +80,10 @@ def search_channels():
     # If searching by category
     if category:
         results = store.get_channels_by_category(category, limit=20)
+        # BATCH: Get liked status in one query
+        liked = store.get_liked_channels_batch([ch['id'] for ch in results], username)
         for ch in results:
-            ch['liked_by_user'] = store.has_liked_channel(ch['id'], username)
+            ch['liked_by_user'] = ch['id'] in liked
         
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return jsonify({
@@ -100,10 +105,12 @@ def search_channels():
     else:
         search_results = store.search_channels_by_interest(query, limit=20)
         
-        # Add like status
+        # BATCH: Get all channel IDs and liked status in one query
+        all_ids = [ch['id'] for key in ['exact_matches', 'category_matches', 'suggestions'] for ch in search_results[key]]
+        liked = store.get_liked_channels_batch(all_ids, username)
         for key in ['exact_matches', 'category_matches', 'suggestions']:
             for ch in search_results[key]:
-                ch['liked_by_user'] = store.has_liked_channel(ch['id'], username)
+                ch['liked_by_user'] = ch['id'] in liked
     
     # If AJAX request, return JSON
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
