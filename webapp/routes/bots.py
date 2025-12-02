@@ -2,7 +2,10 @@
 🤖 Bot Store and API Routes
 
 Handles bot browsing, creation, and management.
-PREMIUM FEATURE - Requires subscription for full access.
+
+Access Levels:
+- FREE: CoinGecko Bot, Phanes Trading Bot (available to all)
+- PREMIUM: Full bot store access, bot creation, other bots
 
 Security Features:
 - API key hashing
@@ -35,6 +38,36 @@ bots_bp = Blueprint('bots', __name__)
 
 
 # ==========================================
+# HELPER FUNCTIONS
+# ==========================================
+
+def is_user_premium(username: str) -> bool:
+    """Check if user has premium subscription"""
+    if not username:
+        return False
+    user = store.get_user(username)
+    return user and user.get('premium', False)
+
+
+def can_access_bot(username: str, bot_id: str) -> bool:
+    """
+    Check if user can access a specific bot.
+    Free bots are accessible to everyone.
+    Premium bots require subscription.
+    """
+    bot = store.get_bot(bot_id)
+    if not bot:
+        return False
+    
+    # Free bots are accessible to all logged-in users
+    if bot.get('free', False):
+        return True
+    
+    # Premium bots require subscription
+    return is_user_premium(username)
+
+
+# ==========================================
 # DECORATORS
 # ==========================================
 
@@ -49,25 +82,56 @@ def login_required(f):
 
 
 def premium_required(f):
-    """Decorator to require premium subscription"""
+    """Decorator to require premium subscription for full bot store access"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' not in session:
             return redirect(url_for('auth.login'))
         
         username = session['username']
-        user = store.get_user(username)
         
-        if not user or not user.get('premium', False):
+        if not is_user_premium(username):
             if request.is_json:
                 return jsonify({
                     'error': 'Premium subscription required',
-                    'upgrade_url': url_for('settings.upgrade')
+                    'upgrade_url': url_for('settings.upgrade'),
+                    'free_bots': ['CoinGecko Bot', 'Phanes Trading Bot']
                 }), 403
-            flash('Bot Store is a premium feature. Please upgrade to access.', 'warning')
-            return redirect(url_for('settings.upgrade'))
+            flash('Full Bot Store access is a premium feature. Free users can access CoinGecko and Phanes bots.', 'warning')
+            return redirect(url_for('bots.bot_store'))  # Redirect to store (they can see free bots)
         
         return f(*args, **kwargs)
+    return decorated_function
+
+
+def premium_or_free_bot(f):
+    """
+    Decorator that allows access if:
+    - User is premium, OR
+    - The bot being accessed is free
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session:
+            return redirect(url_for('auth.login'))
+        
+        username = session['username']
+        bot_id = kwargs.get('bot_id')
+        
+        if bot_id and can_access_bot(username, bot_id):
+            return f(*args, **kwargs)
+        
+        if is_user_premium(username):
+            return f(*args, **kwargs)
+        
+        if request.is_json:
+            return jsonify({
+                'error': 'Premium subscription required for this bot',
+                'upgrade_url': url_for('settings.upgrade')
+            }), 403
+        flash('This bot requires a premium subscription.', 'warning')
+        return redirect(url_for('bots.bot_store'))
+    
     return decorated_function
 
 
@@ -123,28 +187,39 @@ def rate_limit_bot_api(f):
 
 @bots_bp.route('/bots')
 @login_required
-@premium_required
 def bot_store():
-    """Bot Store - Browse available bots (Premium Feature)"""
+    """
+    Bot Store - Browse available bots
+    
+    FREE USERS: Can see and access CoinGecko and Phanes bots
+    PREMIUM USERS: Full access to all bots
+    """
     username = session.get('username')
     category = request.args.get('category')
+    user = store.get_user(username)
+    is_premium = user.get('premium', False) if user else False
     
-    # Get bots
+    # Get all approved bots
     if category:
-        bots = store.get_approved_bots(category=category)
+        all_bots = store.get_approved_bots(category=category)
     else:
-        bots = store.get_approved_bots()
+        all_bots = store.get_approved_bots()
+    
+    # Separate free and premium bots
+    free_bots = [b for b in all_bots if b.get('free', False)]
+    premium_bots = [b for b in all_bots if not b.get('free', False)]
+    
+    # For free users, show all bots but mark premium ones as locked
+    # For premium users, show all bots unlocked
     
     featured_bots = store.get_featured_bots(limit=4)
     categories = store.BOT_CATEGORIES
     
-    # Get user's premium status
-    user = store.get_user(username)
-    is_premium = user.get('premium', False) if user else False
-    
     return render_template('bot_store.html',
                          username=username,
-                         bots=bots,
+                         bots=all_bots,
+                         free_bots=free_bots,
+                         premium_bots=premium_bots,
                          featured_bots=featured_bots,
                          categories=categories,
                          selected_category=category,
@@ -154,14 +229,27 @@ def bot_store():
 
 @bots_bp.route('/bots/<bot_id>')
 @login_required
-@premium_required
+@premium_or_free_bot
 def bot_detail(bot_id):
-    """Bot detail page"""
+    """
+    Bot detail page
+    
+    Accessible if:
+    - Bot is free (CoinGecko, Phanes), OR
+    - User has premium subscription
+    """
     username = session.get('username')
+    user = store.get_user(username)
+    is_premium = user.get('premium', False) if user else False
+    
     bot = store.get_bot(bot_id)
     
     if not bot:
         return "Bot not found", 404
+    
+    # Check if user can access this bot
+    is_free_bot = bot.get('free', False)
+    can_add = is_free_bot or is_premium
     
     # Track view
     BotAnalytics.track_event(bot_id, 'view', {'user': username})
@@ -187,19 +275,37 @@ def bot_detail(bot_id):
                          user_groups=user_groups,
                          user_channels=user_channels,
                          permission_details=permission_details,
-                         risk_level=BotPermissions.get_risk_level(bot.get('permissions', [])))
+                         risk_level=BotPermissions.get_risk_level(bot.get('permissions', [])),
+                         is_premium=is_premium,
+                         is_free_bot=is_free_bot,
+                         can_add=can_add)
 
 
 @bots_bp.route('/bots/<bot_id>/add', methods=['POST'])
 @login_required
-@premium_required
 def add_bot(bot_id):
-    """Add bot to a group or channel"""
-    username = session.get('username')
-    data = request.json
+    """
+    Add bot to a group or channel
     
+    Free users can only add free bots (CoinGecko, Phanes)
+    Premium users can add any bot
+    """
+    username = session.get('username')
+    
+    # Check if user can access this bot
+    if not can_access_bot(username, bot_id):
+        return jsonify({
+            'success': False, 
+            'error': 'Premium subscription required to add this bot',
+            'upgrade_url': url_for('settings.upgrade')
+        }), 403
+    
+    data = request.json
     target_type = data.get('type')
     target_id = data.get('target_id')
+    
+    if not target_type or not target_id:
+        return jsonify({'success': False, 'error': 'Missing target type or ID'}), 400
     
     # Track installation
     BotAnalytics.track_event(bot_id, 'install', {
@@ -223,9 +329,8 @@ def add_bot(bot_id):
 
 @bots_bp.route('/bots/<bot_id>/remove', methods=['POST'])
 @login_required
-@premium_required
 def remove_bot(bot_id):
-    """Remove bot from a group"""
+    """Remove bot from a group (any user who added it can remove)"""
     username = session.get('username')
     data = request.json
     
@@ -251,14 +356,21 @@ def remove_bot(bot_id):
 
 @bots_bp.route('/bots/<bot_id>/rate', methods=['POST'])
 @login_required
-@premium_required
 def rate_bot(bot_id):
-    """Rate a bot"""
+    """Rate a bot (users can rate bots they have access to)"""
     username = session.get('username')
-    data = request.json
     
+    # Only allow rating if user can access the bot
+    if not can_access_bot(username, bot_id):
+        return jsonify({'success': False, 'error': 'You must have access to this bot to rate it'}), 403
+    
+    data = request.json
     rating = data.get('rating', 0)
     review = data.get('review', '')
+    
+    # Validate rating
+    if not isinstance(rating, (int, float)) or rating < 1 or rating > 5:
+        return jsonify({'success': False, 'error': 'Rating must be between 1 and 5'}), 400
     
     success = store.rate_bot(bot_id, username, rating, review)
     
@@ -271,9 +383,8 @@ def rate_bot(bot_id):
 
 @bots_bp.route('/bots/<bot_id>/report', methods=['POST'])
 @login_required
-@premium_required
 def report_bot(bot_id):
-    """Report a bot for violations"""
+    """Report a bot for violations (any user can report)"""
     username = session.get('username')
     data = request.json
     
@@ -281,6 +392,9 @@ def report_bot(bot_id):
     
     if not reason:
         return jsonify({'success': False, 'error': 'Reason required'}), 400
+    
+    if len(reason) < 10:
+        return jsonify({'success': False, 'error': 'Please provide more detail (at least 10 characters)'}), 400
     
     success = store.report_bot(bot_id, username, reason)
     

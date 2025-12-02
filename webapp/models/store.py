@@ -1136,6 +1136,7 @@ class DataStore:
     def _init_verified_bots(self):
         """Initialize pre-verified official bots"""
         verified_bots = [
+            # ===== FREE BOTS (Available to all users) =====
             {
                 'bot_id': 'coingecko_bot',
                 'name': 'CoinGecko Price Bot',
@@ -1147,6 +1148,7 @@ class DataStore:
                 'website': 'https://coingecko.com',
                 'verified': True,
                 'official': True,
+                'free': True,  # FREE FOR ALL USERS
                 'status': self.BOT_STATUS_APPROVED,
                 'commands': [
                     {'command': '/price', 'description': 'Get price of a coin', 'usage': '/price BTC'},
@@ -1154,12 +1156,49 @@ class DataStore:
                     {'command': '/top', 'description': 'Top coins by market cap', 'usage': '/top 10'},
                     {'command': '/trending', 'description': 'Trending coins', 'usage': '/trending'},
                 ],
-                'permissions': ['read_messages', 'send_messages'],
+                'permissions': ['commands.receive', 'messages.send'],
                 'api_type': 'coingecko',
                 'created_at': self.now(),
                 'installs': 0,
                 'rating': 4.8,
+                'reviews': [],
+                'reports': [],
+                'groups': [],
+                'channels': [],
             },
+            {
+                'bot_id': 'phanes_bot',
+                'name': 'Phanes Trading Bot',
+                'username': '@phanes',
+                'description': 'Advanced trading signals, copy trading, and portfolio management. Connect to major exchanges.',
+                'avatar': '🔮',
+                'category': 'trading',
+                'developer': 'Menza Official',
+                'website': 'https://phanes.trade',
+                'verified': True,
+                'official': True,
+                'free': True,  # FREE FOR ALL USERS
+                'status': self.BOT_STATUS_APPROVED,
+                'commands': [
+                    {'command': '/trade', 'description': 'Execute a trade', 'usage': '/trade BTC buy 0.01'},
+                    {'command': '/balance', 'description': 'Check wallet balance', 'usage': '/balance'},
+                    {'command': '/pnl', 'description': 'Profit/loss report', 'usage': '/pnl 7d'},
+                    {'command': '/copy', 'description': 'Copy a trader', 'usage': '/copy @trader'},
+                    {'command': '/alert', 'description': 'Set price alert', 'usage': '/alert BTC 50000'},
+                    {'command': '/positions', 'description': 'View open positions', 'usage': '/positions'},
+                ],
+                'permissions': ['commands.receive', 'messages.send'],
+                'api_type': 'phanes',
+                'created_at': self.now(),
+                'installs': 0,
+                'rating': 4.9,
+                'reviews': [],
+                'reports': [],
+                'groups': [],
+                'channels': [],
+            },
+            
+            # ===== PREMIUM BOTS (Require subscription) =====
             {
                 'bot_id': 'news_bot',
                 'name': 'Crypto News Bot',
@@ -1171,21 +1210,26 @@ class DataStore:
                 'website': None,
                 'verified': True,
                 'official': True,
+                'free': False,  # PREMIUM
                 'status': self.BOT_STATUS_APPROVED,
                 'commands': [
                     {'command': '/news', 'description': 'Latest crypto news', 'usage': '/news'},
                     {'command': '/alerts', 'description': 'Set news alerts', 'usage': '/alerts BTC'},
                     {'command': '/tldr', 'description': 'Summarize recent news', 'usage': '/tldr'},
                 ],
-                'permissions': ['read_messages', 'send_messages'],
+                'permissions': ['commands.receive', 'messages.send'],
                 'api_type': 'internal',
                 'created_at': self.now(),
                 'installs': 0,
                 'rating': 4.5,
+                'reviews': [],
+                'reports': [],
+                'groups': [],
+                'channels': [],
             },
             {
                 'bot_id': 'trading_signals_bot',
-                'name': 'Trading Signals Bot',
+                'name': 'Trading Signals Pro',
                 'username': '@signals',
                 'description': 'Professional trading signals and market analysis for crypto traders.',
                 'avatar': '📊',
@@ -1194,17 +1238,22 @@ class DataStore:
                 'website': None,
                 'verified': True,
                 'official': True,
+                'free': False,  # PREMIUM
                 'status': self.BOT_STATUS_APPROVED,
                 'commands': [
                     {'command': '/signal', 'description': 'Get latest signal', 'usage': '/signal'},
                     {'command': '/analysis', 'description': 'Market analysis', 'usage': '/analysis BTC'},
                     {'command': '/portfolio', 'description': 'Track portfolio', 'usage': '/portfolio'},
                 ],
-                'permissions': ['read_messages', 'send_messages'],
+                'permissions': ['commands.receive', 'messages.send'],
                 'api_type': 'internal',
                 'created_at': self.now(),
                 'installs': 0,
                 'rating': 4.6,
+                'reviews': [],
+                'reports': [],
+                'groups': [],
+                'channels': [],
             },
             {
                 'bot_id': 'mod_bot',
@@ -1217,6 +1266,7 @@ class DataStore:
                 'website': None,
                 'verified': True,
                 'official': True,
+                'free': False,  # PREMIUM
                 'status': self.BOT_STATUS_APPROVED,
                 'commands': [
                     {'command': '/warn', 'description': 'Warn a user', 'usage': '/warn @user reason'},
@@ -1224,11 +1274,15 @@ class DataStore:
                     {'command': '/ban', 'description': 'Ban a user', 'usage': '/ban @user'},
                     {'command': '/rules', 'description': 'Show group rules', 'usage': '/rules'},
                 ],
-                'permissions': ['read_messages', 'send_messages', 'manage_members'],
+                'permissions': ['commands.receive', 'messages.send', 'members.manage'],
                 'api_type': 'internal',
                 'created_at': self.now(),
                 'installs': 0,
                 'rating': 4.7,
+                'reviews': [],
+                'reports': [],
+                'groups': [],
+                'channels': [],
             },
         ]
         
@@ -1292,6 +1346,21 @@ class DataStore:
         # Sort by installs and rating
         bots.sort(key=lambda x: (x.get('official', False), x.get('installs', 0), x.get('rating', 0)), reverse=True)
         return bots[:limit]
+    
+    def get_free_bots(self) -> List[dict]:
+        """Get all free bots available to non-premium users"""
+        bots = self.get_approved_bots()
+        return [b for b in bots if b.get('free', False)]
+    
+    def get_premium_bots(self) -> List[dict]:
+        """Get bots that require premium subscription"""
+        bots = self.get_approved_bots()
+        return [b for b in bots if not b.get('free', False)]
+    
+    def is_free_bot(self, bot_id: str) -> bool:
+        """Check if a bot is free for all users"""
+        bot = self.get_bot(bot_id)
+        return bot and bot.get('free', False)
     
     def create_bot(self, data: dict, developer_username: str) -> dict:
         """Create a new bot (pending approval)"""

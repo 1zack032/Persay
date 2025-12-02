@@ -761,6 +761,8 @@ def register_messaging_events(socketio):
         
         if api_type == 'coingecko':
             return process_coingecko_command(command, args)
+        elif api_type == 'phanes':
+            return process_phanes_command(command, args, sender)
         elif api_type == 'internal':
             return process_internal_command(bot, command, args, sender)
         elif api_type == 'webhook':
@@ -872,6 +874,109 @@ def register_messaging_events(socketio):
         except Exception as e:
             print(f"❌ CoinGecko error: {e}")
             return "⚠️ Error fetching crypto data. Please try again."
+        
+        return None
+    
+    def process_phanes_command(command, args, sender):
+        """
+        Process Phanes Trading Bot commands
+        FREE bot - Available to all users
+        """
+        try:
+            if command == '/trade':
+                if len(args) < 3:
+                    return "❌ Usage: /trade <coin> <buy/sell> <amount>\nExample: /trade BTC buy 0.01"
+                
+                coin = args[0].upper()
+                action = args[1].lower()
+                amount = args[2]
+                
+                if action not in ['buy', 'sell']:
+                    return "❌ Invalid action. Use 'buy' or 'sell'"
+                
+                # Simulated trade response
+                emoji = '🟢' if action == 'buy' else '🔴'
+                return f"{emoji} **Trade Order Placed**\n\n" + \
+                       f"📊 Pair: {coin}/USDT\n" + \
+                       f"📈 Action: {action.upper()}\n" + \
+                       f"💰 Amount: {amount} {coin}\n" + \
+                       f"⏱️ Status: Pending\n\n" + \
+                       f"_Connect your exchange API to execute real trades_"
+            
+            elif command == '/balance':
+                # Simulated portfolio balance
+                return "💰 **Portfolio Balance**\n\n" + \
+                       "🪙 BTC: 0.5 ($22,500)\n" + \
+                       "🔷 ETH: 2.5 ($4,125)\n" + \
+                       "◎ SOL: 50 ($2,500)\n" + \
+                       "💵 USDT: 1,000\n\n" + \
+                       "📊 Total: $30,125\n" + \
+                       "📈 24h Change: +2.3%\n\n" + \
+                       "_Connect your wallet for real balances_"
+            
+            elif command == '/pnl':
+                period = args[0] if args else '7d'
+                
+                return f"📊 **P&L Report ({period})**\n\n" + \
+                       "🟢 Winning trades: 12\n" + \
+                       "🔴 Losing trades: 5\n" + \
+                       "📈 Win rate: 70.6%\n\n" + \
+                       "💰 Realized P&L: +$1,245\n" + \
+                       "📊 Unrealized: +$320\n" + \
+                       "🏆 Best trade: BTC +$450\n" + \
+                       "💔 Worst trade: DOGE -$85"
+            
+            elif command == '/copy':
+                if not args:
+                    return "❌ Usage: /copy @trader\n\n" + \
+                           "🏆 **Top Traders to Copy:**\n" + \
+                           "1. @crypto_whale - 85% win rate\n" + \
+                           "2. @btc_master - +120% YTD\n" + \
+                           "3. @defi_guru - 72% win rate"
+                
+                trader = args[0]
+                return f"✅ **Copy Trading Activated**\n\n" + \
+                       f"Following: {trader}\n" + \
+                       f"Mode: Mirror trades\n" + \
+                       f"Risk: 10% of portfolio\n\n" + \
+                       f"_You'll receive notifications for each trade_"
+            
+            elif command == '/alert':
+                if len(args) < 2:
+                    return "❌ Usage: /alert <coin> <price>\nExample: /alert BTC 50000"
+                
+                coin = args[0].upper()
+                price = args[1]
+                
+                return f"🔔 **Price Alert Set**\n\n" + \
+                       f"📊 Coin: {coin}\n" + \
+                       f"🎯 Target: ${price}\n" + \
+                       f"📱 Notification: Push + Message\n\n" + \
+                       f"_You'll be notified when {coin} reaches ${price}_"
+            
+            elif command == '/positions':
+                return "📊 **Open Positions**\n\n" + \
+                       "🟢 BTC Long @ $44,200\n" + \
+                       "   P&L: +$320 (+1.6%)\n\n" + \
+                       "🟢 ETH Long @ $2,280\n" + \
+                       "   P&L: +$85 (+2.1%)\n\n" + \
+                       "🔴 SOL Short @ $105\n" + \
+                       "   P&L: -$15 (-0.8%)\n\n" + \
+                       "📈 Total Unrealized: +$390"
+            
+            else:
+                return f"🔮 **Phanes Trading Bot**\n\n" + \
+                       "Available commands:\n" + \
+                       "• /trade <coin> <buy/sell> <amount>\n" + \
+                       "• /balance - Portfolio balance\n" + \
+                       "• /pnl - Profit/loss report\n" + \
+                       "• /copy @trader - Copy trading\n" + \
+                       "• /alert <coin> <price>\n" + \
+                       "• /positions - Open positions"
+        
+        except Exception as e:
+            print(f"❌ Phanes error: {e}")
+            return "⚠️ Error processing command. Please try again."
         
         return None
     
