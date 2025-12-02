@@ -802,18 +802,23 @@ def register_messaging_events(socketio):
                 if cached:
                     data = cached
                 else:
-                    response = requests.get(
-                        'https://api.coingecko.com/api/v3/simple/price',
-                        params={
-                            'ids': coin_id,
-                            'vs_currencies': 'usd',
-                            'include_24hr_change': 'true'
-                        },
-                        timeout=5
-                    )
-                    data = response.json()
-                    # Cache for 30 seconds
-                    BotResponseCache.set(cache_key, data, 'coingecko_price')
+                    try:
+                        response = requests.get(
+                            'https://api.coingecko.com/api/v3/simple/price',
+                            params={
+                                'ids': coin_id,
+                                'vs_currencies': 'usd',
+                                'include_24hr_change': 'true'
+                            },
+                            timeout=3  # Reduced timeout
+                        )
+                        response.raise_for_status()
+                        data = response.json()
+                        BotResponseCache.set(cache_key, data, 'coingecko_price')
+                    except requests.exceptions.Timeout:
+                        return "⏱️ Price lookup timed out. Try again."
+                    except Exception:
+                        return "⚠️ Temporarily unavailable. Try again."
                 
                 if coin_id in data:
                     price = data[coin_id]['usd']
@@ -834,19 +839,24 @@ def register_messaging_events(socketio):
                 if cached:
                     data = cached
                 else:
-                    response = requests.get(
-                        'https://api.coingecko.com/api/v3/coins/markets',
-                        params={
-                            'vs_currency': 'usd',
-                            'order': 'market_cap_desc',
-                            'per_page': limit,
-                            'page': 1
-                        },
-                        timeout=5
-                    )
-                    data = response.json()
-                    # Cache for 60 seconds
-                    BotResponseCache.set(cache_key, data, 'default')
+                    try:
+                        response = requests.get(
+                            'https://api.coingecko.com/api/v3/coins/markets',
+                            params={
+                                'vs_currency': 'usd',
+                                'order': 'market_cap_desc',
+                                'per_page': limit,
+                                'page': 1
+                            },
+                            timeout=3  # Reduced timeout
+                        )
+                        response.raise_for_status()
+                        data = response.json()
+                        BotResponseCache.set(cache_key, data, 'default')
+                    except requests.exceptions.Timeout:
+                        return "⏱️ Request timed out. Try again."
+                    except Exception:
+                        return "⚠️ Temporarily unavailable. Try again."
                 
                 result = "🏆 **Top Cryptocurrencies**\n\n"
                 for i, coin in enumerate(data, 1):
@@ -864,13 +874,18 @@ def register_messaging_events(socketio):
                 if cached:
                     data = cached
                 else:
-                    response = requests.get(
-                        'https://api.coingecko.com/api/v3/search/trending',
-                        timeout=5
-                    )
-                    data = response.json()
-                    # Cache for 5 minutes
-                    BotResponseCache.set(cache_key, data, 'coingecko_trending')
+                    try:
+                        response = requests.get(
+                            'https://api.coingecko.com/api/v3/search/trending',
+                            timeout=3  # Reduced timeout
+                        )
+                        response.raise_for_status()
+                        data = response.json()
+                        BotResponseCache.set(cache_key, data, 'coingecko_trending')
+                    except requests.exceptions.Timeout:
+                        return "⏱️ Request timed out. Try again."
+                    except Exception:
+                        return "⚠️ Temporarily unavailable. Try again."
                 
                 result = "🔥 **Trending Coins**\n\n"
                 for i, item in enumerate(data.get('coins', [])[:7], 1):
