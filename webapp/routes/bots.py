@@ -251,16 +251,14 @@ def bot_detail(bot_id):
     is_free_bot = bot.get('free', False)
     can_add = is_free_bot or is_premium
     
-    # Track view
+    # Track view (async/fire-and-forget pattern)
     BotAnalytics.track_event(bot_id, 'view', {'user': username})
     
-    # Get user's groups and channels to add bot to
-    user_groups = [g for g in store.get_all_groups() 
-                   if username in g.get('members', []) and 
-                   (username in g.get('admins', []) or username == g.get('owner'))]
+    # Get user's groups where they're admin - OPTIMIZED: single query
+    user_groups = store.get_user_admin_groups(username)
     
-    user_channels = [c for c in store.get_all_user_channels(username)
-                     if store.get_member_role(c['id'], username) == store.ROLE_ADMIN]
+    # Get user's channels where they're admin - OPTIMIZED: filter in query
+    user_channels = store.get_user_admin_channels(username)
     
     # Get permission info
     permission_details = []
@@ -546,15 +544,14 @@ def bot_created(bot_id):
 @login_required
 @premium_required
 def my_bots():
-    """List developer's bots"""
+    """List developer's bots - OPTIMIZED: direct query"""
     username = session.get('username')
     
-    all_bots = store.get_all_bots()
-    my_bots_list = [b for b in all_bots if b.get('developer') == username]
+    # Direct query for user's bots only (not fetching all bots)
+    my_bots_list = store.get_bots_by_developer(username)
     
-    # Get analytics for each bot
-    for bot in my_bots_list:
-        bot['analytics'] = BotAnalytics.get_stats(bot['bot_id'], days=7)
+    # Skip analytics on list page - too expensive for list view
+    # Analytics available on individual bot pages
     
     return render_template('my_bots.html',
                          username=username,
@@ -663,28 +660,20 @@ def regenerate_api_key(bot_id):
 @login_required
 @admin_required
 def admin_bots():
-    """Admin panel for bot management"""
+    """Admin panel for bot management - OPTIMIZED"""
     username = session.get('username')
     
-    # Get all bots by status
-    all_bots = store.get_all_bots()
-    
-    pending = [b for b in all_bots if b.get('status') == store.BOT_STATUS_PENDING]
-    approved = [b for b in all_bots if b.get('status') == store.BOT_STATUS_APPROVED]
-    rejected = [b for b in all_bots if b.get('status') == store.BOT_STATUS_REJECTED]
-    suspended = [b for b in all_bots if b.get('status') == store.BOT_STATUS_SUSPENDED]
-    
-    # Get reported bots
-    reported = [b for b in all_bots if len(b.get('reports', [])) > 0]
+    # Get bots grouped by status in optimized queries
+    bots_by_status = store.get_bots_grouped_by_status()
     
     return render_template('admin_bots.html',
                          username=username,
-                         pending_bots=pending,
-                         approved_bots=approved,
-                         rejected_bots=rejected,
-                         suspended_bots=suspended,
-                         reported_bots=reported,
-                         total_bots=len(all_bots))
+                         pending_bots=bots_by_status.get('pending', []),
+                         approved_bots=bots_by_status.get('approved', []),
+                         rejected_bots=bots_by_status.get('rejected', []),
+                         suspended_bots=bots_by_status.get('suspended', []),
+                         reported_bots=bots_by_status.get('reported', []),
+                         total_bots=bots_by_status.get('total', 0))
 
 
 @bots_bp.route('/admin/bots/<bot_id>/review')

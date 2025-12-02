@@ -40,8 +40,9 @@ def channels_page():
     if not user_data:
         my_channels = store.get_user_channels(username)
         subscribed = store.get_subscribed_channels(username)
+        # Roles are already in channel.members dict - no extra queries needed
         for channel in subscribed:
-            channel['user_role'] = store.get_member_role(channel['id'], username)
+            channel['user_role'] = channel.get('members', {}).get(username, 'viewer')
         user_data = {'my_channels': my_channels, 'subscribed': subscribed}
         engine.set_cached(user_key, user_data, ttl=120)
     

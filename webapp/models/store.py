@@ -304,6 +304,28 @@ class DataStore:
                     return username
             return None
     
+    def find_users_by_contacts_batch(self, contact_type: str, values: List[str]) -> Dict[str, str]:
+        """BATCH: Find users by multiple contacts in ONE query - returns {value: username}"""
+        if not values:
+            return {}
+        
+        values = [v for v in values if v]  # Filter out None/empty
+        if not values:
+            return {}
+        
+        result = {}
+        if USE_MONGODB:
+            query = {contact_type: {'$in': values}, f'find_by_{contact_type}': True}
+            users = self.users_col.find(query, {'username': 1, contact_type: 1})
+            for user in users:
+                result[user[contact_type]] = user['username']
+        else:
+            for username, user in self.users.items():
+                val = user.get(contact_type)
+                if val in values and user.get(f'find_by_{contact_type}'):
+                    result[val] = username
+        return result
+    
     # ==========================================
     # ONLINE STATUS (Always in-memory) - OPTIMIZED
     # ==========================================
@@ -1716,6 +1738,79 @@ class DataStore:
             return list(self.groups_col.find({}, {'_id': 0}))
         else:
             return list(self.groups.values())
+    
+    def get_user_admin_groups(self, username: str) -> List[dict]:
+        """Get groups where user is admin/owner - OPTIMIZED: single query"""
+        if USE_MONGODB:
+            return list(self.groups_col.find(
+                {'$or': [
+                    {'owner': username},
+                    {'admins': username}
+                ]},
+                {'_id': 0}
+            ).limit(20))
+        else:
+            return [g for g in self.groups.values()
+                    if g.get('owner') == username or username in g.get('admins', [])][:20]
+    
+    def get_user_admin_channels(self, username: str) -> List[dict]:
+        """Get channels where user is admin - OPTIMIZED: single query"""
+        if USE_MONGODB:
+            return list(self.channels_col.find(
+                {'$or': [
+                    {'owner': username},
+                    {f'members.{username}': self.ROLE_ADMIN}
+                ]},
+                {'_id': 0}
+            ).limit(20))
+        else:
+            return [c for c in self.channels.values()
+                    if c.get('owner') == username or 
+                    c.get('members', {}).get(username) == self.ROLE_ADMIN][:20]
+    
+    def get_bots_by_developer(self, developer: str) -> List[dict]:
+        """Get bots created by a specific developer - OPTIMIZED: direct query"""
+        if USE_MONGODB:
+            return list(self.bots_col.find({'developer': developer}, {'_id': 0}))
+        else:
+            return [b for b in self.bots.values() if b.get('developer') == developer]
+    
+    def get_bots_grouped_by_status(self) -> dict:
+        """Get bots grouped by status - OPTIMIZED: single aggregation"""
+        if USE_MONGODB:
+            # Use aggregation to group in database
+            pipeline = [
+                {'$facet': {
+                    'pending': [{'$match': {'status': self.BOT_STATUS_PENDING}}],
+                    'approved': [{'$match': {'status': self.BOT_STATUS_APPROVED}}],
+                    'rejected': [{'$match': {'status': self.BOT_STATUS_REJECTED}}],
+                    'suspended': [{'$match': {'status': self.BOT_STATUS_SUSPENDED}}],
+                    'reported': [{'$match': {'reports.0': {'$exists': True}}}],
+                    'total': [{'$count': 'count'}]
+                }}
+            ]
+            result = list(self.bots_col.aggregate(pipeline))
+            if result:
+                r = result[0]
+                return {
+                    'pending': [{k: v for k, v in b.items() if k != '_id'} for b in r.get('pending', [])],
+                    'approved': [{k: v for k, v in b.items() if k != '_id'} for b in r.get('approved', [])],
+                    'rejected': [{k: v for k, v in b.items() if k != '_id'} for b in r.get('rejected', [])],
+                    'suspended': [{k: v for k, v in b.items() if k != '_id'} for b in r.get('suspended', [])],
+                    'reported': [{k: v for k, v in b.items() if k != '_id'} for b in r.get('reported', [])],
+                    'total': r.get('total', [{}])[0].get('count', 0)
+                }
+            return {'pending': [], 'approved': [], 'rejected': [], 'suspended': [], 'reported': [], 'total': 0}
+        else:
+            bots = list(self.bots.values())
+            return {
+                'pending': [b for b in bots if b.get('status') == self.BOT_STATUS_PENDING],
+                'approved': [b for b in bots if b.get('status') == self.BOT_STATUS_APPROVED],
+                'rejected': [b for b in bots if b.get('status') == self.BOT_STATUS_REJECTED],
+                'suspended': [b for b in bots if b.get('status') == self.BOT_STATUS_SUSPENDED],
+                'reported': [b for b in bots if len(b.get('reports', [])) > 0],
+                'total': len(bots)
+            }
     
     def set_user_premium(self, username: str, is_premium: bool) -> bool:
         """Set user's premium status"""

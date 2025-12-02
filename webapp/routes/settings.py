@@ -172,34 +172,27 @@ def sync_contacts():
     if not contacts:
         return jsonify({'success': False, 'message': 'No contacts provided'})
     
-    # Process contacts - find matches on Menza
-    matches_found = 0
+    # OPTIMIZED: Batch lookup for contacts
+    phones = [c.get('phone') for c in contacts if c.get('phone')]
+    emails = [c.get('email') for c in contacts if c.get('email')]
+    
+    # Single batch query for all phones and emails
+    phone_matches = store.find_users_by_contacts_batch('phone', phones) if phones else {}
+    email_matches = store.find_users_by_contacts_batch('email', emails) if emails else {}
+    
     synced_contacts = []
+    matches_found = 0
     
     for contact in contacts:
         phone = contact.get('phone')
         email = contact.get('email')
         name = contact.get('name', 'Unknown')
         
-        # Check if any user has this phone or email
-        on_menza = False
-        menza_username = None
-        
-        # Search by phone
-        if phone:
-            found_user = store.find_user_by_contact('phone', phone)
-            if found_user:
-                on_menza = True
-                menza_username = found_user
-                matches_found += 1
-        
-        # Search by email
-        if email and not on_menza:
-            found_user = store.find_user_by_contact('email', email)
-            if found_user:
-                on_menza = True
-                menza_username = found_user
-                matches_found += 1
+        # Check batch results
+        menza_username = phone_matches.get(phone) or email_matches.get(email)
+        on_menza = menza_username is not None
+        if on_menza:
+            matches_found += 1
         
         synced_contacts.append({
             'name': name,
