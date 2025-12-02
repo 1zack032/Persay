@@ -29,8 +29,10 @@ To add a new feature:
 3. Register in the respective __init__.py
 """
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_socketio import SocketIO
+import traceback
+import sys
 
 from webapp.config import get_config
 
@@ -66,6 +68,22 @@ def add_cache_headers(response):
         response.cache_control.max_age = 31536000
         response.cache_control.public = True
     return response
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Global error handler - log all exceptions"""
+    print(f"❌ ERROR: {type(e).__name__}: {str(e)}", file=sys.stderr)
+    print(f"❌ TRACEBACK:\n{traceback.format_exc()}", file=sys.stderr)
+    
+    # Return generic error for production
+    return jsonify({
+        'error': 'Internal server error',
+        'message': str(e) if app.debug else 'Something went wrong'
+    }), 500
+
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({'error': 'Not found'}), 404
 
 # Initialize SocketIO with threading mode for production
 import os

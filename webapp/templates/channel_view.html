@@ -158,10 +158,9 @@
                         </div>
                     </div>
                     
-                    {% if post.linked_post and post.linked_post in channel_posts %}
+                    {% if post.linked_post %}
                     <div class="linked-post">
-                        <div class="linked-post-label">🔗 Replying to previous post</div>
-                        {{ channel_posts[post.linked_post].content[:100] }}...
+                        <div class="linked-post-label">🔗 Reply to post</div>
                     </div>
                     {% endif %}
                     

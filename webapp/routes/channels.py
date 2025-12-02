@@ -310,8 +310,7 @@ def view_channel(channel_id):
                          can_manage=can_manage,
                          members_with_roles=members_with_roles,
                          my_channels=my_channels,
-                         subscribed_channels=subscribed_channels,
-                         channel_posts=store.channel_posts)
+                         subscribed_channels=subscribed_channels)
 
 
 @channels_bp.route('/channel/<channel_id>/settings', methods=['GET', 'POST'])
@@ -360,11 +359,16 @@ def channel_settings(channel_id):
     # Get all members with their roles
     members_with_roles = store.get_channel_members_with_roles(channel_id)
     
+    # Get posts for statistics
+    posts = store.get_channel_posts(channel_id)
+    total_likes = sum(len(p.get('likes', [])) for p in posts)
+    
     return render_template('channel_settings.html',
                          channel=channel,
                          username=username,
                          members_with_roles=members_with_roles,
-                         channel_posts=store.channel_posts)
+                         total_likes=total_likes,
+                         posts_count=len(posts))
 
 
 @channels_bp.route('/channel/<channel_id>/post', methods=['POST'])
