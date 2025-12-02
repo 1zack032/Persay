@@ -1,59 +1,63 @@
 """
-📺 Channel Routes
+📺 Channel Routes - MIE Optimized
 
 Channel creation, viewing, posting, subscription management,
 discoverability settings, and search.
+Uses Menza Intelligence Engine for caching.
 """
 
 from flask import Blueprint, render_template, request, session, redirect, url_for, jsonify
 from webapp.models import store
 from webapp.config import Config
+from webapp.core import get_engine
 
 channels_bp = Blueprint('channels', __name__)
 
 
 @channels_bp.route('/channels')
 def channels_page():
-    """Channel discovery and management page"""
+    """Channel discovery - MIE cached"""
     if 'username' not in session:
         return redirect(url_for('auth.login'))
     
     username = session['username']
-    
-    # Get filter from query params
+    engine = get_engine()
     discover_filter = request.args.get('filter', 'trending')
     period = request.args.get('period', 'daily')
     
-    # Get user's channels
-    my_channels = store.get_user_channels(username)
-    subscribed = store.get_subscribed_channels(username)
+    # Cache key for discover data (shared across users, refreshed often)
+    discover_key = f"discover_channels:{discover_filter}"
+    discover_data = engine.get_cached(discover_key)
     
-    # Add user's role to subscribed channels
-    for channel in subscribed:
-        channel['user_role'] = store.get_member_role(channel['id'], username)
+    if not discover_data:
+        discover_data = store.get_discover_channels_rotated(username=username)
+        engine.set_cached(discover_key, discover_data, ttl=60)
     
-    # Get discover channels with rotation algorithm
-    discover_data = store.get_discover_channels_rotated(username=username)
+    # User-specific data (shorter cache)
+    user_key = f"user_channels_page:{username}"
+    user_data = engine.get_cached(user_key)
+    
+    if not user_data:
+        my_channels = store.get_user_channels(username)
+        subscribed = store.get_subscribed_channels(username)
+        for channel in subscribed:
+            channel['user_role'] = store.get_member_role(channel['id'], username)
+        user_data = {'my_channels': my_channels, 'subscribed': subscribed}
+        engine.set_cached(user_key, user_data, ttl=120)
     
     # Select channels based on filter
-    if discover_filter == 'most_liked':
-        discover_channels = discover_data['most_liked']
-    elif discover_filter == 'most_viewed':
-        discover_channels = discover_data['most_viewed']
-    elif discover_filter == 'new':
-        discover_channels = discover_data['new']
-    else:  # trending (default)
-        discover_channels = discover_data['trending']
+    filter_map = {'most_liked': 'most_liked', 'most_viewed': 'most_viewed', 'new': 'new'}
+    discover_channels = discover_data.get(filter_map.get(discover_filter, 'trending'), [])
     
-    # Add like status for current user
+    # Add like status (quick lookup)
     for channel in discover_channels:
         channel['liked_by_user'] = store.has_liked_channel(channel['id'], username)
         channel['like_count'] = len(channel.get('likes', []))
     
     return render_template('channels.html',
                          username=username,
-                         my_channels=my_channels,
-                         subscribed_channels=subscribed,
+                         my_channels=user_data['my_channels'],
+                         subscribed_channels=user_data['subscribed'],
                          discover_channels=discover_channels,
                          discover_filter=discover_filter,
                          period=period,

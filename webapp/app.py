@@ -1,5 +1,5 @@
 """
-🔐 Persay - Encrypted Messaging Application
+🔐 Menza - Encrypted Messaging Application
 
 Main application entry point.
 This file initializes Flask, SocketIO, and registers all routes/events.
@@ -9,6 +9,9 @@ ARCHITECTURE:
 webapp/
 ├── app.py              ← You are here (entry point)
 ├── config.py           ← Configuration settings
+├── core/
+│   ├── __init__.py
+│   └── menza_intelligence_engine.py  ← 🧠 MIE - Performance Engine
 ├── models/
 │   ├── __init__.py
 │   └── store.py        ← Data storage (swap for database in production)
@@ -29,12 +32,16 @@ To add a new feature:
 3. Register in the respective __init__.py
 """
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, session
 from flask_socketio import SocketIO
 import traceback
 import sys
 
 from webapp.config import get_config
+
+# Initialize Menza Intelligence Engine
+from webapp.core import initialize_engine, get_engine
+mie = initialize_engine()
 
 # ============================================
 # APP INITIALIZATION
@@ -84,6 +91,35 @@ def handle_exception(e):
 @app.errorhandler(404)
 def not_found(e):
     return jsonify({'error': 'Not found'}), 404
+
+
+# ============================================
+# 🧠 MENZA INTELLIGENCE ENGINE API
+# ============================================
+
+@app.route('/api/engine/stats')
+def engine_stats():
+    """Get MIE performance statistics"""
+    engine = get_engine()
+    return jsonify({
+        'success': True,
+        'engine': engine.get_engine_stats()
+    })
+
+@app.route('/api/engine/health')
+def engine_health():
+    """Get MIE health status"""
+    engine = get_engine()
+    return jsonify({
+        'success': True,
+        'health': engine.get_health_status()
+    })
+
+@app.route('/investors')
+def investor_dashboard():
+    """Investor dashboard showing MIE performance"""
+    from flask import render_template
+    return render_template('investor_dashboard.html')
 
 # Initialize SocketIO with threading mode for production
 import os

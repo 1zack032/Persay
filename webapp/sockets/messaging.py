@@ -1,23 +1,19 @@
 """
-💬 Messaging WebSocket Events
+💬 Messaging WebSocket Events - MIE Optimized
 
 Handles real-time private messaging between users.
-- User connection/disconnection
-- Joining chat rooms
-- Sending encrypted messages
-- Public key sharing
-- Bot command processing
+Uses Menza Intelligence Engine for:
+- Predictive caching
+- Connection optimization
+- Rate limiting
+- Message prioritization
 """
 
 from flask import session, request
 from flask_socketio import emit, join_room
 from webapp.models import store
-from webapp.utils.bot_security import (
-    BotResponseCache,
-    BotAnalytics,
-    generate_webhook_headers
-)
-import re
+from webapp.core import get_engine
+from webapp.utils.bot_security import BotAnalytics, generate_webhook_headers
 import requests
 
 
@@ -26,17 +22,20 @@ def register_messaging_events(socketio):
     
     @socketio.on('connect')
     def handle_connect():
-        """When a user connects to the chat"""
+        """When a user connects - MIE optimized"""
         if 'username' in session:
             username = session['username']
             store.set_user_online(request.sid, username)
             
-            # Tell everyone this user is online
+            # Register with MIE for optimization
+            engine = get_engine()
+            engine.on_user_connect(request.sid, username, {
+                'ip': request.remote_addr,
+                'user_agent': request.headers.get('User-Agent', '')[:100]
+            })
+            
             emit('user_online', {'username': username}, broadcast=True)
-            
-            # Send list of online users to the newly connected user
             emit('online_list', {'users': store.get_online_users()})
-            
             print(f"✅ {username} connected")
     
     @socketio.on('disconnect')
@@ -44,72 +43,84 @@ def register_messaging_events(socketio):
         """When a user disconnects"""
         username = store.set_user_offline(request.sid)
         
+        # Unregister from MIE
+        get_engine().on_user_disconnect(request.sid)
+        
         if username and not store.is_user_online(username):
-            # Tell everyone this user is offline (if no other connections)
             emit('user_offline', {'username': username}, broadcast=True)
             print(f"👋 {username} disconnected")
     
     @socketio.on('join_chat')
     def handle_join_chat(data):
-        """
-        When a user wants to chat with someone.
-        Creates a private room for the two users.
-        """
+        """When a user wants to chat - MIE optimized with caching"""
         if 'username' not in session:
             return
         
         my_username = session['username']
         friend_username = data.get('friend')
-        
-        # Create a unique room ID for this pair
         room_id = store.get_room_id(my_username, friend_username)
+        engine = get_engine()
         
-        # Join the room
         join_room(room_id)
         
-        # Get chat settings
-        settings = store.get_chat_settings(room_id)
+        # Record interaction for predictions
+        engine.predictor.record_interaction(my_username, friend_username, 'message')
         
-        # Send chat history and settings for this room
+        # Get cached or fetch chat data
+        cache_key = f"chat_data:{room_id}"
+        chat_data = engine.get_cached(cache_key)
+        
+        if not chat_data:
+            chat_data = {
+                'messages': store.get_messages(room_id),
+                'settings': store.get_chat_settings(room_id)
+            }
+            engine.set_cached(cache_key, chat_data, ttl=30)
+        
         emit('chat_history', {
-            'messages': store.get_messages(room_id),
+            'messages': chat_data['messages'],
             'room': room_id,
-            'settings': settings
+            'settings': chat_data['settings']
         })
         
-        # Also send shared notes for this room
-        notes = store.get_shared_notes_for_room(room_id)
-        notes_metadata = []
-        for note in notes:
-            metadata = store.get_note_metadata(note['id'], my_username)
-            if metadata:
-                notes_metadata.append(metadata)
+        # Get shared notes (less frequently accessed, shorter cache)
+        notes_key = f"notes:{room_id}:{my_username}"
+        notes_metadata = engine.get_cached(notes_key)
         
-        emit('shared_notes_list', {
-            'notes': notes_metadata
-        })
+        if notes_metadata is None:
+            notes = store.get_shared_notes_for_room(room_id)
+            notes_metadata = [
+                m for n in notes 
+                if (m := store.get_note_metadata(n['id'], my_username))
+            ]
+            engine.set_cached(notes_key, notes_metadata, ttl=60)
         
+        emit('shared_notes_list', {'notes': notes_metadata})
         print(f"💬 {my_username} joined chat with {friend_username}")
     
     @socketio.on('send_message')
     def handle_send_message(data):
-        """
-        When a user sends an encrypted message.
-        
-        IMPORTANT: The message is ALREADY ENCRYPTED when it arrives here!
-        We just pass it along - we can't read it!
-        """
+        """Send encrypted message - MIE optimized with rate limiting"""
         if 'username' not in session:
             return
         
         sender = session['username']
         recipient = data.get('to')
         encrypted_message = data.get('encrypted_message')
+        engine = get_engine()
         
-        # Create room ID
+        # Check rate limit
+        user = store.get_user(sender)
+        allowed, info = engine.check_rate_limit(sender, user.get('premium', False))
+        if not allowed:
+            emit('rate_limited', {'retry_after': info.get('retry_after', 60)})
+            return
+        
         room_id = store.get_room_id(sender, recipient)
         
-        # Create message data
+        # Record interaction and determine priority
+        priority = engine.on_message_sent(sender, recipient, 'dm')
+        
         message_data = {
             'from': sender,
             'to': recipient,
@@ -117,13 +128,13 @@ def register_messaging_events(socketio):
             'timestamp': store.now()
         }
         
-        # Store the message
         store.add_message(room_id, message_data)
         
-        # Send to everyone in the room
-        emit('new_message', message_data, room=room_id)
+        # Invalidate cache for this chat
+        engine.cache.invalidate(f"chat_data:{room_id}")
         
-        print(f"📨 Message from {sender} to {recipient} (encrypted)")
+        emit('new_message', message_data, room=room_id)
+        print(f"📨 Message from {sender} to {recipient}")
     
     @socketio.on('share_public_key')
     def handle_share_key(data):
