@@ -543,13 +543,11 @@ def register_messaging_events(socketio):
         # Notify the creator
         emit('group_created', {'group': group})
         
-        # Notify all members
+        # Notify all members - OPTIMIZED: use get_user_sids for O(1) lookup
         for member in group['members']:
             if member != username:
-                # Send to all sessions of this member
-                for sid, user in store.online_users.items():
-                    if user == member:
-                        emit('group_invite', {'group': group}, room=sid)
+                for sid in store.get_user_sids(member):
+                    emit('group_invite', {'group': group}, room=sid)
         
         print(f"👥 {username} created group '{group_name}' with {len(members)} members")
     
@@ -684,18 +682,17 @@ def register_messaging_events(socketio):
             'group_id': group_id
         }, room=room_id)
         
-        # Prompt other members to set their phrase
+        # Prompt other members - OPTIMIZED: use get_user_sids for O(1) lookup
         for member in group['members']:
             if member != username:
-                for sid, user in store.online_users.items():
-                    if user == member:
-                        emit('prompt_set_phrase', {
-                            'note_id': note['id'],
-                            'note_title': title,
-                            'created_by': username,
-                            'group_id': group_id,
-                            'group_name': group['name']
-                        }, room=sid)
+                for sid in store.get_user_sids(member):
+                    emit('prompt_set_phrase', {
+                        'note_id': note['id'],
+                        'note_title': title,
+                        'created_by': username,
+                        'group_id': group_id,
+                        'group_name': group['name']
+                    }, room=sid)
         
         group_name = group['name']
         print(f"📝 {username} created group note '{title}' in '{group_name}'")

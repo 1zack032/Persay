@@ -138,7 +138,7 @@ def get_categories():
 
 @channels_bp.route('/api/channels/search')
 def api_search_channels():
-    """API endpoint to search channels with subscription status"""
+    """API endpoint to search channels - OPTIMIZED: single pass, no N+1"""
     if 'username' not in session:
         return jsonify({'error': 'Not logged in'}), 401
     
@@ -146,46 +146,49 @@ def api_search_channels():
     username = session['username']
     include_subscription = request.args.get('include_subscription', 'false') == 'true'
     
-    if not query:
+    if not query or len(query) < 2:
         return jsonify({'channels': []})
     
-    # Search all channels
-    all_channels = store.get_all_channels()
-    subscribed_ids = set(ch['id'] for ch in store.get_subscribed_channels(username))
-    owned_ids = set(ch['id'] for ch in store.get_user_channels(username))
+    engine = get_engine()
+    cache_key = f"channel_search:{query}:{username}"
+    cached = engine.get_cached(cache_key)
+    if cached:
+        return jsonify({'channels': cached})
+    
+    # Get user's channels in a single batch (combined in get_all_user_channels)
+    user_channel_ids = set(ch['id'] for ch in store.get_all_user_channels(username))
+    
+    # Search channels - use store's optimized search
+    search_results = store.search_channels(query, discoverable_only=False, limit=50)
     
     matched_channels = []
-    for channel in all_channels:
-        name_match = query in channel.get('name', '').lower()
-        desc_match = query in channel.get('description', '').lower()
-        category_match = any(query in cat.lower() for cat in channel.get('categories', []))
+    for channel in search_results:
+        is_member = channel['id'] in user_channel_ids
         
-        # Only include if matches and (discoverable OR user is subscribed/owner)
-        is_member = channel['id'] in subscribed_ids or channel['id'] in owned_ids
-        if (name_match or desc_match or category_match) and (channel.get('discoverable') or is_member):
-            ch_data = {
+        # Only include if discoverable OR user is member
+        if channel.get('discoverable') or is_member:
+            matched_channels.append({
                 'id': channel['id'],
                 'name': channel['name'],
                 'description': channel.get('description', ''),
                 'branding': channel.get('branding', {}),
-                'subscribers': channel.get('subscribers', []),
+                'subscribers': len(channel.get('subscribers', [])),  # Just count, not full list
                 'discoverable': channel.get('discoverable', False),
-                'likes': channel.get('likes', 0),
-                'views': channel.get('views', 0)
-            }
-            
-            if include_subscription:
-                ch_data['is_subscribed'] = is_member
-            
-            matched_channels.append(ch_data)
+                'likes': len(channel.get('likes', [])),
+                'views': channel.get('views', 0),
+                'is_subscribed': is_member if include_subscription else None
+            })
     
-    # Sort: subscribed/owned first, then by popularity
+    # Sort: subscribed first, then by subscriber count
     matched_channels.sort(key=lambda x: (
         -(1 if x.get('is_subscribed') else 0),
-        -len(x.get('subscribers', []))
+        -x.get('subscribers', 0)
     ))
     
-    return jsonify({'channels': matched_channels[:20]})
+    result = matched_channels[:20]
+    engine.set_cached(cache_key, result, ttl=30)
+    
+    return jsonify({'channels': result})
 
 
 @channels_bp.route('/channel/<channel_id>/like', methods=['POST'])

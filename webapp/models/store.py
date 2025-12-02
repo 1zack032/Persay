@@ -309,20 +309,42 @@ class DataStore:
             return None
     
     # ==========================================
-    # ONLINE STATUS (Always in-memory)
+    # ONLINE STATUS (Always in-memory) - OPTIMIZED
     # ==========================================
     
     def set_user_online(self, socket_id: str, username: str):
         self.online_users[socket_id] = username
+        # Maintain reverse index for O(1) lookups
+        if not hasattr(self, '_user_to_sids'):
+            self._user_to_sids = {}
+        if username not in self._user_to_sids:
+            self._user_to_sids[username] = set()
+        self._user_to_sids[username].add(socket_id)
     
     def set_user_offline(self, socket_id: str) -> Optional[str]:
-        return self.online_users.pop(socket_id, None)
+        username = self.online_users.pop(socket_id, None)
+        # Update reverse index
+        if username and hasattr(self, '_user_to_sids') and username in self._user_to_sids:
+            self._user_to_sids[username].discard(socket_id)
+            if not self._user_to_sids[username]:
+                del self._user_to_sids[username]
+        return username
     
     def get_online_users(self) -> List[str]:
+        if hasattr(self, '_user_to_sids'):
+            return list(self._user_to_sids.keys())
         return list(set(self.online_users.values()))
     
     def is_user_online(self, username: str) -> bool:
+        if hasattr(self, '_user_to_sids'):
+            return username in self._user_to_sids
         return username in self.online_users.values()
+    
+    def get_user_sids(self, username: str) -> List[str]:
+        """Get all socket IDs for a user - O(1) lookup"""
+        if hasattr(self, '_user_to_sids'):
+            return list(self._user_to_sids.get(username, set()))
+        return [sid for sid, user in self.online_users.items() if user == username]
     
     # ==========================================
     # MESSAGING METHODS
@@ -382,6 +404,7 @@ class DataStore:
             return True
     
     def get_chat_partners(self, username: str) -> List[dict]:
+        """Get chat partners - OPTIMIZED: batch user lookups to avoid N+1"""
         if USE_MONGODB:
             # Find all rooms this user is part of
             pipeline = [
@@ -394,7 +417,9 @@ class DataStore:
             ]
             rooms = list(self.messages_col.aggregate(pipeline))
             
-            partners = []
+            # Extract partner usernames first (avoid N+1 query)
+            partner_usernames = set()
+            room_data = {}
             for room in rooms:
                 room_id = room['_id']
                 if room_id.startswith('group_'):
@@ -402,32 +427,56 @@ class DataStore:
                 users = room_id.split('_')
                 if len(users) == 2:
                     other = users[0] if users[1] == username else users[1]
-                    user_data = self.get_user(other)
-                    partners.append({
-                        'username': other,
-                        'display_name': user_data.get('display_name', other) if user_data else other,
-                        'last_message_time': room['last_message_time'],
-                        'message_count': room['message_count']
-                    })
+                    partner_usernames.add(other)
+                    room_data[other] = room
+            
+            # Batch fetch all user data in ONE query
+            if partner_usernames:
+                users_data = {
+                    u['username']: u for u in 
+                    self.users_col.find({'username': {'$in': list(partner_usernames)}}, 
+                                       {'username': 1, 'display_name': 1, '_id': 0})
+                }
+            else:
+                users_data = {}
+            
+            # Build result
+            partners = []
+            for other, room in room_data.items():
+                user_data = users_data.get(other, {})
+                partners.append({
+                    'username': other,
+                    'display_name': user_data.get('display_name', other),
+                    'last_message_time': room['last_message_time'],
+                    'message_count': room['message_count']
+                })
             
             return sorted(partners, key=lambda x: x['last_message_time'] or '', reverse=True)
         else:
-            partners = {}
+            # In-memory: collect usernames first, then batch lookup
+            partner_data = {}
             for room_id, messages in self.messages.items():
                 if room_id.startswith('group_'):
                     continue
                 users = room_id.split('_')
-                if len(users) == 2 and username in users:
+                if len(users) == 2 and username in users and messages:
                     other = users[0] if users[1] == username else users[1]
-                    if messages:
-                        user_data = self.get_user(other)
-                        partners[other] = {
-                            'username': other,
-                            'display_name': user_data.get('display_name', other) if user_data else other,
-                            'last_message_time': messages[-1].get('timestamp'),
-                            'message_count': len(messages)
-                        }
-            return sorted(partners.values(), key=lambda x: x['last_message_time'] or '', reverse=True)
+                    partner_data[other] = {
+                        'last_message_time': messages[-1].get('timestamp'),
+                        'message_count': len(messages)
+                    }
+            
+            # Build result with user data
+            partners = []
+            for other, data in partner_data.items():
+                user = self.users.get(other, {})
+                partners.append({
+                    'username': other,
+                    'display_name': user.get('display_name', other),
+                    'last_message_time': data['last_message_time'],
+                    'message_count': data['message_count']
+                })
+            return sorted(partners, key=lambda x: x['last_message_time'] or '', reverse=True)
     
     # ==========================================
     # CHAT SETTINGS
@@ -847,38 +896,61 @@ class DataStore:
                 self.channels[channel_id]['views'] = self.channels[channel_id].get('views', 0) + 1
     
     def like_channel(self, channel_id: str, username: str) -> dict:
-        channel = self.get_channel(channel_id)
-        if not channel:
-            return {'success': False, 'error': 'Not found'}
-        
-        if username in channel.get('likes', []):
-            return {'success': False, 'error': 'Already liked', 'likes': len(channel.get('likes', []))}
-        
+        """Like a channel - OPTIMIZED: single atomic update"""
         if USE_MONGODB:
-            self.channels_col.update_one({'id': channel_id}, {'$addToSet': {'likes': username}})
+            # Atomic update: only add if not already liked
+            result = self.channels_col.update_one(
+                {'id': channel_id, 'likes': {'$ne': username}},
+                {'$addToSet': {'likes': username}}
+            )
+            if result.matched_count == 0:
+                # Either not found or already liked
+                channel = self.channels_col.find_one({'id': channel_id}, {'likes': 1})
+                if not channel:
+                    return {'success': False, 'error': 'Not found'}
+                return {'success': False, 'error': 'Already liked', 'likes': len(channel.get('likes', []))}
+            return {'success': True, 'likes': result.modified_count}
         else:
-            if 'likes' not in self.channels[channel_id]:
-                self.channels[channel_id]['likes'] = []
-            self.channels[channel_id]['likes'].append(username)
-        
-        return {'success': True, 'likes': len(channel.get('likes', [])) + 1}
+            if channel_id not in self.channels:
+                return {'success': False, 'error': 'Not found'}
+            ch = self.channels[channel_id]
+            if 'likes' not in ch:
+                ch['likes'] = []
+            if username in ch['likes']:
+                return {'success': False, 'error': 'Already liked', 'likes': len(ch['likes'])}
+            ch['likes'].append(username)
+            return {'success': True, 'likes': len(ch['likes'])}
     
     def unlike_channel(self, channel_id: str, username: str) -> dict:
-        channel = self.get_channel(channel_id)
-        if not channel:
-            return {'success': False, 'error': 'Not found'}
-        
+        """Unlike a channel - OPTIMIZED: single atomic update"""
         if USE_MONGODB:
-            self.channels_col.update_one({'id': channel_id}, {'$pull': {'likes': username}})
+            result = self.channels_col.update_one(
+                {'id': channel_id},
+                {'$pull': {'likes': username}}
+            )
+            if result.matched_count == 0:
+                return {'success': False, 'error': 'Not found'}
+            return {'success': True}
         else:
-            if username in self.channels[channel_id].get('likes', []):
-                self.channels[channel_id]['likes'].remove(username)
-        
-        return {'success': True, 'likes': len(channel.get('likes', [])) - 1}
+            if channel_id not in self.channels:
+                return {'success': False, 'error': 'Not found'}
+            ch = self.channels[channel_id]
+            if username in ch.get('likes', []):
+                ch['likes'].remove(username)
+            return {'success': True, 'likes': len(ch.get('likes', []))}
     
     def has_liked_channel(self, channel_id: str, username: str) -> bool:
-        channel = self.get_channel(channel_id)
-        return channel and username in channel.get('likes', [])
+        """Check if user liked channel - OPTIMIZED: projection query"""
+        if USE_MONGODB:
+            # Only fetch what we need
+            result = self.channels_col.find_one(
+                {'id': channel_id, 'likes': username},
+                {'_id': 1}  # Just check existence
+            )
+            return result is not None
+        else:
+            ch = self.channels.get(channel_id)
+            return ch and username in ch.get('likes', [])
     
     def get_discoverable_channels(self, exclude_user: str = None, limit: int = 50) -> List[dict]:
         if USE_MONGODB:
@@ -948,33 +1020,53 @@ class DataStore:
         return matching[:limit]
     
     def search_channels_by_interest(self, query: str, limit: int = 20) -> dict:
-        """Search channels by interest/keyword"""
-        query_lower = query.lower()
-        channels = self.get_discoverable_channels(limit=100)
+        """Search channels by interest/keyword - OPTIMIZED: use MongoDB queries when available"""
+        query_lower = query.lower().strip()
         
-        exact_matches = []
-        category_matches = []
-        suggestions = []
-        related_categories = []
+        if not query_lower:
+            return {'exact_matches': [], 'category_matches': [], 'suggestions': [], 'related_categories': []}
         
-        # Find matching categories
-        for cat_id, cat_data in self.INTEREST_CATEGORIES.items():
-            if query_lower in cat_id or any(query_lower in kw for kw in cat_data['keywords']):
-                related_categories.append({'id': cat_id, 'name': cat_id.title(), **cat_data})
+        # Find matching categories first (fast, in-memory)
+        related_categories = [
+            {'id': cat_id, 'name': cat_id.title(), **cat_data}
+            for cat_id, cat_data in self.INTEREST_CATEGORIES.items()
+            if query_lower in cat_id or any(query_lower in kw for kw in cat_data['keywords'])
+        ]
         
-        for channel in channels:
-            name_lower = channel['name'].lower()
-            desc_lower = channel.get('description', '').lower()
+        if USE_MONGODB:
+            # Use MongoDB text search for efficiency
+            exact_matches = list(self.channels_col.find(
+                {'discoverable': True, 'name': {'$regex': query_lower, '$options': 'i'}},
+                {'_id': 0}
+            ).limit(limit))
             
-            # Exact name match
-            if query_lower in name_lower:
-                exact_matches.append(channel)
-            # Category match
-            elif any(query_lower in cat for cat in channel.get('categories', [])):
-                category_matches.append(channel)
-            # Description match
-            elif query_lower in desc_lower:
-                suggestions.append(channel)
+            category_matches = list(self.channels_col.find(
+                {'discoverable': True, 'categories': {'$regex': query_lower, '$options': 'i'},
+                 'name': {'$not': {'$regex': query_lower, '$options': 'i'}}},
+                {'_id': 0}
+            ).limit(limit))
+            
+            suggestions = list(self.channels_col.find(
+                {'discoverable': True, 'description': {'$regex': query_lower, '$options': 'i'},
+                 'name': {'$not': {'$regex': query_lower, '$options': 'i'}},
+                 'categories': {'$not': {'$regex': query_lower, '$options': 'i'}}},
+                {'_id': 0}
+            ).limit(limit))
+        else:
+            # In-memory fallback with single pass
+            exact_matches, category_matches, suggestions = [], [], []
+            for ch in self.channels.values():
+                if not ch.get('discoverable', True):
+                    continue
+                name_lower = ch['name'].lower()
+                if query_lower in name_lower:
+                    exact_matches.append(ch)
+                elif any(query_lower in cat for cat in ch.get('categories', [])):
+                    category_matches.append(ch)
+                elif query_lower in ch.get('description', '').lower():
+                    suggestions.append(ch)
+                if len(exact_matches) >= limit and len(category_matches) >= limit:
+                    break
         
         return {
             'exact_matches': exact_matches[:limit],
@@ -984,15 +1076,20 @@ class DataStore:
         }
     
     def get_channel_members_with_roles(self, channel_id: str) -> List[dict]:
+        """Get channel members - OPTIMIZED: use already-fetched channel data"""
         channel = self.get_channel(channel_id)
         if not channel:
             return []
         
+        owner = channel['owner']
+        members_dict = channel.get('members', {})
+        
+        # Build result directly from channel data (no extra queries)
         return [
             {
                 'username': u,
-                'role': self.get_member_role(channel_id, u),
-                'is_owner': u == channel['owner']
+                'role': self.ROLE_ADMIN if u == owner else members_dict.get(u, self.ROLE_VIEWER),
+                'is_owner': u == owner
             }
             for u in channel.get('subscribers', [])
         ]
