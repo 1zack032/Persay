@@ -1,20 +1,42 @@
 """
-💬 Messaging WebSocket Events - MIE Optimized
+💬 Messaging WebSocket Events - Memory Optimized
 
 Handles real-time private messaging between users.
-Uses Menza Intelligence Engine for:
-- Predictive caching
-- Connection optimization
-- Rate limiting
-- Message prioritization
 """
 
 from flask import session, request
 from flask_socketio import emit, join_room
 from webapp.models import store
-from webapp.core import get_engine
 from webapp.utils.bot_security import BotAnalytics, generate_webhook_headers
 import requests
+
+
+# Simple bot response cache (lightweight)
+class BotResponseCache:
+    """Simple cache for bot responses"""
+    _cache = {}
+    _max_entries = 20  # Small cache
+    
+    @classmethod
+    def get(cls, key):
+        import time
+        entry = cls._cache.get(key)
+        if entry and entry['expires'] > time.time():
+            return entry['data']
+        return None
+    
+    @classmethod
+    def set(cls, key, data, cache_type='default'):
+        import time
+        # TTL based on type
+        ttl = {'coingecko_price': 60, 'coingecko_trending': 300, 'default': 120}.get(cache_type, 120)
+        
+        # Evict oldest if full
+        if len(cls._cache) >= cls._max_entries:
+            oldest = min(cls._cache.items(), key=lambda x: x[1]['expires'])
+            del cls._cache[oldest[0]]
+        
+        cls._cache[key] = {'data': data, 'expires': time.time() + ttl}
 
 
 def register_messaging_events(socketio):
@@ -22,60 +44,39 @@ def register_messaging_events(socketio):
     
     @socketio.on('connect')
     def handle_connect():
-        """When a user connects - MIE optimized"""
+        """When a user connects"""
         if 'username' in session:
             username = session['username']
             store.set_user_online(request.sid, username)
-            
-            # Register with MIE for optimization
-            engine = get_engine()
-            engine.on_user_connect(request.sid, username, {
-                'ip': request.remote_addr,
-                'user_agent': request.headers.get('User-Agent', '')[:100]
-            })
-            
             emit('user_online', {'username': username}, broadcast=True)
             emit('online_list', {'users': store.get_online_users()})
-            print(f"✅ {username} connected")
+            print(f"✅ {username} connected", flush=True)
     
     @socketio.on('disconnect')
     def handle_disconnect():
         """When a user disconnects"""
         username = store.set_user_offline(request.sid)
-        
-        # Unregister from MIE
-        get_engine().on_user_disconnect(request.sid)
-        
         if username and not store.is_user_online(username):
             emit('user_offline', {'username': username}, broadcast=True)
-            print(f"👋 {username} disconnected")
+            print(f"👋 {username} disconnected", flush=True)
     
     @socketio.on('join_chat')
     def handle_join_chat(data):
-        """When a user wants to chat - MIE optimized with caching"""
+        """When a user wants to chat"""
         if 'username' not in session:
             return
         
         my_username = session['username']
         friend_username = data.get('friend')
         room_id = store.get_room_id(my_username, friend_username)
-        engine = get_engine()
         
         join_room(room_id)
         
-        # Record interaction for predictions
-        engine.predictor.record_interaction(my_username, friend_username, 'message')
-        
-        # Get cached or fetch chat data
-        cache_key = f"chat_data:{room_id}"
-        chat_data = engine.get_cached(cache_key)
-        
-        if not chat_data:
-            chat_data = {
-                'messages': store.get_messages(room_id),
-                'settings': store.get_chat_settings(room_id)
-            }
-            engine.set_cached(cache_key, chat_data, ttl=30)
+        # Get chat data
+        chat_data = {
+            'messages': store.get_messages(room_id),
+            'settings': store.get_chat_settings(room_id)
+        }
         
         emit('chat_history', {
             'messages': chat_data['messages'],
@@ -83,43 +84,28 @@ def register_messaging_events(socketio):
             'settings': chat_data['settings']
         })
         
-        # Get shared notes (less frequently accessed, shorter cache)
-        notes_key = f"notes:{room_id}:{my_username}"
-        notes_metadata = engine.get_cached(notes_key)
-        
-        if notes_metadata is None:
-            notes = store.get_shared_notes_for_room(room_id)
-            notes_metadata = [
-                m for n in notes 
-                if (m := store.get_note_metadata(n['id'], my_username))
-            ]
-            engine.set_cached(notes_key, notes_metadata, ttl=60)
+        # Get shared notes
+        notes = store.get_shared_notes_for_room(room_id)
+        notes_metadata = []
+        for n in notes:
+            metadata = store.get_note_metadata(n['id'], my_username)
+            if metadata:
+                notes_metadata.append(metadata)
         
         emit('shared_notes_list', {'notes': notes_metadata})
-        print(f"💬 {my_username} joined chat with {friend_username}")
+        print(f"💬 {my_username} joined chat with {friend_username}", flush=True)
     
     @socketio.on('send_message')
     def handle_send_message(data):
-        """Send encrypted message - MIE optimized with rate limiting"""
+        """Send encrypted message"""
         if 'username' not in session:
             return
         
         sender = session['username']
         recipient = data.get('to')
         encrypted_message = data.get('encrypted_message')
-        engine = get_engine()
-        
-        # Check rate limit
-        user = store.get_user(sender)
-        allowed, info = engine.check_rate_limit(sender, user.get('premium', False))
-        if not allowed:
-            emit('rate_limited', {'retry_after': info.get('retry_after', 60)})
-            return
         
         room_id = store.get_room_id(sender, recipient)
-        
-        # Record interaction and determine priority
-        priority = engine.on_message_sent(sender, recipient, 'dm')
         
         message_data = {
             'from': sender,
@@ -129,35 +115,24 @@ def register_messaging_events(socketio):
         }
         
         store.add_message(room_id, message_data)
-        
-        # Invalidate cache for this chat
-        engine.cache.invalidate(f"chat_data:{room_id}")
-        
         emit('new_message', message_data, room=room_id)
-        print(f"📨 Message from {sender} to {recipient}")
+        print(f"📨 Message from {sender} to {recipient}", flush=True)
     
     @socketio.on('share_public_key')
     def handle_share_key(data):
-        """
-        When a user shares their public key.
-        Others need this to encrypt messages TO this user.
-        """
+        """When a user shares their public key"""
         if 'username' not in session:
             return
         
         username = session['username']
         public_key = data.get('public_key')
         
-        # Store the public key
         store.set_user_public_key(username, public_key)
-        
-        # Broadcast to everyone
         emit('public_key_update', {
             'username': username,
             'public_key': public_key
         }, broadcast=True)
-        
-        print(f"🔑 {username} shared their public key")
+        print(f"🔑 {username} shared their public key", flush=True)
     
     @socketio.on('get_public_key')
     def handle_get_key(data):
@@ -177,10 +152,7 @@ def register_messaging_events(socketio):
     
     @socketio.on('delete_message')
     def handle_delete_message(data):
-        """
-        Delete a specific message.
-        Only the sender can delete their own messages.
-        """
+        """Delete a specific message"""
         if 'username' not in session:
             return
         
@@ -191,42 +163,28 @@ def register_messaging_events(socketio):
         room_id = store.get_room_id(username, friend)
         
         if store.delete_message(room_id, message_id, username):
-            # Notify everyone in the room that message was deleted
-            emit('message_deleted', {
-                'message_id': message_id
-            }, room=room_id)
-            print(f"🗑️ {username} deleted a message")
+            emit('message_deleted', {'message_id': message_id}, room=room_id)
+            print(f"🗑️ {username} deleted a message", flush=True)
         else:
             emit('delete_error', {'error': 'Could not delete message'})
     
     @socketio.on('clear_chat')
     def handle_clear_chat(data):
-        """
-        Clear all messages in a chat (start fresh).
-        Both users need to agree, OR the initiator just clears for themselves.
-        For simplicity, we'll clear for both users.
-        """
+        """Clear all messages in a chat"""
         if 'username' not in session:
             return
         
         username = session['username']
         friend = data.get('friend')
-        
         room_id = store.get_room_id(username, friend)
         
         if store.clear_chat(room_id):
-            # Notify everyone in the room
-            emit('chat_cleared', {
-                'cleared_by': username
-            }, room=room_id)
-            print(f"🧹 {username} cleared chat with {friend}")
+            emit('chat_cleared', {'cleared_by': username}, room=room_id)
+            print(f"🧹 {username} cleared chat with {friend}", flush=True)
     
     @socketio.on('set_auto_delete')
     def handle_set_auto_delete(data):
-        """
-        Set auto-delete period for messages in this chat.
-        Options: 'never', '1_day', '1_week', '1_month', '1_year'
-        """
+        """Set auto-delete period for messages"""
         if 'username' not in session:
             return
         
@@ -235,16 +193,13 @@ def register_messaging_events(socketio):
         period = data.get('period', 'never')
         
         room_id = store.get_room_id(username, friend)
-        
         settings = store.set_auto_delete(room_id, period)
         
-        # Notify everyone in the room about settings change
         emit('settings_updated', {
             'settings': settings,
             'updated_by': username
         }, room=room_id)
-        
-        print(f"⏰ {username} set auto-delete to {period} for chat with {friend}")
+        print(f"⏰ {username} set auto-delete to {period}", flush=True)
     
     @socketio.on('get_chat_settings')
     def handle_get_settings(data):
@@ -257,7 +212,6 @@ def register_messaging_events(socketio):
         
         room_id = store.get_room_id(username, friend)
         settings = store.get_chat_settings(room_id)
-        
         emit('chat_settings', {'settings': settings})
     
     # ==========================================
@@ -266,11 +220,7 @@ def register_messaging_events(socketio):
     
     @socketio.on('create_shared_note')
     def handle_create_shared_note(data):
-        """
-        Create a new shared note in a chat.
-        The creator sets their secret phrase immediately.
-        Other members are prompted to set their own phrases.
-        """
+        """Create a new shared note"""
         if 'username' not in session:
             return
         
@@ -286,7 +236,6 @@ def register_messaging_events(socketio):
         
         room_id = store.get_room_id(username, friend)
         
-        # Create the note
         note = store.create_shared_note(
             room_id=room_id,
             title=title,
@@ -295,10 +244,8 @@ def register_messaging_events(socketio):
             creator_phrase=creator_phrase
         )
         
-        # Add the other user(s) to pending list
         store.add_pending_member(note['id'], friend)
         
-        # Broadcast to the room that a note was created
         emit('shared_note_created', {
             'id': note['id'],
             'title': note['title'],
@@ -306,36 +253,23 @@ def register_messaging_events(socketio):
             'created_at': note['created_at']
         }, room=room_id)
         
-        # Prompt the friend to set their phrase
         emit('prompt_set_phrase', {
             'note_id': note['id'],
             'title': note['title'],
             'created_by': username
         }, room=room_id)
         
-        # Also send updated notes list to the creator immediately
+        # Send updated notes list
         notes = store.get_shared_notes_for_room(room_id)
-        print(f"📝 DEBUG: Found {len(notes)} notes for room {room_id}")
-        notes_metadata = []
-        for n in notes:
-            metadata = store.get_note_metadata(n['id'], username)
-            print(f"📝 DEBUG: Note metadata for {n['id']}: {metadata}")
-            if metadata:
-                notes_metadata.append(metadata)
+        notes_metadata = [store.get_note_metadata(n['id'], username) for n in notes]
+        notes_metadata = [m for m in notes_metadata if m]
+        emit('shared_notes_list', {'notes': notes_metadata})
         
-        print(f"📝 DEBUG: Sending {len(notes_metadata)} notes to client")
-        emit('shared_notes_list', {
-            'notes': notes_metadata
-        })
-        
-        print(f"📝 {username} created shared note '{title}' with {friend}")
+        print(f"📝 {username} created shared note '{title}'", flush=True)
     
     @socketio.on('set_note_phrase')
     def handle_set_note_phrase(data):
-        """
-        Set your secret phrase for a shared note.
-        Each user sets their own unique phrase.
-        """
+        """Set your secret phrase for a shared note"""
         if 'username' not in session:
             return
         
@@ -352,15 +286,13 @@ def register_messaging_events(socketio):
                 'note_id': note_id,
                 'message': 'Your secret phrase has been set!'
             })
-            print(f"🔐 {username} set their phrase for note {note_id}")
+            print(f"🔐 {username} set phrase for note", flush=True)
         else:
             emit('note_error', {'error': 'Could not set phrase'})
     
     @socketio.on('unlock_note')
     def handle_unlock_note(data):
-        """
-        Attempt to unlock a shared note with your phrase.
-        """
+        """Unlock a shared note with phrase"""
         if 'username' not in session:
             return
         
@@ -380,7 +312,6 @@ def register_messaging_events(socketio):
                 'last_edited_by': note.get('last_edited_by'),
                 'last_edited_at': note.get('last_edited_at')
             })
-            print(f"🔓 {username} unlocked note {note_id}")
         else:
             emit('note_unlock_failed', {
                 'note_id': note_id,
@@ -389,10 +320,7 @@ def register_messaging_events(socketio):
     
     @socketio.on('get_shared_notes')
     def handle_get_shared_notes(data):
-        """
-        Get all shared notes for a chat room.
-        Returns metadata only (not content - need to unlock for that).
-        """
+        """Get all shared notes for a chat"""
         if 'username' not in session:
             return
         
@@ -402,22 +330,17 @@ def register_messaging_events(socketio):
         room_id = store.get_room_id(username, friend)
         notes = store.get_shared_notes_for_room(room_id)
         
-        # Return metadata for each note
         notes_metadata = []
         for note in notes:
             metadata = store.get_note_metadata(note['id'], username)
             if metadata:
                 notes_metadata.append(metadata)
         
-        emit('shared_notes_list', {
-            'notes': notes_metadata
-        })
+        emit('shared_notes_list', {'notes': notes_metadata})
     
     @socketio.on('edit_shared_note')
     def handle_edit_shared_note(data):
-        """
-        Edit a shared note. User must provide their phrase to edit.
-        """
+        """Edit a shared note"""
         if 'username' not in session:
             return
         
@@ -440,31 +363,22 @@ def register_messaging_events(socketio):
         
         if result['status'] == 'success':
             room_id = store.get_room_id(username, friend)
-            
-            # Notify both users about the edit
             emit('note_edited', {
                 'note_id': note_id,
                 'title': result['note']['title'],
                 'edited_by': username,
                 'edited_at': result['note']['last_edited_at']
             }, room=room_id)
-            
-            # Send success to the editor
             emit('note_edit_success', {
                 'note_id': note_id,
                 'message': 'Note updated successfully!'
             })
-            
-            print(f"✏️ {username} edited note '{result['note']['title']}'")
         else:
             emit('note_error', {'error': result['message']})
     
     @socketio.on('request_delete_note')
     def handle_request_delete_note(data):
-        """
-        Request deletion of a shared note.
-        Both users must agree for the note to be deleted.
-        """
+        """Request deletion of a shared note"""
         if 'username' not in session:
             return
         
@@ -479,24 +393,18 @@ def register_messaging_events(socketio):
         result = store.request_note_deletion(note_id, username)
         
         if result['status'] == 'deleted':
-            # Notify both users that note was deleted
             room_id = store.get_room_id(username, friend)
             emit('note_deleted', {
                 'note_id': note_id,
                 'message': 'Note deleted by mutual agreement'
             }, room=room_id)
-            print(f"🗑️ Note {note_id} deleted by mutual agreement")
-        
         elif result['status'] == 'requested':
-            # Notify both users about the deletion request
             room_id = store.get_room_id(username, friend)
             emit('note_delete_requested', {
                 'note_id': note_id,
                 'requested_by': username,
                 'message': f'{username} requested to delete this note'
             }, room=room_id)
-            print(f"🗑️ {username} requested to delete note {note_id}")
-        
         else:
             emit('note_error', {'error': result.get('message', 'Could not process request')})
     
@@ -516,7 +424,6 @@ def register_messaging_events(socketio):
                 'note_id': note_id,
                 'cancelled_by': username
             }, room=room_id)
-            print(f"↩️ {username} cancelled delete request for note {note_id}")
     
     # ==========================================
     # GROUP CHAT EVENTS
@@ -537,23 +444,20 @@ def register_messaging_events(socketio):
             emit('group_error', {'error': 'Group name is required'})
             return
         
-        # Create the group
         group = store.create_group(group_name, username, members, invite_code)
-        
-        # Notify the creator
         emit('group_created', {'group': group})
         
-        # Notify all members - OPTIMIZED: use get_user_sids for O(1) lookup
+        # Notify members
         for member in group['members']:
             if member != username:
                 for sid in store.get_user_sids(member):
                     emit('group_invite', {'group': group}, room=sid)
         
-        print(f"👥 {username} created group '{group_name}' with {len(members)} members")
+        print(f"👥 {username} created group '{group_name}'", flush=True)
     
     @socketio.on('join_group')
     def handle_join_group(data):
-        """Join a group chat room to receive messages"""
+        """Join a group chat room"""
         if 'username' not in session:
             return
         
@@ -562,20 +466,17 @@ def register_messaging_events(socketio):
         
         group = store.get_group(group_id)
         if not group or username not in group['members']:
-            emit('group_error', {'error': 'Not authorized to join this group'})
+            emit('group_error', {'error': 'Not authorized'})
             return
         
         room_id = f"group_{group_id}"
         join_room(room_id)
         
-        # Send group history
         emit('group_history', {
             'group_id': group_id,
             'messages': store.get_group_messages(group_id),
             'group': group
         })
-        
-        print(f"👥 {username} joined group '{group['name']}'")
     
     @socketio.on('group_message')
     def handle_group_message(data):
@@ -593,17 +494,13 @@ def register_messaging_events(socketio):
             emit('group_error', {'error': 'Not authorized'})
             return
         
-        # Add message to store
         message = store.add_group_message(group_id, username, content, encrypted)
         
-        # Broadcast to group room
         room_id = f"group_{group_id}"
         emit('new_group_message', {
             'group_id': group_id,
             'message': message
         }, room=room_id)
-        
-        print(f"💬 Group message in '{group['name']}' from {username}")
     
     @socketio.on('get_user_groups')
     def handle_get_user_groups():
@@ -671,18 +568,15 @@ def register_messaging_events(socketio):
         room_id = f"group_{group_id}"
         note = store.create_shared_note(room_id, title, content, username, phrase)
         
-        # Add other group members as pending
         for member in group['members']:
             if member != username:
                 store.add_pending_member(note['id'], member)
         
-        # Notify all group members
         emit('shared_note_created', {
             'note': store.get_note_metadata(note['id'], username),
             'group_id': group_id
         }, room=room_id)
         
-        # Prompt other members - OPTIMIZED: use get_user_sids for O(1) lookup
         for member in group['members']:
             if member != username:
                 for sid in store.get_user_sids(member):
@@ -694,45 +588,35 @@ def register_messaging_events(socketio):
                         'group_name': group['name']
                     }, room=sid)
         
-        group_name = group['name']
-        print(f"📝 {username} created group note '{title}' in '{group_name}'")
+        print(f"📝 {username} created group note '{title}'", flush=True)
     
     # ==========================================
-    # BOT COMMAND EVENTS
+    # BOT COMMANDS
     # ==========================================
     
     def process_bot_command(message, sender, target_type, target_id, room_id):
-        """
-        Check if a message is a bot command and process it.
-        Returns True if a command was processed, False otherwise.
-        """
-        # Check if message starts with /
+        """Check if message is a bot command and process it"""
         if not message or not message.startswith('/'):
             return False
         
-        # Parse command and args
         parts = message.split()
         command = parts[0].lower()
         args = parts[1:] if len(parts) > 1 else []
         
-        # Get bots for this target
         if target_type == 'group':
             bots = store.get_group_bots(target_id)
         else:
-            return False  # DM commands not supported yet
+            return False
         
-        # Find a bot that handles this command
         for bot in bots:
             if bot['status'] != store.BOT_STATUS_APPROVED:
                 continue
             
             for cmd in bot.get('commands', []):
                 if cmd['command'] == command:
-                    # Process the command
                     response = process_command(bot, command, args, sender, target_type, target_id)
                     
                     if response:
-                        # Send bot response
                         bot_message = {
                             'from': bot['username'],
                             'content': response,
@@ -741,7 +625,6 @@ def register_messaging_events(socketio):
                             'timestamp': store.now()
                         }
                         
-                        # Store and emit the message
                         if target_type == 'group':
                             store.add_group_message(target_id, bot['username'], response, False)
                             emit('new_group_message', {
@@ -754,15 +637,9 @@ def register_messaging_events(socketio):
         return False
     
     def process_command(bot, command, args, sender, target_type, target_id):
-        """
-        Process a bot command and return a response.
-        For internal bots, handle directly. For webhook bots, call the webhook.
-        """
-        # Track command usage
+        """Process a bot command"""
         BotAnalytics.track_event(bot['bot_id'], 'command', {
-            'command': command,
-            'user': sender,
-            'args': args
+            'command': command, 'user': sender, 'args': args
         })
         
         api_type = bot.get('api_type', 'internal')
@@ -779,23 +656,19 @@ def register_messaging_events(socketio):
         return None
     
     def process_coingecko_command(command, args):
-        """Process CoinGecko bot commands with caching"""
+        """Process CoinGecko commands"""
         try:
             if command == '/price':
                 if not args:
                     return "❌ Usage: /price <coin>\nExample: /price bitcoin"
                 
                 coin = args[0].lower()
-                # Map common symbols to CoinGecko IDs
                 coin_map = {
                     'btc': 'bitcoin', 'eth': 'ethereum', 'sol': 'solana',
-                    'doge': 'dogecoin', 'xrp': 'ripple', 'ada': 'cardano',
-                    'dot': 'polkadot', 'matic': 'polygon', 'link': 'chainlink',
-                    'avax': 'avalanche-2', 'bnb': 'binancecoin'
+                    'doge': 'dogecoin', 'xrp': 'ripple', 'ada': 'cardano'
                 }
                 coin_id = coin_map.get(coin, coin)
                 
-                # Check cache first
                 cache_key = f"coingecko_price_{coin_id}"
                 cached = BotResponseCache.get(cache_key)
                 
@@ -805,20 +678,14 @@ def register_messaging_events(socketio):
                     try:
                         response = requests.get(
                             'https://api.coingecko.com/api/v3/simple/price',
-                            params={
-                                'ids': coin_id,
-                                'vs_currencies': 'usd',
-                                'include_24hr_change': 'true'
-                            },
-                            timeout=3  # Reduced timeout
+                            params={'ids': coin_id, 'vs_currencies': 'usd', 'include_24hr_change': 'true'},
+                            timeout=3
                         )
                         response.raise_for_status()
                         data = response.json()
                         BotResponseCache.set(cache_key, data, 'coingecko_price')
-                    except requests.exceptions.Timeout:
-                        return "⏱️ Price lookup timed out. Try again."
-                    except Exception:
-                        return "⚠️ Temporarily unavailable. Try again."
+                    except:
+                        return "⚠️ Price lookup failed. Try again."
                 
                 if coin_id in data:
                     price = data[coin_id]['usd']
@@ -826,13 +693,11 @@ def register_messaging_events(socketio):
                     emoji = '📈' if change >= 0 else '📉'
                     return f"{emoji} **{coin_id.upper()}**\n💰 ${price:,.2f}\n{'+' if change >= 0 else ''}{change:.2f}% (24h)"
                 else:
-                    return f"❌ Coin '{coin}' not found. Try /price bitcoin"
+                    return f"❌ Coin '{coin}' not found"
             
             elif command == '/top':
-                limit = int(args[0]) if args else 5
-                limit = min(limit, 10)  # Max 10
+                limit = min(int(args[0]) if args else 5, 10)
                 
-                # Check cache
                 cache_key = f"coingecko_top_{limit}"
                 cached = BotResponseCache.get(cache_key)
                 
@@ -842,164 +707,48 @@ def register_messaging_events(socketio):
                     try:
                         response = requests.get(
                             'https://api.coingecko.com/api/v3/coins/markets',
-                            params={
-                                'vs_currency': 'usd',
-                                'order': 'market_cap_desc',
-                                'per_page': limit,
-                                'page': 1
-                            },
-                            timeout=3  # Reduced timeout
+                            params={'vs_currency': 'usd', 'order': 'market_cap_desc', 'per_page': limit, 'page': 1},
+                            timeout=3
                         )
                         response.raise_for_status()
                         data = response.json()
                         BotResponseCache.set(cache_key, data, 'default')
-                    except requests.exceptions.Timeout:
-                        return "⏱️ Request timed out. Try again."
-                    except Exception:
-                        return "⚠️ Temporarily unavailable. Try again."
+                    except:
+                        return "⚠️ Request failed. Try again."
                 
                 result = "🏆 **Top Cryptocurrencies**\n\n"
                 for i, coin in enumerate(data, 1):
-                    change = coin.get('price_change_percentage_24h', 0)
+                    change = coin.get('price_change_percentage_24h', 0) or 0
                     emoji = '📈' if change >= 0 else '📉'
                     result += f"{i}. **{coin['symbol'].upper()}** - ${coin['current_price']:,.2f} {emoji} {change:+.2f}%\n"
-                
                 return result
-            
-            elif command == '/trending':
-                # Check cache
-                cache_key = "coingecko_trending"
-                cached = BotResponseCache.get(cache_key)
-                
-                if cached:
-                    data = cached
-                else:
-                    try:
-                        response = requests.get(
-                            'https://api.coingecko.com/api/v3/search/trending',
-                            timeout=3  # Reduced timeout
-                        )
-                        response.raise_for_status()
-                        data = response.json()
-                        BotResponseCache.set(cache_key, data, 'coingecko_trending')
-                    except requests.exceptions.Timeout:
-                        return "⏱️ Request timed out. Try again."
-                    except Exception:
-                        return "⚠️ Temporarily unavailable. Try again."
-                
-                result = "🔥 **Trending Coins**\n\n"
-                for i, item in enumerate(data.get('coins', [])[:7], 1):
-                    coin = item['item']
-                    result += f"{i}. **{coin['symbol'].upper()}** - {coin['name']}\n"
-                
-                return result
-            
         except Exception as e:
-            print(f"❌ CoinGecko error: {e}")
-            return "⚠️ Error fetching crypto data. Please try again."
+            print(f"❌ CoinGecko error: {e}", flush=True)
+            return "⚠️ Error fetching crypto data"
         
         return None
     
     def process_phanes_command(command, args, sender):
-        """
-        Process Phanes Trading Bot commands
-        FREE bot - Available to all users
-        """
+        """Process Phanes Trading Bot commands"""
         try:
             if command == '/trade':
                 if len(args) < 3:
-                    return "❌ Usage: /trade <coin> <buy/sell> <amount>\nExample: /trade BTC buy 0.01"
+                    return "❌ Usage: /trade <coin> <buy/sell> <amount>"
                 
-                coin = args[0].upper()
-                action = args[1].lower()
-                amount = args[2]
-                
+                coin, action, amount = args[0].upper(), args[1].lower(), args[2]
                 if action not in ['buy', 'sell']:
-                    return "❌ Invalid action. Use 'buy' or 'sell'"
+                    return "❌ Use 'buy' or 'sell'"
                 
-                # Simulated trade response
                 emoji = '🟢' if action == 'buy' else '🔴'
-                return f"{emoji} **Trade Order Placed**\n\n" + \
-                       f"📊 Pair: {coin}/USDT\n" + \
-                       f"📈 Action: {action.upper()}\n" + \
-                       f"💰 Amount: {amount} {coin}\n" + \
-                       f"⏱️ Status: Pending\n\n" + \
-                       f"_Connect your exchange API to execute real trades_"
+                return f"{emoji} **Trade Order**\n📊 {coin}/USDT\n📈 {action.upper()}\n💰 {amount} {coin}\n_Demo mode_"
             
             elif command == '/balance':
-                # Simulated portfolio balance
-                return "💰 **Portfolio Balance**\n\n" + \
-                       "🪙 BTC: 0.5 ($22,500)\n" + \
-                       "🔷 ETH: 2.5 ($4,125)\n" + \
-                       "◎ SOL: 50 ($2,500)\n" + \
-                       "💵 USDT: 1,000\n\n" + \
-                       "📊 Total: $30,125\n" + \
-                       "📈 24h Change: +2.3%\n\n" + \
-                       "_Connect your wallet for real balances_"
+                return "💰 **Portfolio**\n🪙 BTC: 0.5 ($22,500)\n🔷 ETH: 2.5 ($4,125)\n📊 Total: $26,625"
             
             elif command == '/pnl':
-                period = args[0] if args else '7d'
-                
-                return f"📊 **P&L Report ({period})**\n\n" + \
-                       "🟢 Winning trades: 12\n" + \
-                       "🔴 Losing trades: 5\n" + \
-                       "📈 Win rate: 70.6%\n\n" + \
-                       "💰 Realized P&L: +$1,245\n" + \
-                       "📊 Unrealized: +$320\n" + \
-                       "🏆 Best trade: BTC +$450\n" + \
-                       "💔 Worst trade: DOGE -$85"
-            
-            elif command == '/copy':
-                if not args:
-                    return "❌ Usage: /copy @trader\n\n" + \
-                           "🏆 **Top Traders to Copy:**\n" + \
-                           "1. @crypto_whale - 85% win rate\n" + \
-                           "2. @btc_master - +120% YTD\n" + \
-                           "3. @defi_guru - 72% win rate"
-                
-                trader = args[0]
-                return f"✅ **Copy Trading Activated**\n\n" + \
-                       f"Following: {trader}\n" + \
-                       f"Mode: Mirror trades\n" + \
-                       f"Risk: 10% of portfolio\n\n" + \
-                       f"_You'll receive notifications for each trade_"
-            
-            elif command == '/alert':
-                if len(args) < 2:
-                    return "❌ Usage: /alert <coin> <price>\nExample: /alert BTC 50000"
-                
-                coin = args[0].upper()
-                price = args[1]
-                
-                return f"🔔 **Price Alert Set**\n\n" + \
-                       f"📊 Coin: {coin}\n" + \
-                       f"🎯 Target: ${price}\n" + \
-                       f"📱 Notification: Push + Message\n\n" + \
-                       f"_You'll be notified when {coin} reaches ${price}_"
-            
-            elif command == '/positions':
-                return "📊 **Open Positions**\n\n" + \
-                       "🟢 BTC Long @ $44,200\n" + \
-                       "   P&L: +$320 (+1.6%)\n\n" + \
-                       "🟢 ETH Long @ $2,280\n" + \
-                       "   P&L: +$85 (+2.1%)\n\n" + \
-                       "🔴 SOL Short @ $105\n" + \
-                       "   P&L: -$15 (-0.8%)\n\n" + \
-                       "📈 Total Unrealized: +$390"
-            
-            else:
-                return f"🔮 **Phanes Trading Bot**\n\n" + \
-                       "Available commands:\n" + \
-                       "• /trade <coin> <buy/sell> <amount>\n" + \
-                       "• /balance - Portfolio balance\n" + \
-                       "• /pnl - Profit/loss report\n" + \
-                       "• /copy @trader - Copy trading\n" + \
-                       "• /alert <coin> <price>\n" + \
-                       "• /positions - Open positions"
-        
+                return "📊 **P&L**\n🟢 +12 wins\n🔴 -5 losses\n📈 70.6% win rate"
         except Exception as e:
-            print(f"❌ Phanes error: {e}")
-            return "⚠️ Error processing command. Please try again."
+            print(f"❌ Phanes error: {e}", flush=True)
         
         return None
     
@@ -1009,100 +758,45 @@ def register_messaging_events(socketio):
         
         if bot_id == 'news_bot':
             if command == '/news':
-                return "📰 **Latest Crypto News**\n\n" + \
-                       "1. Bitcoin reaches new highs as institutional adoption grows\n" + \
-                       "2. Ethereum 2.0 staking rewards increase\n" + \
-                       "3. Major exchange announces new trading pairs\n\n" + \
-                       "_Data from crypto news aggregators_"
-            elif command == '/tldr':
-                return "📋 **Today's Summary**\n\n" + \
-                       "• Crypto market cap up 2.3%\n" + \
-                       "• BTC dominance at 52%\n" + \
-                       "• Top gainer: SOL (+8%)\n" + \
-                       "• Fear & Greed Index: 65 (Greed)"
-        
+                return "📰 **Latest News**\n1. Bitcoin reaches new highs\n2. ETH 2.0 staking grows"
         elif bot_id == 'trading_signals_bot':
             if command == '/signal':
-                return "📊 **Trading Signal**\n\n" + \
-                       "🟢 **BTC/USD**\n" + \
-                       "Entry: $45,000\n" + \
-                       "Target: $48,000\n" + \
-                       "Stop Loss: $43,500\n" + \
-                       "Risk/Reward: 1:2.5\n\n" + \
-                       "_This is not financial advice_"
-            elif command == '/analysis':
-                coin = args[0].upper() if args else 'BTC'
-                return f"📈 **{coin} Analysis**\n\n" + \
-                       "Trend: Bullish 🟢\n" + \
-                       "Support: $42,000\n" + \
-                       "Resistance: $48,500\n" + \
-                       "RSI: 58 (Neutral)\n" + \
-                       "MACD: Bullish crossover"
-        
+                return "📊 **Signal**\n🟢 BTC/USD\nEntry: $45,000\nTarget: $48,000"
         elif bot_id == 'mod_bot':
             if command == '/rules':
-                return "📜 **Group Rules**\n\n" + \
-                       "1. Be respectful to all members\n" + \
-                       "2. No spam or self-promotion\n" + \
-                       "3. No NSFW content\n" + \
-                       "4. No financial advice as facts\n" + \
-                       "5. Use appropriate channels"
+                return "📜 **Rules**\n1. Be respectful\n2. No spam\n3. No NSFW"
         
-        return f"🤖 {bot['name']} received command: {command}"
+        return f"🤖 {bot['name']} received: {command}"
     
     def call_webhook(bot, command, args, sender, target_type, target_id):
-        """Call external bot webhook with secure signature"""
+        """Call external bot webhook"""
         webhook_url = bot.get('webhook_url')
         if not webhook_url:
             return None
         
         try:
-            # Build payload
             payload = {
-                'event': 'command',
-                'command': command,
-                'args': args,
-                'sender': sender,
-                'type': target_type,
-                'target_id': target_id,
+                'event': 'command', 'command': command, 'args': args,
+                'sender': sender, 'type': target_type, 'target_id': target_id,
                 'timestamp': store.now()
             }
             
-            # Generate secure headers with HMAC signature
-            # Use the raw API key if available, otherwise the hash (for verification on their end)
             api_key = bot.get('api_key') or bot.get('api_key_hash', '')
             headers = generate_webhook_headers(bot['bot_id'], payload, api_key)
             
-            # Track webhook call
-            BotAnalytics.track_event(bot['bot_id'], 'webhook_call', {
-                'command': command,
-                'sender': sender
-            })
-            
-            response = requests.post(
-                webhook_url,
-                json=payload,
-                headers=headers,
-                timeout=3
-            )
+            response = requests.post(webhook_url, json=payload, headers=headers, timeout=3)
             
             if response.status_code == 200:
                 data = response.json()
                 return data.get('message') or data.get('response')
         except Exception as e:
-            print(f"❌ Webhook error for {bot['bot_id']}: {e}")
-            BotAnalytics.track_event(bot['bot_id'], 'webhook_error', {
-                'error': str(e)
-            })
+            print(f"❌ Webhook error: {e}", flush=True)
         
         return None
     
     @socketio.on('bot_command')
     def handle_bot_command(data):
-        """
-        Process a bot command directly.
-        Used when user explicitly invokes a command.
-        """
+        """Process a bot command directly"""
         if 'username' not in session:
             return
         
@@ -1122,7 +816,6 @@ def register_messaging_events(socketio):
             
             room_id = f"group_{group_id}"
             
-            # Process the command
             bots = store.get_group_bots(group_id)
             for bot in bots:
                 if bot['status'] != store.BOT_STATUS_APPROVED:
@@ -1146,8 +839,6 @@ def register_messaging_events(socketio):
                                 'group_id': group_id,
                                 'message': bot_message
                             }, room=room_id)
-                        
                         return
             
             emit('bot_error', {'error': 'No bot found for this command'})
-
