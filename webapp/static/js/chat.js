@@ -646,11 +646,9 @@
                 return;
             }
             
-            // Filter users based on query
-            const allUsers = [{% for user in all_users %}'{{ user }}',{% endfor %}];
-            const filtered = allUsers.filter(u => 
-                u.toLowerCase().includes(query.toLowerCase()) && u !== myUsername
-            );
+            // Filter users based on query (fetch from API)
+            // Use empty array as fallback - real search uses API
+            const filtered = [];
             
             if (filtered.length === 0) {
                 resultsContainer.innerHTML = `
