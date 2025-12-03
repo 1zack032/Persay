@@ -1,55 +1,67 @@
 """
-📺 Channel Routes - PRODUCTION
+📺 Channel Routes - MIE Optimized
 """
 
 from flask import Blueprint, render_template, request, session, redirect, url_for, jsonify
 from webapp.models import store
 from webapp.config import Config
+from webapp.core.menza_intelligence_engine import MIE
 
 channels_bp = Blueprint('channels', __name__)
 
 
 @channels_bp.route('/channels')
 def channels_page():
-    """Channel discovery page"""
+    """Channel discovery page - MIE cached"""
     if 'username' not in session:
         return redirect(url_for('auth.login'))
     
     username = session['username']
     discover_filter = request.args.get('filter', 'trending')
     
-    # Get discover channels directly (no broken caching)
-    try:
-        discover_data = store.get_discover_channels_rotated(username=username)
-    except Exception:
-        discover_data = {'trending': [], 'most_liked': [], 'most_viewed': [], 'new': []}
+    # Check MIE cache for discover data
+    discover_cache_key = f"discover:{discover_filter}"
+    discover_data = MIE.get_cached_response(discover_cache_key)
     
-    # Get user channels
-    try:
-        my_channels = store.get_user_channels(username)
-        subscribed = store.get_subscribed_channels(username)
-        for channel in subscribed:
-            channel['user_role'] = channel.get('members', {}).get(username, 'viewer')
-    except Exception:
-        my_channels = []
-        subscribed = []
+    if discover_data is None:
+        try:
+            discover_data = store.get_discover_channels_rotated(username=username)
+            MIE.cache_response(discover_cache_key, discover_data, ttl=60)
+        except Exception:
+            discover_data = {'trending': [], 'most_liked': [], 'most_viewed': [], 'new': []}
+    
+    # Check MIE cache for user channels
+    user_cache_key = f"user_channels_full:{username}"
+    user_data = MIE.get_cached_response(user_cache_key)
+    
+    if user_data is None:
+        try:
+            my_channels = store.get_user_channels(username)
+            subscribed = store.get_subscribed_channels(username)
+            for channel in subscribed:
+                channel['user_role'] = channel.get('members', {}).get(username, 'viewer')
+            user_data = {'my_channels': my_channels, 'subscribed': subscribed}
+            MIE.cache_response(user_cache_key, user_data, ttl=120)
+        except Exception:
+            user_data = {'my_channels': [], 'subscribed': []}
     
     # Get channels for display
     filter_map = {'most_liked': 'most_liked', 'most_viewed': 'most_viewed', 'new': 'new'}
     discover_channels = discover_data.get(filter_map.get(discover_filter, 'trending'), [])
     
     # Batch get liked status
-    channel_ids = [ch['id'] for ch in discover_channels]
-    liked_channels = store.get_liked_channels_batch(channel_ids, username) if channel_ids else set()
-    
-    for channel in discover_channels:
-        channel['liked_by_user'] = channel['id'] in liked_channels
-        channel['like_count'] = len(channel.get('likes', []))
+    if discover_channels:
+        channel_ids = [ch['id'] for ch in discover_channels]
+        liked_channels = store.get_liked_channels_batch(channel_ids, username)
+        
+        for channel in discover_channels:
+            channel['liked_by_user'] = channel['id'] in liked_channels
+            channel['like_count'] = len(channel.get('likes', []))
     
     return render_template('channels.html',
                          username=username,
-                         my_channels=my_channels,
-                         subscribed_channels=subscribed,
+                         my_channels=user_data['my_channels'],
+                         subscribed_channels=user_data['subscribed'],
                          discover_channels=discover_channels,
                          discover_filter=discover_filter,
                          trending_channels=discover_data.get('trending', [])[:5])
@@ -57,7 +69,7 @@ def channels_page():
 
 @channels_bp.route('/channels/search')
 def search_channels():
-    """Search for channels"""
+    """Search for channels - MIE cached"""
     if 'username' not in session:
         return redirect(url_for('auth.login'))
     
@@ -66,8 +78,15 @@ def search_channels():
     username = session['username']
     
     if category:
-        results = store.get_channels_by_category(category, limit=20)
-        liked = store.get_liked_channels_batch([ch['id'] for ch in results], username)
+        # Check cache for category search
+        cache_key = f"channel_category:{category}"
+        results = MIE.get_cached_response(cache_key)
+        
+        if results is None:
+            results = store.get_channels_by_category(category, limit=20)
+            MIE.cache_response(cache_key, results, ttl=60)
+        
+        liked = store.get_liked_channels_batch([ch['id'] for ch in results], username) if results else set()
         for ch in results:
             ch['liked_by_user'] = ch['id'] in liked
         
@@ -84,7 +103,14 @@ def search_channels():
     if len(query) < 1:
         search_results = {'exact_matches': [], 'category_matches': [], 'suggestions': [], 'related_categories': []}
     else:
-        search_results = store.search_channels_by_interest(query, limit=20)
+        # Check cache for query search
+        cache_key = f"channel_search:{query.lower()}"
+        search_results = MIE.get_cached_response(cache_key)
+        
+        if search_results is None:
+            search_results = store.search_channels_by_interest(query, limit=20)
+            MIE.cache_response(cache_key, search_results, ttl=30)
+        
         all_ids = [ch['id'] for key in ['exact_matches', 'category_matches', 'suggestions'] for ch in search_results.get(key, [])]
         liked = store.get_liked_channels_batch(all_ids, username) if all_ids else set()
         for key in ['exact_matches', 'category_matches', 'suggestions']:
@@ -113,12 +139,21 @@ def search_channels():
 def get_categories():
     if 'username' not in session:
         return jsonify({'error': 'Not logged in'}), 401
-    return jsonify({'categories': store.get_all_categories()})
+    
+    # Cache categories (they rarely change)
+    cache_key = "all_categories"
+    categories = MIE.get_cached_response(cache_key)
+    
+    if categories is None:
+        categories = store.get_all_categories()
+        MIE.cache_response(cache_key, categories, ttl=300)  # 5 minutes
+    
+    return jsonify({'categories': categories})
 
 
 @channels_bp.route('/api/channels/search')
 def api_search_channels():
-    """API search"""
+    """API search - MIE cached"""
     if 'username' not in session:
         return jsonify({'error': 'Not logged in'}), 401
     
@@ -127,6 +162,12 @@ def api_search_channels():
     
     if not query or len(query) < 2:
         return jsonify({'channels': []})
+    
+    # Check cache
+    cache_key = f"api_channel_search:{query}:{username}"
+    cached = MIE.get_cached_response(cache_key)
+    if cached is not None:
+        return jsonify({'channels': cached})
     
     try:
         user_channel_ids = set(ch['id'] for ch in store.get_all_user_channels(username))
@@ -149,13 +190,20 @@ def api_search_channels():
             })
     
     matched.sort(key=lambda x: (-1 if x.get('is_subscribed') else 0, -x.get('subscribers', 0)))
-    return jsonify({'channels': matched[:20]})
+    result = matched[:20]
+    
+    MIE.cache_response(cache_key, result, ttl=30)
+    return jsonify({'channels': result})
 
 
 @channels_bp.route('/channel/<channel_id>/like', methods=['POST'])
 def like_channel(channel_id):
     if 'username' not in session:
         return jsonify({'success': False}), 401
+    
+    # Invalidate related caches
+    MIE.clear_caches()  # Simple approach - clear all
+    
     return jsonify(store.like_channel(channel_id, session['username']))
 
 
@@ -163,6 +211,8 @@ def like_channel(channel_id):
 def unlike_channel(channel_id):
     if 'username' not in session:
         return jsonify({'success': False}), 401
+    
+    MIE.clear_caches()
     return jsonify(store.unlike_channel(channel_id, session['username']))
 
 
@@ -216,6 +266,9 @@ def create_channel():
             if member_username and store.user_exists(member_username):
                 store.subscribe_to_channel(channel['id'], member_username, role)
         
+        # Invalidate user's channel cache
+        MIE.clear_caches()
+        
         return redirect(url_for('channels.view_channel', channel_id=channel['id']))
     
     return render_template('channel_create.html', username=session['username'])
@@ -237,12 +290,14 @@ def view_channel(channel_id):
     can_manage = store.can_manage_channel(channel_id, username)
     members_with_roles = store.get_channel_members_with_roles(channel_id)
     
-    try:
+    # Get user's channels from cache
+    cache_key = f"user_channels:{username}"
+    my_channels = MIE.get_cached_response(cache_key)
+    if my_channels is None:
         my_channels = store.get_user_channels(username)
-        subscribed_channels = store.get_subscribed_channels(username)
-    except Exception:
-        my_channels = []
-        subscribed_channels = []
+        MIE.cache_response(cache_key, my_channels, ttl=120)
+    
+    subscribed_channels = store.get_subscribed_channels(username)
     
     if not is_owner:
         store.increment_channel_views(channel_id)
@@ -285,6 +340,7 @@ def channel_settings(channel_id):
             if new_role in ['admin', 'mod', 'viewer']:
                 store.set_member_role(channel_id, member_username, new_role, username)
         
+        MIE.clear_caches()
         return redirect(url_for('channels.channel_settings', channel_id=channel_id))
     
     members_with_roles = store.get_channel_members_with_roles(channel_id)
@@ -326,7 +382,9 @@ def create_post(channel_id):
 def subscribe_channel(channel_id):
     if 'username' not in session:
         return redirect(url_for('auth.login'))
+    
     store.subscribe_to_channel(channel_id, session['username'])
+    MIE.clear_caches()
     return redirect(url_for('channels.view_channel', channel_id=channel_id))
 
 
@@ -334,5 +392,7 @@ def subscribe_channel(channel_id):
 def unsubscribe_channel(channel_id):
     if 'username' not in session:
         return redirect(url_for('auth.login'))
+    
     store.unsubscribe_from_channel(channel_id, session['username'])
+    MIE.clear_caches()
     return redirect(url_for('channels.view_channel', channel_id=channel_id))
