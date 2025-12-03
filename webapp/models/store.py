@@ -327,10 +327,20 @@ class DataStore:
             return results
     
     def change_user_password(self, username: str, current_password: str, new_password: str) -> bool:
+        """Change password - expects plain text passwords, handles hashing"""
+        import hashlib
         user = self.get_user(username)
-        if not user or user.get('password') != current_password:
+        if not user:
             return False
-        return self.update_user_profile(username, {'password': new_password})
+        
+        # Hash the current password and compare
+        current_hash = hashlib.sha256(current_password.encode()).hexdigest()
+        if user.get('password') != current_hash:
+            return False
+        
+        # Hash the new password before storing
+        new_hash = hashlib.sha256(new_password.encode()).hexdigest()
+        return self.update_user_profile(username, {'password': new_hash})
     
     def set_user_public_key(self, username: str, public_key: str):
         self.update_user_profile(username, {'public_key': public_key})

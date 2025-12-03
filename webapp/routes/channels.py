@@ -1,11 +1,10 @@
 """
-📺 Channel Routes - PRODUCTION (simplified)
+📺 Channel Routes - PRODUCTION
 """
 
 from flask import Blueprint, render_template, request, session, redirect, url_for, jsonify
 from webapp.models import store
 from webapp.config import Config
-from webapp.core import get_engine
 
 channels_bp = Blueprint('channels', __name__)
 
@@ -17,29 +16,23 @@ def channels_page():
         return redirect(url_for('auth.login'))
     
     username = session['username']
-    engine = get_engine()
     discover_filter = request.args.get('filter', 'trending')
-    period = request.args.get('period', 'daily')
     
-    # Get discover channels (cached)
-    discover_key = f"discover_channels:{discover_filter}"
-    discover_data = engine.get_cached(discover_key)
-    
-    if not discover_data:
+    # Get discover channels directly (no broken caching)
+    try:
         discover_data = store.get_discover_channels_rotated(username=username)
-        engine.set_cached(discover_key, discover_data, ttl=60)
+    except Exception:
+        discover_data = {'trending': [], 'most_liked': [], 'most_viewed': [], 'new': []}
     
-    # Get user channels (cached)
-    user_key = f"user_channels_page:{username}"
-    user_data = engine.get_cached(user_key)
-    
-    if not user_data:
+    # Get user channels
+    try:
         my_channels = store.get_user_channels(username)
         subscribed = store.get_subscribed_channels(username)
         for channel in subscribed:
             channel['user_role'] = channel.get('members', {}).get(username, 'viewer')
-        user_data = {'my_channels': my_channels, 'subscribed': subscribed}
-        engine.set_cached(user_key, user_data, ttl=120)
+    except Exception:
+        my_channels = []
+        subscribed = []
     
     # Get channels for display
     filter_map = {'most_liked': 'most_liked', 'most_viewed': 'most_viewed', 'new': 'new'}
@@ -47,7 +40,7 @@ def channels_page():
     
     # Batch get liked status
     channel_ids = [ch['id'] for ch in discover_channels]
-    liked_channels = store.get_liked_channels_batch(channel_ids, username)
+    liked_channels = store.get_liked_channels_batch(channel_ids, username) if channel_ids else set()
     
     for channel in discover_channels:
         channel['liked_by_user'] = channel['id'] in liked_channels
@@ -55,11 +48,10 @@ def channels_page():
     
     return render_template('channels.html',
                          username=username,
-                         my_channels=user_data['my_channels'],
-                         subscribed_channels=user_data['subscribed'],
+                         my_channels=my_channels,
+                         subscribed_channels=subscribed,
                          discover_channels=discover_channels,
                          discover_filter=discover_filter,
-                         period=period,
                          trending_channels=discover_data.get('trending', [])[:5])
 
 
@@ -93,27 +85,27 @@ def search_channels():
         search_results = {'exact_matches': [], 'category_matches': [], 'suggestions': [], 'related_categories': []}
     else:
         search_results = store.search_channels_by_interest(query, limit=20)
-        all_ids = [ch['id'] for key in ['exact_matches', 'category_matches', 'suggestions'] for ch in search_results[key]]
-        liked = store.get_liked_channels_batch(all_ids, username)
+        all_ids = [ch['id'] for key in ['exact_matches', 'category_matches', 'suggestions'] for ch in search_results.get(key, [])]
+        liked = store.get_liked_channels_batch(all_ids, username) if all_ids else set()
         for key in ['exact_matches', 'category_matches', 'suggestions']:
-            for ch in search_results[key]:
+            for ch in search_results.get(key, []):
                 ch['liked_by_user'] = ch['id'] in liked
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({
-            'exact_matches': search_results['exact_matches'],
-            'category_matches': search_results['category_matches'],
-            'suggestions': search_results['suggestions'],
-            'related_categories': search_results['related_categories'],
+            'exact_matches': search_results.get('exact_matches', []),
+            'category_matches': search_results.get('category_matches', []),
+            'suggestions': search_results.get('suggestions', []),
+            'related_categories': search_results.get('related_categories', []),
             'query': query
         })
     
-    all_results = search_results['exact_matches'] + search_results['category_matches'] + search_results['suggestions']
+    all_results = search_results.get('exact_matches', []) + search_results.get('category_matches', []) + search_results.get('suggestions', [])
     return render_template('channels_search.html',
                          username=username,
                          query=query,
                          results=all_results,
-                         related_categories=search_results['related_categories'],
+                         related_categories=search_results.get('related_categories', []),
                          categories=store.get_all_categories())
 
 
@@ -136,8 +128,11 @@ def api_search_channels():
     if not query or len(query) < 2:
         return jsonify({'channels': []})
     
-    user_channel_ids = set(ch['id'] for ch in store.get_all_user_channels(username))
-    search_results = store.search_channels(query, discoverable_only=False, limit=50)
+    try:
+        user_channel_ids = set(ch['id'] for ch in store.get_all_user_channels(username))
+        search_results = store.search_channels(query, discoverable_only=False, limit=50)
+    except Exception:
+        return jsonify({'channels': []})
     
     matched = []
     for channel in search_results:
@@ -193,10 +188,14 @@ def create_channel():
             invited_members = []
         
         if len(name) < Config.MIN_CHANNEL_NAME_LENGTH:
-            return render_template('channel_create.html', error=f"Channel name must be at least {Config.MIN_CHANNEL_NAME_LENGTH} characters")
+            return render_template('channel_create.html', 
+                error=f"Channel name must be at least {Config.MIN_CHANNEL_NAME_LENGTH} characters",
+                username=session['username'])
         
         if store.channel_name_exists(name):
-            return render_template('channel_create.html', error="A channel with this name already exists")
+            return render_template('channel_create.html', 
+                error="A channel with this name already exists",
+                username=session['username'])
         
         channel = store.create_channel(
             name=name,
@@ -210,16 +209,16 @@ def create_channel():
         )
         
         for member in invited_members:
-            username = member.get('username', '').strip()
+            member_username = member.get('username', '').strip()
             role = member.get('role', 'viewer')
             if role not in ['admin', 'mod', 'viewer']:
                 role = 'viewer'
-            if username and store.user_exists(username):
-                store.subscribe_to_channel(channel['id'], username, role)
+            if member_username and store.user_exists(member_username):
+                store.subscribe_to_channel(channel['id'], member_username, role)
         
         return redirect(url_for('channels.view_channel', channel_id=channel['id']))
     
-    return render_template('channel_create.html')
+    return render_template('channel_create.html', username=session['username'])
 
 
 @channels_bp.route('/channel/<channel_id>')
@@ -237,8 +236,13 @@ def view_channel(channel_id):
     can_post = store.can_post_in_channel(channel_id, username)
     can_manage = store.can_manage_channel(channel_id, username)
     members_with_roles = store.get_channel_members_with_roles(channel_id)
-    my_channels = store.get_user_channels(username)
-    subscribed_channels = store.get_subscribed_channels(username)
+    
+    try:
+        my_channels = store.get_user_channels(username)
+        subscribed_channels = store.get_subscribed_channels(username)
+    except Exception:
+        my_channels = []
+        subscribed_channels = []
     
     if not is_owner:
         store.increment_channel_views(channel_id)
@@ -308,9 +312,12 @@ def create_post(channel_id):
     linked_post_id = request.form.get('linked_post', None) or None
     
     if content:
-        from webapp.app import socketio
-        post = store.create_post(channel_id=channel_id, author=session['username'], content=content, linked_post=linked_post_id)
-        socketio.emit('new_channel_post', {'channel_id': channel_id, 'post': post}, room=f'channel_{channel_id}')
+        try:
+            from webapp.app import socketio
+            post = store.create_post(channel_id=channel_id, author=session['username'], content=content, linked_post=linked_post_id)
+            socketio.emit('new_channel_post', {'channel_id': channel_id, 'post': post}, room=f'channel_{channel_id}')
+        except Exception as e:
+            print(f"Post error: {e}", flush=True)
     
     return redirect(url_for('channels.view_channel', channel_id=channel_id))
 
