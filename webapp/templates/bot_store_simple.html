@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Bot Store - Menza{% endblock %}
+
+{% block content %}
+<div class="bot-store">
+    <div class="store-header">
+        <h1>🤖 Bot Store</h1>
+        <p>Add bots to your chats and channels</p>
+    </div>
+
+    <!-- Free Bots -->
+    <section class="bot-section">
+        <h2>✨ Free Bots</h2>
+        <p class="section-desc">Available to all users</p>
+        
+        <div class="bot-grid">
+            {% for bot in free_bots %}
+            <div class="bot-card">
+                <div class="bot-avatar">{{ bot.avatar }}</div>
+                <div class="bot-info">
+                    <h3>{{ bot.name }}</h3>
+                    <p>{{ bot.description }}</p>
+                </div>
+                <div class="bot-commands">
+                    {% for cmd in bot.commands %}
+                    <code>{{ cmd.command }}</code>
+                    {% endfor %}
+                </div>
+                <button class="btn-add" onclick="addBot('{{ bot.id }}')">
+                    Add to Chat
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Premium Bots -->
+    <section class="bot-section premium-section">
+        <h2>💎 Premium Bots</h2>
+        {% if is_premium %}
+        <p class="section-desc">Your premium bots</p>
+        {% else %}
+        <p class="section-desc">
+            <a href="/premium">Upgrade to Premium</a> to access these bots
+        </p>
+        {% endif %}
+        
+        <div class="bot-grid">
+            {% for bot in premium_bots %}
+            <div class="bot-card {% if not is_premium %}locked{% endif %}">
+                <div class="bot-avatar">{{ bot.avatar }}</div>
+                <div class="bot-info">
+                    <h3>{{ bot.name }}</h3>
+                    <p>{{ bot.description }}</p>
+                </div>
+                <div class="bot-commands">
+                    {% for cmd in bot.commands %}
+                    <code>{{ cmd.command }}</code>
+                    {% endfor %}
+                </div>
+                {% if is_premium %}
+                <button class="btn-add" onclick="addBot('{{ bot.id }}')">
+                    Add to Chat
+                </button>
+                {% else %}
+                <button class="btn-locked" disabled>
+                    🔒 Premium Only
+                </button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- How to Use -->
+    <section class="how-to-use">
+        <h2>📖 How to Use Bots</h2>
+        <ol>
+            <li>Add a bot to your chat or group</li>
+            <li>Use commands like <code>/price BTC</code></li>
+            <li>Bot responds with information</li>
+        </ol>
+    </section>
+</div>
+
+<style>
+.bot-store {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.store-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.store-header h1 {
+    font-size: 2rem;
+    color: #fff;
+}
+
+.store-header p {
+    color: #888;
+}
+
+.bot-section {
+    margin-bottom: 3rem;
+}
+
+.bot-section h2 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.section-desc {
+    color: #888;
+    margin-bottom: 1rem;
+}
+
+.section-desc a {
+    color: #8B5CF6;
+}
+
+.bot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.bot-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.2s;
+}
+
+.bot-card:hover {
+    border-color: #8B5CF6;
+    transform: translateY(-2px);
+}
+
+.bot-card.locked {
+    opacity: 0.6;
+}
+
+.bot-avatar {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.bot-info h3 {
+    color: #fff;
+    margin: 0 0 0.5rem 0;
+}
+
+.bot-info p {
+    color: #888;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.bot-commands {
+    margin: 1rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.bot-commands code {
+    background: rgba(139, 92, 246, 0.2);
+    color: #8B5CF6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.btn-add {
+    width: 100%;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add:hover {
+    transform: scale(1.02);
+}
+
+.btn-locked {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 8px;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.how-to-use {
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.how-to-use h2 {
+    color: #fff;
+    margin: 0 0 1rem 0;
+}
+
+.how-to-use ol {
+    color: #ccc;
+    padding-left: 1.5rem;
+}
+
+.how-to-use li {
+    margin-bottom: 0.5rem;
+}
+
+.how-to-use code {
+    background: rgba(0,0,0,0.3);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+}
+</style>
+
+<script>
+function addBot(botId) {
+    alert('Bot ' + botId + ' added! Use commands in your chat.');
+}
+</script>
+{% endblock %}
+
