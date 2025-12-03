@@ -4,7 +4,6 @@
 
 from flask import Blueprint, render_template, session, redirect, url_for, request, jsonify
 from webapp.models import store
-from webapp.core import get_engine
 
 main_bp = Blueprint('main', __name__)
 
@@ -51,14 +50,11 @@ def chat():
     
     username = session['username']
     
-    # Get user's channels (cached in MIE)
-    engine = get_engine()
-    cache_key = f"user_channels:{username}"
-    my_channels = engine.get_cached(cache_key)
-    
-    if not my_channels:
+    # Get user's channels directly (no caching to avoid issues)
+    try:
         my_channels = store.get_all_user_channels(username)
-        engine.set_cached(cache_key, my_channels, ttl=120)
+    except Exception:
+        my_channels = []
     
     return render_template('chat.html', 
                          username=username,

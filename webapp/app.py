@@ -41,14 +41,6 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
 def before_request():
     """Track request start time"""
     g.start_time = time.time()
-    
-    # Skip static files
-    if request.path.startswith('/static') or request.path == '/health':
-        return
-    
-    # Initialize test users on first request
-    from webapp.models.store import ensure_initialized
-    ensure_initialized()
 
 @app.after_request
 def after_request(response):

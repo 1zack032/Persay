@@ -38,68 +38,53 @@ def timed_db_op(func):
             raise
     return wrapper
 
-# MongoDB connection with aggressive optimization
+# MongoDB connection - LAZY initialization
 USE_MONGODB = False
 db = None
 client = None
+_mongo_initialized = False
 
 def _connect_mongodb():
-    """Connect to MongoDB with optimized settings"""
-    global USE_MONGODB, db, client
+    """Connect to MongoDB - called lazily on first use"""
+    global USE_MONGODB, db, client, _mongo_initialized
     
-    start_time = time.time()
+    if _mongo_initialized:
+        return USE_MONGODB
+    
+    _mongo_initialized = True
     
     try:
         from pymongo import MongoClient
         
         uri = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URI')
         if not uri:
-            print("⚠️ No MONGODB_URI - using memory", flush=True)
+            print("⚠️ No MONGODB_URI", flush=True)
             return False
         
-        print("🔄 Connecting to MongoDB...", flush=True)
-        
-        # Aggressive timeouts for speed
+        # Very short timeouts to prevent worker hangs
         client = MongoClient(
             uri,
-            serverSelectionTimeoutMS=5000,   # 5s max to find server
-            connectTimeoutMS=5000,            # 5s max to connect
-            socketTimeoutMS=10000,            # 10s max per operation
-            maxPoolSize=10,                   # Connection pool
-            minPoolSize=1,
-            maxIdleTimeMS=30000,
+            serverSelectionTimeoutMS=3000,
+            connectTimeoutMS=3000,
+            socketTimeoutMS=5000,
+            maxPoolSize=5,
+            minPoolSize=0,
             retryWrites=True,
-            retryReads=True,
-            w=1,                              # Faster writes (don't wait for majority)
-            journal=False,
+            w=1,
             appName='Menza'
         )
         
-        # Quick ping test
-        ping_start = time.time()
+        # Quick ping
         client.admin.command('ping')
-        ping_ms = (time.time() - ping_start) * 1000
-        
         db = client['menza']
         USE_MONGODB = True
-        
-        total_ms = (time.time() - start_time) * 1000
-        print(f"✅ MongoDB connected (ping: {ping_ms:.0f}ms, total: {total_ms:.0f}ms)", flush=True)
-        
-        # Log if ping is slow
-        if ping_ms > 100:
-            print(f"⚠️ MongoDB ping is slow ({ping_ms:.0f}ms) - check region matching!", flush=True)
-        
+        print("✅ MongoDB OK", flush=True)
         return True
         
     except Exception as e:
-        total_ms = (time.time() - start_time) * 1000
-        print(f"⚠️ MongoDB failed after {total_ms:.0f}ms: {str(e)[:60]}", flush=True)
+        print(f"⚠️ MongoDB: {str(e)[:40]}", flush=True)
         USE_MONGODB = False
         return False
-
-# Try to connect
-_connect_mongodb()
 
 
 class DataStore:
@@ -128,14 +113,34 @@ class DataStore:
     }
     
     def __init__(self):
-        # In-memory cache for frequently accessed data
+        # In-memory cache
         self._username_cache = None
         self._username_cache_time = 0
-        self._cache_ttl = 60  # Cache for 60 seconds
-        self._bots_initialized = False  # Lazy bot init flag
+        self._cache_ttl = 60
+        self._bots_initialized = False
+        self._db_initialized = False
+        
+        # Start with in-memory
+        self.users: Dict[str, dict] = {}
+        self.messages: Dict[str, List[dict]] = {}
+        self.groups: Dict[str, dict] = {}
+        self.channels: Dict[str, dict] = {}
+        self.channel_posts: Dict[str, dict] = {}
+        self.shared_notes: Dict[str, dict] = {}
+        self.chat_settings: Dict[str, dict] = {}
+        self.bots: Dict[str, dict] = {}
+        self.online_users: Dict[str, str] = {}
+    
+    def _ensure_db(self):
+        """Lazy DB initialization - called on first DB operation"""
+        if self._db_initialized:
+            return
+        self._db_initialized = True
+        
+        # Try MongoDB connection
+        _connect_mongodb()
         
         if USE_MONGODB:
-            # MongoDB collections
             self.users_col = db['users']
             self.messages_col = db['messages']
             self.groups_col = db['groups']
@@ -144,49 +149,8 @@ class DataStore:
             self.notes_col = db['shared_notes']
             self.settings_col = db['chat_settings']
             self.bots_col = db['bots']
-            
-            # Create indexes for performance (idempotent - safe to call multiple times)
-            self._ensure_indexes()
-            print("✅ MongoDB ready", flush=True)
+            print("✅ DB ready", flush=True)
     
-    def _ensure_indexes(self):
-        """Create indexes for fast queries - critical for scaling"""
-        try:
-            # User indexes
-            self.users_col.create_index('username', unique=True, background=True)
-            self.users_col.create_index('email', sparse=True, background=True)
-            
-            # Message indexes for fast chat loading
-            self.messages_col.create_index('room_id', background=True)
-            self.messages_col.create_index([('room_id', 1), ('timestamp', -1)], background=True)
-            
-            # Channel indexes
-            self.channels_col.create_index('owner', background=True)
-            self.channels_col.create_index('discoverable', background=True)
-            self.channels_col.create_index('subscribers', background=True)
-            
-            # Group indexes
-            self.groups_col.create_index('members', background=True)
-            self.groups_col.create_index('invite_code', sparse=True, background=True)
-            
-            # Bot indexes
-            self.bots_col.create_index('bot_id', unique=True, background=True)
-            self.bots_col.create_index('status', background=True)
-        except Exception:
-            pass  # Indexes may already exist
-        else:
-            # Fallback to in-memory storage
-            self.users: Dict[str, dict] = {}
-            self.messages: Dict[str, List[dict]] = {}
-            self.groups: Dict[str, dict] = {}
-            self.channels: Dict[str, dict] = {}
-            self.channel_posts: Dict[str, dict] = {}
-            self.shared_notes: Dict[str, dict] = {}
-            self.chat_settings: Dict[str, dict] = {}
-            self.bots: Dict[str, dict] = {}
-        
-        # Always in-memory (doesn't need persistence)
-        self.online_users: Dict[str, str] = {}
     
     def _ensure_bots_initialized(self):
         """Lazy bot initialization - called on first bot access"""
@@ -215,6 +179,7 @@ class DataStore:
     # ==========================================
     
     def create_user(self, username: str, password: str) -> dict:
+        self._ensure_db()
         user = {
             'username': username,
             'password': password,
@@ -242,6 +207,7 @@ class DataStore:
     
     @timed_db_op
     def get_user(self, username: str) -> Optional[dict]:
+        self._ensure_db()
         if USE_MONGODB:
             user = self.users_col.find_one({'username': username}, {'_id': 0})
             return user
