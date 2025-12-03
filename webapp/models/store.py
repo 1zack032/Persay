@@ -38,53 +38,18 @@ def timed_db_op(func):
             raise
     return wrapper
 
-# MongoDB connection - LAZY initialization
+# MongoDB - DISABLED for stability testing
+# Enable when in-memory version works
 USE_MONGODB = False
 db = None
 client = None
-_mongo_initialized = False
 
 def _connect_mongodb():
-    """Connect to MongoDB - called lazily on first use"""
-    global USE_MONGODB, db, client, _mongo_initialized
-    
-    if _mongo_initialized:
-        return USE_MONGODB
-    
-    _mongo_initialized = True
-    
-    try:
-        from pymongo import MongoClient
-        
-        uri = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URI')
-        if not uri:
-            print("⚠️ No MONGODB_URI", flush=True)
-            return False
-        
-        # Very short timeouts to prevent worker hangs
-        client = MongoClient(
-            uri,
-            serverSelectionTimeoutMS=3000,
-            connectTimeoutMS=3000,
-            socketTimeoutMS=5000,
-            maxPoolSize=5,
-            minPoolSize=0,
-            retryWrites=True,
-            w=1,
-            appName='Menza'
-        )
-        
-        # Quick ping
-        client.admin.command('ping')
-        db = client['menza']
-        USE_MONGODB = True
-        print("✅ MongoDB OK", flush=True)
-        return True
-        
-    except Exception as e:
-        print(f"⚠️ MongoDB: {str(e)[:40]}", flush=True)
-        USE_MONGODB = False
-        return False
+    """MongoDB disabled - using in-memory for stability"""
+    global USE_MONGODB
+    USE_MONGODB = False
+    print("📦 Using in-memory storage", flush=True)
+    return False
 
 
 class DataStore:
