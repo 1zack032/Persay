@@ -726,7 +726,8 @@
         // ENCRYPTION FUNCTIONS
         // ============================================
         
-        const myUsername = "{{ username }}";
+        // Username set from HTML template via window.MENZA_USERNAME
+        const myUsername = window.MENZA_USERNAME || '';
         let currentFriend = null;
         let socket = null;
         let onlineUsers = new Set();
@@ -1042,6 +1043,9 @@
             socket.on('group_error', (data) => {
                 showToast(data.error, 'error');
             });
+            
+            // Register call-related socket events
+            registerCallSocketEvents();
             
             // Load user's groups on connect
             socket.emit('get_user_groups');
@@ -2263,9 +2267,13 @@
             }
         }
         
-        // Socket event: Call started
-        socket.on('call_started', (data) => {
-            currentCall = data;
+        // Register all call-related socket events (called from initSocket)
+        function registerCallSocketEvents() {
+            if (!socket) return; // Guard: socket must exist
+            
+            // Socket event: Call started
+            socket.on('call_started', (data) => {
+                currentCall = data;
             canSpeak = data.can_speak !== false;
             showCallUI(data);
             startCallTimer();
@@ -2950,9 +2958,10 @@
             showToast(`${data.username} started sharing their screen`, 'info');
         });
         
-        socket.on('screen_share_stopped', (data) => {
-            showToast(`${data.username} stopped sharing their screen`, 'info');
-        });
+            socket.on('screen_share_stopped', (data) => {
+                showToast(`${data.username} stopped sharing their screen`, 'info');
+            });
+        } // End of registerCallSocketEvents
         
         // PWA Install Prompt
         let deferredPrompt;
