@@ -1911,72 +1911,16 @@ class DataStore:
         return True
 
 
-# Global store instance
+# Global store instance - created once at import
 store = DataStore()
-
-if USE_MONGODB:
-    print("🗄️ Using MongoDB for persistent storage", flush=True)
-else:
-    print("⚠️ Using in-memory storage (data will be lost on restart)", flush=True)
+print("💾 Store initialized", flush=True)
 
 
 # ==========================================
-# LAZY INITIALIZATION (runs on first request, not import)
+# LAZY INITIALIZATION - REMOVED
+# Test users can be created manually via API
 # ==========================================
-_initialized = False
 
 def ensure_initialized():
-    """Initialize test users on first request"""
-    global _initialized
-    if _initialized:
-        return
-    _initialized = True
-    
-    import hashlib
-    
-    test_users = [
-        ('alice_free', 'test123456', 'Alice (Free)', False, False),
-        ('bob_free', 'test123456', 'Bob (Free)', False, False),
-        ('frank_premium', 'test123456', 'Frank (Premium)', True, False),
-        ('admin_user', 'admin123456', 'Admin', True, True),
-    ]
-    
-    try:
-        if USE_MONGODB:
-            # Check existing users in batch
-            existing = set(u['username'] for u in store.users_col.find(
-                {'username': {'$in': [t[0] for t in test_users]}},
-                {'username': 1}
-            ))
-            
-            new_users = []
-            for username, password, display_name, is_premium, is_admin in test_users:
-                if username not in existing:
-                    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
-                    new_users.append({
-                        'username': username, 'password': pwd_hash, 'display_name': display_name,
-                        'avatar': None, 'email': None, 'phone': None, 'seed_phrase_hash': None,
-                        'show_online_status': True, 'read_receipts': True, 'contacts': [],
-                        'contacts_synced': False, 'discoverable': True, 'preferences': {},
-                        'is_premium': is_premium, 'is_admin': is_admin, 'premium': is_premium,
-                        'created_at': store.now()
-                    })
-            
-            if new_users:
-                store.users_col.insert_many(new_users)
-        else:
-            # In-memory
-            for username, password, display_name, is_premium, is_admin in test_users:
-                if username not in store.users:
-                    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
-                    store.users[username] = {
-                        'username': username, 'password': pwd_hash, 'display_name': display_name,
-                        'avatar': None, 'email': None, 'phone': None, 'seed_phrase_hash': None,
-                        'show_online_status': True, 'read_receipts': True, 'contacts': [],
-                        'contacts_synced': False, 'discoverable': True, 'preferences': {},
-                        'is_premium': is_premium, 'is_admin': is_admin, 'premium': is_premium,
-                        'created_at': store.now()
-                    }
-        print("✅ Users ready", flush=True)
-    except Exception as e:
-        print(f"⚠️ User init: {e}", flush=True)
+    """No-op - removed heavy initialization"""
+    pass

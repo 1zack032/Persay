@@ -1,29 +1,20 @@
 """
-🧠 Menza Core - Intelligence Engine (Lite)
-
-Memory-optimized algorithms that power Menza's performance.
+🧠 Menza Core - Minimal
+No heavy initialization on import.
 """
 
-from .menza_intelligence_engine import MenzaIntelligenceEngine, MIE, LRUCache
-
-# Compatibility exports
+# Lazy imports - nothing runs on import
 def get_engine():
-    """Get the MIE singleton"""
+    """Get MIE singleton (lazy)"""
+    from .menza_intelligence_engine import MIE
     return MIE
 
 def initialize_engine():
-    """Initialize MIE (already done on import)"""
-    return MIE
+    """No-op for compatibility"""
+    pass
 
 def optimized(func):
-    """Decorator for optimized functions (no-op for compatibility)"""
+    """No-op decorator for compatibility"""
     return func
 
-__all__ = [
-    'MenzaIntelligenceEngine',
-    'MIE',
-    'LRUCache',
-    'get_engine',
-    'initialize_engine',
-    'optimized'
-]
+__all__ = ['get_engine', 'initialize_engine', 'optimized']

@@ -1,25 +1,26 @@
 """
 Menza - Production Entry Point
-This file is for Render.com deployment
+Minimal and fast for Render.com
 """
 import sys
 import os
 
-# Set production mode
+# Production mode
 os.environ['FLASK_DEBUG'] = 'false'
 os.environ['FLASK_ENV'] = 'production'
 
-# Add project root to path
+# Add project root
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-# Import the Flask app
+print("🚀 Starting Menza...", flush=True)
+
+# Import Flask app
 from webapp.app import app, socketio
 
-# Expose for gunicorn
+# For gunicorn
 application = app
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
-    print(f"Starting Menza on port {port}")
+    print(f"🌐 Menza running on port {port}", flush=True)
     socketio.run(app, host='0.0.0.0', port=port)
-
