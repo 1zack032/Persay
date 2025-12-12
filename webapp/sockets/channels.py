@@ -32,6 +32,9 @@ def register_channel_events(socketio):
     @socketio.on('leave_channel')
     def handle_leave_channel(data):
         """Leave a channel room"""
+        if 'username' not in session:
+            return
+        
         channel_id = data.get('channel_id')
         leave_room(f'channel_{channel_id}')
     

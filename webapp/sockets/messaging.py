@@ -92,7 +92,14 @@ def register_messaging_events(socketio):
     
     @socketio.on('get_public_key')
     def handle_get_key(data):
+        # Require authentication to prevent abuse
+        if 'username' not in session:
+            return
+        
         target = data.get('username')
+        if not target:
+            return
+        
         user = store.get_user(target)
         if user and user.get('public_key'):
             emit('receive_public_key', {'username': target, 'public_key': user['public_key']})
@@ -204,11 +211,59 @@ def register_messaging_events(socketio):
             if not group or username not in group['members']:
                 return
             
+            # Add user's message
             message = store.add_group_message(group_id, username, content, True)
             room_id = f"group_{group_id}"
             emit('new_group_message', {'group_id': group_id, 'message': message}, room=room_id)
+            
+            # Check if it's a bot command
+            if content.startswith('/'):
+                group_bots = group.get('bots', [])
+                if group_bots:
+                    # Process bot command
+                    bot_response = process_group_bot_command(content, group_bots)
+                    if bot_response:
+                        # Add bot response as a message
+                        bot_message = store.add_group_message(
+                            group_id, 
+                            bot_response['bot_name'], 
+                            bot_response['response'], 
+                            True
+                        )
+                        # Mark it as a bot message
+                        bot_message['is_bot'] = True
+                        bot_message['bot_id'] = bot_response['bot_id']
+                        emit('new_group_message', {
+                            'group_id': group_id, 
+                            'message': bot_message
+                        }, room=room_id)
+                        
         except Exception as e:
             print(f"Group message error: {e}", flush=True)
+    
+    def process_group_bot_command(content, group_bots):
+        """Process a bot command in a group context"""
+        from webapp.routes.bots import ALL_BOTS, process_bot_command
+        
+        parts = content.strip().split()
+        command = parts[0] if parts else ''
+        args = parts[1:] if len(parts) > 1 else []
+        
+        # Check each bot in the group to see if it handles this command
+        for bot_id in group_bots:
+            bot = ALL_BOTS.get(bot_id)
+            if bot:
+                # Check if this bot has this command
+                for cmd in bot.get('commands', []):
+                    if cmd['command'] == command:
+                        response = process_bot_command(bot_id, command, args)
+                        return {
+                            'bot_id': bot_id,
+                            'bot_name': f"🤖 {bot['name']}",
+                            'response': response
+                        }
+        
+        return None
     
     @socketio.on('get_user_groups')
     def handle_get_user_groups():

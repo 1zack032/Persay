@@ -149,6 +149,186 @@ def get_bot(bot_id):
     return jsonify({'bot': bot})
 
 
+@bots_bp.route('/api/bots/<bot_id>/add', methods=['POST'])
+def add_bot_to_chats(bot_id):
+    """Add a bot to user's chat list"""
+    if 'username' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    bot = ALL_BOTS.get(bot_id)
+    if not bot:
+        return jsonify({'error': 'Bot not found'}), 404
+    
+    username = session['username']
+    user = store.get_user(username)
+    is_premium = user.get('premium', False) if user else False
+    
+    # Check access for premium bots
+    if not bot['free'] and not is_premium:
+        return jsonify({'error': 'Premium required'}), 403
+    
+    # Add bot to user's bot list
+    result = store.add_user_bot(username, bot_id)
+    if result['success']:
+        if result['already_added']:
+            return jsonify({
+                'success': True,
+                'message': f'{bot["name"]} is already in your chats',
+                'bot': bot,
+                'already_added': True
+            })
+        return jsonify({
+            'success': True,
+            'message': f'{bot["name"]} added to your chats',
+            'bot': bot
+        })
+    else:
+        return jsonify({'error': 'Failed to add bot'}), 400
+
+
+@bots_bp.route('/api/bots/my')
+def get_my_bots():
+    """Get user's added bots"""
+    if 'username' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    username = session['username']
+    user_bots = store.get_user_bots(username)
+    
+    # Get full bot info for each added bot
+    bots = []
+    for bot_id in user_bots:
+        if bot_id in ALL_BOTS:
+            bots.append(ALL_BOTS[bot_id])
+    
+    return jsonify({'bots': bots})
+
+
+@bots_bp.route('/api/bots/<bot_id>/remove', methods=['POST'])
+def remove_bot_from_chats(bot_id):
+    """Remove a bot from user's chat list"""
+    if 'username' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    username = session['username']
+    success = store.remove_user_bot(username, bot_id)
+    
+    if success:
+        return jsonify({'success': True, 'message': 'Bot removed'})
+    else:
+        return jsonify({'error': 'Bot not found in your chats'}), 400
+
+
+@bots_bp.route('/api/user/groups')
+def get_user_groups():
+    """Get user's groups for bot management"""
+    if 'username' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    username = session['username']
+    groups = store.get_user_groups(username)
+    
+    return jsonify({'groups': groups})
+
+
+@bots_bp.route('/api/user/channels')
+def get_user_channels():
+    """Get channels where user is admin for bot management"""
+    if 'username' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    username = session['username']
+    channels = store.get_admin_channels(username)
+    
+    return jsonify({'channels': channels})
+
+
+@bots_bp.route('/api/bots/<bot_id>/add-to-group', methods=['POST'])
+def add_bot_to_group(bot_id):
+    """Add a bot to a group"""
+    if 'username' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    bot = ALL_BOTS.get(bot_id)
+    if not bot:
+        return jsonify({'error': 'Bot not found'}), 404
+    
+    username = session['username']
+    user = store.get_user(username)
+    is_premium = user.get('premium', False) if user else False
+    
+    # Check access for premium bots
+    if not bot['free'] and not is_premium:
+        return jsonify({'error': 'Premium required'}), 403
+    
+    data = request.get_json()
+    if not data or 'group_id' not in data:
+        return jsonify({'error': 'Group ID required'}), 400
+    
+    group_id = data['group_id']
+    
+    # Check if user is admin/owner of the group
+    group = store.get_group(group_id)
+    if not group:
+        return jsonify({'error': 'Group not found'}), 404
+    
+    if username not in group.get('admins', []) and username != group.get('owner'):
+        return jsonify({'error': 'You must be an admin to add bots'}), 403
+    
+    # Add bot to group
+    success = store.add_bot_to_group_simple(group_id, bot_id)
+    if success:
+        return jsonify({
+            'success': True,
+            'message': f'{bot["name"]} added to group'
+        })
+    else:
+        return jsonify({'error': 'Bot already in group or error occurred'}), 400
+
+
+@bots_bp.route('/api/bots/<bot_id>/add-to-channel', methods=['POST'])
+def add_bot_to_channel(bot_id):
+    """Add a bot to a channel"""
+    if 'username' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    bot = ALL_BOTS.get(bot_id)
+    if not bot:
+        return jsonify({'error': 'Bot not found'}), 404
+    
+    username = session['username']
+    user = store.get_user(username)
+    is_premium = user.get('premium', False) if user else False
+    
+    # Check access for premium bots
+    if not bot['free'] and not is_premium:
+        return jsonify({'error': 'Premium required'}), 403
+    
+    data = request.get_json()
+    if not data or 'channel_id' not in data:
+        return jsonify({'error': 'Channel ID required'}), 400
+    
+    channel_id = data['channel_id']
+    
+    # Check if user is admin of the channel
+    channel = store.get_channel(channel_id)
+    if not channel:
+        return jsonify({'error': 'Channel not found'}), 404
+    
+    if username != channel.get('creator') and username not in channel.get('admins', []):
+        return jsonify({'error': 'You must be an admin to add bots'}), 403
+    
+    # Add bot to channel
+    success = store.add_bot_to_channel_simple(channel_id, bot_id)
+    if success:
+        return jsonify({
+            'success': True,
+            'message': f'{bot["name"]} added to channel'
+        })
+    else:
+        return jsonify({'error': 'Bot already in channel or error occurred'}), 400
+
+
 @bots_bp.route('/api/bots/<bot_id>/command', methods=['POST'])
 def run_command(bot_id):
     """Run a bot command"""
@@ -167,6 +347,9 @@ def run_command(bot_id):
         return jsonify({'error': 'Premium required'}), 403
     
     data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Invalid request data'}), 400
+    
     command = data.get('command', '')
     args = data.get('args', [])
     

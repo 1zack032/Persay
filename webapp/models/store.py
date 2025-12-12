@@ -291,6 +291,68 @@ class DataStore:
                         break
             return results
     
+    def get_all_users(self, limit: int = 50) -> List[str]:
+        """Get list of all usernames"""
+        if USE_MONGODB:
+            users = self.users_col.find({}, {'username': 1, '_id': 0}).limit(limit)
+            return [u['username'] for u in users]
+        else:
+            return list(self.users.keys())[:limit]
+    
+    # ========================
+    # USER BOTS MANAGEMENT
+    # ========================
+    
+    def get_user_bots(self, username: str) -> List[str]:
+        """Get list of bot IDs added by user"""
+        if USE_MONGODB:
+            user = self.users_col.find_one({'username': username}, {'bots': 1})
+            return user.get('bots', []) if user else []
+        else:
+            user = self.users.get(username, {})
+            return user.get('bots', [])
+    
+    def add_user_bot(self, username: str, bot_id: str) -> dict:
+        """Add a bot to user's chat list. Returns dict with 'success' and 'already_added' keys"""
+        if USE_MONGODB:
+            # First check if already added
+            user = self.users_col.find_one({'username': username}, {'bots': 1})
+            if user and 'bots' in user and bot_id in user['bots']:
+                return {'success': True, 'already_added': True}
+            
+            result = self.users_col.update_one(
+                {'username': username},
+                {'$addToSet': {'bots': bot_id}}
+            )
+            return {'success': result.matched_count > 0, 'already_added': False}
+        else:
+            if username not in self.users:
+                return {'success': False, 'already_added': False}
+            if 'bots' not in self.users[username]:
+                self.users[username]['bots'] = []
+            if bot_id in self.users[username]['bots']:
+                return {'success': True, 'already_added': True}
+            self.users[username]['bots'].append(bot_id)
+            return {'success': True, 'already_added': False}
+    
+    def remove_user_bot(self, username: str, bot_id: str) -> bool:
+        """Remove a bot from user's chat list"""
+        if USE_MONGODB:
+            result = self.users_col.update_one(
+                {'username': username},
+                {'$pull': {'bots': bot_id}}
+            )
+            return result.modified_count > 0
+        else:
+            if username not in self.users:
+                return False
+            if 'bots' not in self.users[username]:
+                return False
+            if bot_id in self.users[username]['bots']:
+                self.users[username]['bots'].remove(bot_id)
+                return True
+            return False
+    
     def change_user_password(self, username: str, current_password: str, new_password: str) -> bool:
         """Change password - expects plain text passwords, handles hashing"""
         import hashlib
@@ -698,6 +760,73 @@ class DataStore:
         else:
             groups = [g for g in self.groups.values() if username in g['members']]
             return sorted(groups, key=lambda g: g.get('last_message_time') or g['created_at'], reverse=True)
+    
+    def get_admin_channels(self, username: str) -> List[dict]:
+        """Get channels where user is creator or admin"""
+        if USE_MONGODB:
+            channels = list(self.channels_col.find({
+                '$or': [
+                    {'creator': username},
+                    {'admins': username}
+                ]
+            }, {'_id': 0}))
+            return channels
+        else:
+            return [c for c in self.channels.values() 
+                    if c.get('creator') == username or username in c.get('admins', [])]
+    
+    def add_bot_to_group_simple(self, group_id: str, bot_id: str) -> bool:
+        """Add a bot to a group"""
+        if USE_MONGODB:
+            # Check if bot already exists
+            group = self.groups_col.find_one({'id': group_id}, {'bots': 1})
+            if group and 'bots' in group and bot_id in group['bots']:
+                return False
+            
+            result = self.groups_col.update_one(
+                {'id': group_id},
+                {'$addToSet': {'bots': bot_id}}
+            )
+            return result.matched_count > 0
+        else:
+            if group_id not in self.groups:
+                return False
+            if 'bots' not in self.groups[group_id]:
+                self.groups[group_id]['bots'] = []
+            if bot_id in self.groups[group_id]['bots']:
+                return False
+            self.groups[group_id]['bots'].append(bot_id)
+            return True
+    
+    def add_bot_to_channel_simple(self, channel_id: str, bot_id: str) -> bool:
+        """Add a bot to a channel"""
+        if USE_MONGODB:
+            # Check if bot already exists
+            channel = self.channels_col.find_one({'id': channel_id}, {'bots': 1})
+            if channel and 'bots' in channel and bot_id in channel['bots']:
+                return False
+            
+            result = self.channels_col.update_one(
+                {'id': channel_id},
+                {'$addToSet': {'bots': bot_id}}
+            )
+            return result.matched_count > 0
+        else:
+            if channel_id not in self.channels:
+                return False
+            if 'bots' not in self.channels[channel_id]:
+                self.channels[channel_id]['bots'] = []
+            if bot_id in self.channels[channel_id]['bots']:
+                return False
+            self.channels[channel_id]['bots'].append(bot_id)
+            return True
+    
+    def get_group_bots(self, group_id: str) -> List[str]:
+        """Get bot IDs in a group"""
+        group = self.get_group(group_id)
+        if not group:
+            return []
+        return group.get('bots', [])
     
     def add_group_member(self, group_id: str, username: str) -> bool:
         if USE_MONGODB:
@@ -1874,6 +2003,97 @@ class DataStore:
             )
         
         return True
+    
+    # ============================================
+    # iOS/Mobile Push Notification Methods
+    # ============================================
+    
+    def save_push_token(self, username: str, token: str, platform: str = 'ios') -> bool:
+        """Save push notification token for a user's device"""
+        token_data = {
+            'token': token,
+            'platform': platform,
+            'updated_at': datetime.now().isoformat()
+        }
+        
+        if USE_MONGODB:
+            # Store tokens in a separate collection or in user document
+            self.users_col.update_one(
+                {'username': username},
+                {'$set': {f'push_tokens.{platform}': token_data}},
+                upsert=False
+            )
+        else:
+            if username in self.users:
+                if 'push_tokens' not in self.users[username]:
+                    self.users[username]['push_tokens'] = {}
+                self.users[username]['push_tokens'][platform] = token_data
+        
+        return True
+    
+    def get_push_token(self, username: str, platform: str = 'ios') -> Optional[str]:
+        """Get push token for a user's device"""
+        if USE_MONGODB:
+            user = self.users_col.find_one(
+                {'username': username},
+                {'push_tokens': 1}
+            )
+            if user and 'push_tokens' in user:
+                token_data = user['push_tokens'].get(platform)
+                return token_data.get('token') if token_data else None
+        else:
+            user = self.users.get(username, {})
+            token_data = user.get('push_tokens', {}).get(platform)
+            return token_data.get('token') if token_data else None
+        
+        return None
+    
+    def register_device(self, username: str, device_info: dict) -> bool:
+        """Register device information for a user"""
+        device_info['registered_at'] = datetime.now().isoformat()
+        device_id = device_info.get('device_id', 'default')
+        
+        if USE_MONGODB:
+            self.users_col.update_one(
+                {'username': username},
+                {'$set': {f'devices.{device_id}': device_info}},
+                upsert=False
+            )
+        else:
+            if username in self.users:
+                if 'devices' not in self.users[username]:
+                    self.users[username]['devices'] = {}
+                self.users[username]['devices'][device_id] = device_info
+        
+        return True
+    
+    def get_users_with_push_tokens(self, usernames: List[str], platform: str = 'ios') -> List[dict]:
+        """Get push tokens for multiple users (for sending notifications)"""
+        result = []
+        
+        if USE_MONGODB:
+            users = self.users_col.find(
+                {'username': {'$in': usernames}, f'push_tokens.{platform}': {'$exists': True}},
+                {'username': 1, 'push_tokens': 1}
+            )
+            for user in users:
+                token_data = user.get('push_tokens', {}).get(platform)
+                if token_data:
+                    result.append({
+                        'username': user['username'],
+                        'token': token_data.get('token')
+                    })
+        else:
+            for username in usernames:
+                user = self.users.get(username, {})
+                token_data = user.get('push_tokens', {}).get(platform)
+                if token_data:
+                    result.append({
+                        'username': username,
+                        'token': token_data.get('token')
+                    })
+        
+        return result
 
 
 # Global store instance - created once at import

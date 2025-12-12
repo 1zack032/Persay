@@ -220,3 +220,146 @@ def logout():
     session.pop('username', None)
     return redirect(url_for('main.index'))
 
+
+# ============================================================
+# 📱 JSON API Endpoints for iOS/Mobile App
+# ============================================================
+
+@auth_bp.route('/api/auth/register', methods=['POST'])
+def api_register():
+    """JSON API for mobile app registration"""
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'Invalid request data'}), 400
+    
+    username = data.get('username', '').strip().lower()
+    password = data.get('password', '')
+    email = data.get('email', '').strip() or None
+    phone = data.get('phone', '').strip() or None
+    
+    # Validation
+    if len(username) < Config.MIN_USERNAME_LENGTH:
+        return jsonify({
+            'success': False, 
+            'message': f'Username must be at least {Config.MIN_USERNAME_LENGTH} characters'
+        }), 400
+    
+    if len(password) < Config.MIN_PASSWORD_LENGTH:
+        return jsonify({
+            'success': False, 
+            'message': f'Password must be at least {Config.MIN_PASSWORD_LENGTH} characters'
+        }), 400
+    
+    if store.user_exists(username):
+        return jsonify({'success': False, 'message': 'Username already taken'}), 400
+    
+    # Generate seed phrase
+    seed_phrase = generate_seed_phrase()
+    seed_hash = hash_seed_phrase(seed_phrase)
+    
+    # Hash password and create user
+    hashed_password = hash_password(password)
+    user = store.create_user(username, hashed_password)
+    store.update_user_profile(username, {
+        'email': email,
+        'phone': phone,
+        'seed_hash': seed_hash
+    })
+    
+    return jsonify({
+        'success': True,
+        'message': 'Account created successfully',
+        'seed_phrase': seed_phrase,
+        'user': {
+            'username': username,
+            'email': email,
+            'phone': phone
+        }
+    })
+
+
+@auth_bp.route('/api/auth/login', methods=['POST'])
+def api_login():
+    """JSON API for mobile app login"""
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'Invalid request data'}), 400
+    
+    username = data.get('username', '').strip().lower()
+    password = data.get('password', '')
+    
+    user = store.get_user(username)
+    
+    if not user:
+        return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
+    
+    if not verify_password(password, user.get('password', '')):
+        return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
+    
+    session['username'] = username
+    
+    return jsonify({
+        'success': True,
+        'message': 'Login successful',
+        'user': {
+            'username': username,
+            'display_name': user.get('display_name'),
+            'email': user.get('email'),
+            'phone': user.get('phone'),
+            'premium': user.get('premium', False)
+        }
+    })
+
+
+@auth_bp.route('/api/auth/logout', methods=['POST', 'GET'])
+def api_logout():
+    """JSON API for mobile app logout"""
+    session.pop('username', None)
+    return jsonify({'success': True, 'message': 'Logged out successfully'})
+
+
+@auth_bp.route('/api/auth/status', methods=['GET'])
+def api_auth_status():
+    """Check if user is authenticated"""
+    if 'username' in session:
+        user = store.get_user(session['username'])
+        if user:
+            return jsonify({
+                'success': True,
+                'user': {
+                    'username': session['username'],
+                    'display_name': user.get('display_name'),
+                    'email': user.get('email'),
+                    'phone': user.get('phone'),
+                    'premium': user.get('premium', False)
+                }
+            })
+    return jsonify({'success': False, 'message': 'Not authenticated'}), 401
+
+
+@auth_bp.route('/api/auth/recover', methods=['POST'])
+def api_recover():
+    """JSON API for account recovery"""
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'Invalid request data'}), 400
+    
+    username = data.get('username', '').strip().lower()
+    seed_phrase_input = data.get('seed_phrase', '').strip().lower()
+    new_password = data.get('new_password', '')
+    
+    user = store.get_user(username)
+    if not user:
+        return jsonify({'success': False, 'message': 'User not found'}), 404
+    
+    # Verify seed phrase
+    input_hash = hash_seed_phrase(seed_phrase_input)
+    if input_hash != user.get('seed_hash'):
+        return jsonify({'success': False, 'message': 'Invalid recovery phrase'}), 401
+    
+    # Update password
+    new_hashed = hash_password(new_password)
+    store.update_user_profile(username, {'password': new_hashed})
+    
+    return jsonify({'success': True, 'message': 'Password reset successful'})
+

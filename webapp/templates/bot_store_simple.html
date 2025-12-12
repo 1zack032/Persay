@@ -1,240 +1,787 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Store - Menza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Initialize theme
+        (function() {
+            const savedTheme = localStorage.getItem('menza-theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            }
+        })();
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #030306;
+            --bg-secondary: #08080c;
+            --bg-card: #0c0c12;
+            --accent-primary: #7c3aed;
+            --accent-secondary: #a855f7;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --border: rgba(255, 255, 255, 0.06);
+        }
 
-{% block title %}Bot Store - Menza{% endblock %}
+        [data-theme="light"] {
+            --bg-primary: #f5f5f7;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --border: rgba(0, 0, 0, 0.08);
+        }
 
-{% block content %}
-<div class="bot-store">
-    <div class="store-header">
-        <h1>🤖 Bot Store</h1>
-        <p>Add bots to your chats and channels</p>
+        body {
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: linear-gradient(180deg, rgba(2, 2, 5, 0.98), rgba(6, 6, 10, 0.95));
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.1);
+        }
+
+        [data-theme="light"] .top-nav {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 245, 247, 0.95));
+        }
+
+        .nav-logo {
+            font-size: 1.375rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #ffffff 0%, #e879f9 50%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        [data-theme="light"] .nav-logo {
+            background: linear-gradient(90deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .nav-tab {
+            padding: 0.5rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-card);
+        }
+
+        .nav-tab.active {
+            color: var(--text-primary);
+            background: var(--accent-primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 56px;
+            padding: 2rem;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .store-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .store-header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .store-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .bot-section {
+            margin-bottom: 3rem;
+        }
+
+        .bot-section h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-desc {
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+        }
+
+        .section-desc a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        .section-desc a:hover {
+            text-decoration: underline;
+        }
+
+        .bot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .bot-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        [data-theme="light"] .bot-card {
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .bot-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-3px);
+        }
+
+        .bot-card.locked {
+            opacity: 0.65;
+        }
+
+        .bot-avatar {
+            font-size: 2.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .bot-info h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.375rem;
+        }
+
+        .bot-info p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .bot-commands {
+            margin: 1rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .bot-commands code {
+            background: rgba(124, 58, 237, 0.15);
+            color: var(--accent-secondary);
+            padding: 0.25rem 0.625rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-family: inherit;
+        }
+
+        .btn-add {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            border-radius: 22px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-add:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-locked {
+            width: 100%;
+            padding: 0.875rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            border-radius: 22px;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            cursor: not-allowed;
+        }
+
+        [data-theme="light"] .btn-locked {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .how-to-use {
+            background: rgba(124, 58, 237, 0.08);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 16px;
+            padding: 1.75rem;
+        }
+
+        .how-to-use h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .how-to-use ol {
+            color: var(--text-secondary);
+            padding-left: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .how-to-use code {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
+        [data-theme="light"] .how-to-use code {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--accent-primary);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            color: var(--text-primary);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .store-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .nav-tabs {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <a href="/" class="nav-logo">MENZA</a>
+        <div class="nav-tabs">
+            <a href="/chat" class="nav-tab">Messages</a>
+            <a href="/channels" class="nav-tab">Channels</a>
+            <a href="/bots" class="nav-tab active">Bots</a>
+            <a href="/settings" class="nav-tab">Settings</a>
+            <a href="/logout" class="nav-tab">Sign Out</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="store-header">
+            <h1>🤖 Bot Store</h1>
+            <p>Add powerful bots to your chats and channels</p>
+        </div>
+
+        <!-- Free Bots -->
+        <section class="bot-section">
+            <h2>✨ Free Bots</h2>
+            <p class="section-desc">Available to all users</p>
+            
+            <div class="bot-grid">
+                {% for bot in free_bots %}
+                <div class="bot-card">
+                    <div class="bot-avatar">{{ bot.avatar }}</div>
+                    <div class="bot-info">
+                        <h3>{{ bot.name }}</h3>
+                        <p>{{ bot.description }}</p>
+                    </div>
+                    <div class="bot-commands">
+                        {% for cmd in bot.commands %}
+                        <code>{{ cmd.command }}</code>
+                        {% endfor %}
+                    </div>
+                    <button class="btn-add" onclick="addBot('{{ bot.id }}')">
+                        Add to Chat
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Premium Bots -->
+        <section class="bot-section">
+            <h2>💎 Premium Bots</h2>
+            {% if is_premium %}
+            <p class="section-desc">Your premium bots</p>
+            {% else %}
+            <p class="section-desc">
+                <a href="/premium">Upgrade to Premium</a> to unlock these advanced bots
+            </p>
+            {% endif %}
+            
+            <div class="bot-grid">
+                {% for bot in premium_bots %}
+                <div class="bot-card {% if not is_premium %}locked{% endif %}">
+                    <div class="bot-avatar">{{ bot.avatar }}</div>
+                    <div class="bot-info">
+                        <h3>{{ bot.name }}</h3>
+                        <p>{{ bot.description }}</p>
+                    </div>
+                    <div class="bot-commands">
+                        {% for cmd in bot.commands %}
+                        <code>{{ cmd.command }}</code>
+                        {% endfor %}
+                    </div>
+                    {% if is_premium %}
+                    <button class="btn-add" onclick="addBot('{{ bot.id }}')">
+                        Add to Chat
+                    </button>
+                    {% else %}
+                    <button class="btn-locked" disabled>
+                        🔒 Premium Only
+                    </button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- How to Use -->
+        <section class="how-to-use">
+            <h2>📖 How to Use Bots</h2>
+            <ol>
+                <li>Add a bot to your chat or group</li>
+                <li>Use commands like <code>/price BTC</code> in your conversation</li>
+                <li>The bot responds instantly with the information you need</li>
+            </ol>
+        </section>
     </div>
 
-    <!-- Free Bots -->
-    <section class="bot-section">
-        <h2>✨ Free Bots</h2>
-        <p class="section-desc">Available to all users</p>
-        
-        <div class="bot-grid">
-            {% for bot in free_bots %}
-            <div class="bot-card">
-                <div class="bot-avatar">{{ bot.avatar }}</div>
-                <div class="bot-info">
-                    <h3>{{ bot.name }}</h3>
-                    <p>{{ bot.description }}</p>
-                </div>
-                <div class="bot-commands">
-                    {% for cmd in bot.commands %}
-                    <code>{{ cmd.command }}</code>
-                    {% endfor %}
-                </div>
-                <button class="btn-add" onclick="addBot('{{ bot.id }}')">
-                    Add to Chat
-                </button>
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+    
+    <!-- Add Bot Modal -->
+    <div class="modal-overlay" id="addBotModal" onclick="if(event.target === this) closeAddBotModal()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalBotName">Add Bot</h3>
+                <button class="modal-close" onclick="closeAddBotModal()">×</button>
             </div>
-            {% endfor %}
-        </div>
-    </section>
-
-    <!-- Premium Bots -->
-    <section class="bot-section premium-section">
-        <h2>💎 Premium Bots</h2>
-        {% if is_premium %}
-        <p class="section-desc">Your premium bots</p>
-        {% else %}
-        <p class="section-desc">
-            <a href="/premium">Upgrade to Premium</a> to access these bots
-        </p>
-        {% endif %}
-        
-        <div class="bot-grid">
-            {% for bot in premium_bots %}
-            <div class="bot-card {% if not is_premium %}locked{% endif %}">
-                <div class="bot-avatar">{{ bot.avatar }}</div>
-                <div class="bot-info">
-                    <h3>{{ bot.name }}</h3>
-                    <p>{{ bot.description }}</p>
+            <div class="modal-body">
+                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+                    Choose where to add this bot:
+                </p>
+                
+                <!-- Personal DM -->
+                <div class="add-option" onclick="addBotToPersonal()">
+                    <div class="option-icon">💬</div>
+                    <div class="option-info">
+                        <div class="option-title">Personal Chat</div>
+                        <div class="option-desc">Chat directly with the bot</div>
+                    </div>
+                    <span class="option-arrow">→</span>
                 </div>
-                <div class="bot-commands">
-                    {% for cmd in bot.commands %}
-                    <code>{{ cmd.command }}</code>
-                    {% endfor %}
+                
+                <!-- Groups Section -->
+                <div class="option-section">
+                    <div class="option-section-header">
+                        <span>👥 Your Groups</span>
+                    </div>
+                    <div id="groupsList" class="option-list">
+                        <div class="loading-text">Loading groups...</div>
+                    </div>
                 </div>
-                {% if is_premium %}
-                <button class="btn-add" onclick="addBot('{{ bot.id }}')">
-                    Add to Chat
-                </button>
-                {% else %}
-                <button class="btn-locked" disabled>
-                    🔒 Premium Only
-                </button>
-                {% endif %}
+                
+                <!-- Channels Section -->
+                <div class="option-section">
+                    <div class="option-section-header">
+                        <span>📢 Your Channels</span>
+                    </div>
+                    <div id="channelsList" class="option-list">
+                        <div class="loading-text">Loading channels...</div>
+                    </div>
+                </div>
             </div>
-            {% endfor %}
         </div>
-    </section>
+    </div>
+    
+    <style>
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 420px;
+            max-height: 80vh;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-header h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+        .modal-body {
+            padding: 1rem 1.25rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .add-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem;
+            background: rgba(124, 58, 237, 0.08);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 0.75rem;
+        }
+        .add-option:hover {
+            background: rgba(124, 58, 237, 0.15);
+            border-color: rgba(124, 58, 237, 0.4);
+        }
+        .option-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+        }
+        .option-info { flex: 1; }
+        .option-title {
+            font-weight: 500;
+            font-size: 0.9375rem;
+        }
+        .option-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        .option-arrow {
+            color: var(--accent-primary);
+            font-size: 1.25rem;
+        }
+        .option-section {
+            margin-top: 1rem;
+        }
+        .option-section-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        .option-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .list-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .list-item:hover {
+            border-color: var(--accent-primary);
+        }
+        .list-item.added {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        .list-item-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+        .list-item-name {
+            flex: 1;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .list-item-badge {
+            font-size: 0.625rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        .loading-text, .empty-text {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 1rem;
+        }
+    </style>
 
-    <!-- How to Use -->
-    <section class="how-to-use">
-        <h2>📖 How to Use Bots</h2>
-        <ol>
-            <li>Add a bot to your chat or group</li>
-            <li>Use commands like <code>/price BTC</code></li>
-            <li>Bot responds with information</li>
-        </ol>
-    </section>
-</div>
+    <script>
+    let currentBotId = null;
+    let currentBotName = null;
+    let userGroups = [];
+    let userChannels = [];
+    
+    async function addBot(botId) {
+        currentBotId = botId;
+        // Get bot name from the card
+        const botCard = document.querySelector(`[onclick="addBot('${botId}')"]`).closest('.bot-card');
+        currentBotName = botCard.querySelector('h3').textContent;
+        
+        document.getElementById('modalBotName').textContent = `Add ${currentBotName}`;
+        document.getElementById('addBotModal').classList.add('show');
+        
+        // Load user's groups and channels
+        loadGroupsAndChannels();
+    }
+    
+    function closeAddBotModal() {
+        document.getElementById('addBotModal').classList.remove('show');
+        currentBotId = null;
+        currentBotName = null;
+    }
+    
+    async function loadGroupsAndChannels() {
+        // Load groups
+        try {
+            const groupsRes = await fetch('/api/user/groups');
+            const groupsData = await groupsRes.json();
+            userGroups = groupsData.groups || [];
+            renderGroups();
+        } catch (e) {
+            document.getElementById('groupsList').innerHTML = '<div class="empty-text">No groups yet</div>';
+        }
+        
+        // Load channels
+        try {
+            const channelsRes = await fetch('/api/user/channels');
+            const channelsData = await channelsRes.json();
+            userChannels = channelsData.channels || [];
+            renderChannels();
+        } catch (e) {
+            document.getElementById('channelsList').innerHTML = '<div class="empty-text">No channels yet</div>';
+        }
+    }
+    
+    function renderGroups() {
+        const container = document.getElementById('groupsList');
+        if (userGroups.length === 0) {
+            container.innerHTML = '<div class="empty-text">No groups yet. <a href="/chat" style="color: var(--accent-primary);">Create one</a></div>';
+            return;
+        }
+        
+        container.innerHTML = userGroups.map(group => {
+            const hasBot = group.bots && group.bots.includes(currentBotId);
+            return `
+                <div class="list-item ${hasBot ? 'added' : ''}" onclick="${hasBot ? '' : `addBotToGroup('${group.id}')`}">
+                    <div class="list-item-avatar">${group.avatar_emoji || '👥'}</div>
+                    <div class="list-item-name">${group.name}</div>
+                    ${hasBot ? '<span class="list-item-badge">✓ Added</span>' : '<span class="option-arrow">+</span>'}
+                </div>
+            `;
+        }).join('');
+    }
+    
+    function renderChannels() {
+        const container = document.getElementById('channelsList');
+        if (userChannels.length === 0) {
+            container.innerHTML = '<div class="empty-text">No channels yet. <a href="/channel/create" style="color: var(--accent-primary);">Create one</a></div>';
+            return;
+        }
+        
+        container.innerHTML = userChannels.map(channel => {
+            const hasBot = channel.bots && channel.bots.includes(currentBotId);
+            return `
+                <div class="list-item ${hasBot ? 'added' : ''}" onclick="${hasBot ? '' : `addBotToChannel('${channel.id}')`}">
+                    <div class="list-item-avatar">📢</div>
+                    <div class="list-item-name">${channel.name}</div>
+                    ${hasBot ? '<span class="list-item-badge">✓ Added</span>' : '<span class="option-arrow">+</span>'}
+                </div>
+            `;
+        }).join('');
+    }
+    
+    async function addBotToPersonal() {
+        try {
+            const response = await fetch(`/api/bots/${currentBotId}/add`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                showToast(`✓ ${currentBotName} added to your personal chats!`);
+                closeAddBotModal();
+            } else {
+                showToast(data.already_added ? `ℹ️ ${currentBotName} is already in your chats` : '❌ ' + (data.error || 'Failed'));
+            }
+        } catch (e) {
+            showToast('❌ Error adding bot');
+        }
+    }
+    
+    async function addBotToGroup(groupId) {
+        try {
+            const response = await fetch(`/api/bots/${currentBotId}/add-to-group`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ group_id: groupId })
+            });
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                showToast(`✓ ${currentBotName} added to group!`);
+                // Update the UI
+                const group = userGroups.find(g => g.id === groupId);
+                if (group) {
+                    if (!group.bots) group.bots = [];
+                    group.bots.push(currentBotId);
+                }
+                renderGroups();
+            } else {
+                showToast('❌ ' + (data.error || 'Failed to add bot to group'));
+            }
+        } catch (e) {
+            showToast('❌ Error adding bot to group');
+        }
+    }
+    
+    async function addBotToChannel(channelId) {
+        try {
+            const response = await fetch(`/api/bots/${currentBotId}/add-to-channel`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ channel_id: channelId })
+            });
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                showToast(`✓ ${currentBotName} added to channel!`);
+                // Update the UI
+                const channel = userChannels.find(c => c.id === channelId);
+                if (channel) {
+                    if (!channel.bots) channel.bots = [];
+                    channel.bots.push(currentBotId);
+                }
+                renderChannels();
+            } else {
+                showToast('❌ ' + (data.error || 'Failed to add bot to channel'));
+            }
+        } catch (e) {
+            showToast('❌ Error adding bot to channel');
+        }
+    }
 
-<style>
-.bot-store {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.store-header {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.store-header h1 {
-    font-size: 2rem;
-    color: #fff;
-}
-
-.store-header p {
-    color: #888;
-}
-
-.bot-section {
-    margin-bottom: 3rem;
-}
-
-.bot-section h2 {
-    color: #fff;
-    margin-bottom: 0.5rem;
-}
-
-.section-desc {
-    color: #888;
-    margin-bottom: 1rem;
-}
-
-.section-desc a {
-    color: #8B5CF6;
-}
-
-.bot-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
-}
-
-.bot-card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    padding: 1.5rem;
-    transition: all 0.2s;
-}
-
-.bot-card:hover {
-    border-color: #8B5CF6;
-    transform: translateY(-2px);
-}
-
-.bot-card.locked {
-    opacity: 0.6;
-}
-
-.bot-avatar {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-}
-
-.bot-info h3 {
-    color: #fff;
-    margin: 0 0 0.5rem 0;
-}
-
-.bot-info p {
-    color: #888;
-    font-size: 0.9rem;
-    margin: 0;
-}
-
-.bot-commands {
-    margin: 1rem 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.bot-commands code {
-    background: rgba(139, 92, 246, 0.2);
-    color: #8B5CF6;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-}
-
-.btn-add {
-    width: 100%;
-    padding: 0.75rem;
-    background: linear-gradient(135deg, #8B5CF6, #7C3AED);
-    border: none;
-    border-radius: 8px;
-    color: #fff;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-add:hover {
-    transform: scale(1.02);
-}
-
-.btn-locked {
-    width: 100%;
-    padding: 0.75rem;
-    background: rgba(255,255,255,0.1);
-    border: none;
-    border-radius: 8px;
-    color: #888;
-    cursor: not-allowed;
-}
-
-.how-to-use {
-    background: rgba(139, 92, 246, 0.1);
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    border-radius: 12px;
-    padding: 1.5rem;
-}
-
-.how-to-use h2 {
-    color: #fff;
-    margin: 0 0 1rem 0;
-}
-
-.how-to-use ol {
-    color: #ccc;
-    padding-left: 1.5rem;
-}
-
-.how-to-use li {
-    margin-bottom: 0.5rem;
-}
-
-.how-to-use code {
-    background: rgba(0,0,0,0.3);
-    padding: 0.2rem 0.4rem;
-    border-radius: 4px;
-}
-</style>
-
-<script>
-function addBot(botId) {
-    alert('Bot ' + botId + ' added! Use commands in your chat.');
-}
-</script>
-{% endblock %}
-
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+    </script>
+</body>
+</html>

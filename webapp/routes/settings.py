@@ -73,6 +73,9 @@ def change_password():
     username = session['username']
     data = request.get_json()
     
+    if not data:
+        return jsonify({'success': False, 'error': 'Invalid request data'}), 400
+    
     current_password = data.get('current_password', '')
     new_password = data.get('new_password', '')
     
@@ -96,6 +99,10 @@ def update_reset_method():
     
     username = session['username']
     data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'error': 'Invalid request data'}), 400
+    
     method = data.get('method', 'email')
     
     if method not in ['email', 'phone']:
@@ -117,6 +124,9 @@ def update_privacy():
     
     username = session['username']
     data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'error': 'Invalid request data'}), 400
     
     success = store.update_user_profile(username, {
         'show_online_status': data.get('show_online_status', True),
@@ -167,6 +177,10 @@ def sync_contacts():
     
     username = session['username']
     data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'message': 'Invalid request data'}), 400
+    
     contacts = data.get('contacts', [])
     
     if not contacts:
@@ -223,6 +237,10 @@ def find_contact():
         return jsonify({'success': False, 'message': 'Not logged in'}), 401
     
     data = request.get_json()
+    
+    if not data:
+        return jsonify({'success': False, 'message': 'Invalid request data'}), 400
+    
     query = data.get('query', '').strip()
     
     if not query:
@@ -302,7 +320,11 @@ def set_theme():
     username = session['username']
     user = store.get_user(username)
     
-    theme_id = request.json.get('theme_id')
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'error': 'Invalid request data'}), 400
+    
+    theme_id = data.get('theme_id')
     
     if theme_id not in CHAT_THEMES:
         return jsonify({'success': False, 'error': 'Invalid theme'}), 400
@@ -330,7 +352,11 @@ def set_font():
     username = session['username']
     user = store.get_user(username)
     
-    font_id = request.json.get('font_id')
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'error': 'Invalid request data'}), 400
+    
+    font_id = data.get('font_id')
     
     if font_id not in PREMIUM_FONTS:
         return jsonify({'success': False, 'error': 'Invalid font'}), 400
@@ -358,7 +384,11 @@ def set_message_style():
     username = session['username']
     user = store.get_user(username)
     
-    style_id = request.json.get('style_id')
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'error': 'Invalid request data'}), 400
+    
+    style_id = data.get('style_id')
     
     if style_id not in MESSAGE_STYLES:
         return jsonify({'success': False, 'error': 'Invalid style'}), 400
@@ -397,4 +427,56 @@ def get_premium_features_api():
         'features': PREMIUM_FEATURES,
         'pricing': PRICING_TIERS
     })
+
+
+# ============================================
+# iOS/Mobile Native Endpoints
+# ============================================
+
+@settings_bp.route('/api/push-token', methods=['POST'])
+def register_push_token():
+    """Register push notification token for iOS/Android devices"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'error': 'Invalid request data'}), 400
+    
+    token = data.get('token')
+    platform = data.get('platform', 'ios')
+    
+    if not token:
+        return jsonify({'success': False, 'error': 'Token required'}), 400
+    
+    username = session['username']
+    
+    # Store the push token
+    store.save_push_token(username, token, platform)
+    
+    return jsonify({'success': True, 'message': 'Push token registered'})
+
+
+@settings_bp.route('/api/device/register', methods=['POST'])
+def register_device():
+    """Register device information for the current user"""
+    if 'username' not in session:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'error': 'Invalid request data'}), 400
+    
+    username = session['username']
+    device_info = {
+        'device_id': data.get('device_id'),
+        'platform': data.get('platform', 'ios'),
+        'model': data.get('model'),
+        'os_version': data.get('os_version'),
+        'app_version': data.get('app_version', '1.0.0')
+    }
+    
+    store.register_device(username, device_info)
+    
+    return jsonify({'success': True, 'message': 'Device registered'})
 

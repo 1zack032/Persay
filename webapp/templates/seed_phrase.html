@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Save Your Recovery Phrase - Menza</title>
+    
+    <!-- Theme initialization -->
+    <script src="/static/js/theme.js"></script>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -16,9 +20,9 @@
             --bg-card: #0c0c12;
             --bg-card-inner: #101018;
             --bg-input: #0a0a10;
-            --accent-primary: #6366f1;
-            --accent-secondary: #8b5cf6;
-            --accent-glow: rgba(99, 102, 241, 0.15);
+            --accent-primary: #7c3aed;
+            --accent-secondary: #a855f7;
+            --accent-glow: rgba(124, 58, 237, 0.15);
             --text-primary: #ffffff;
             --text-secondary: #9ca3af;
             --text-dim: #6b7280;
@@ -33,9 +37,25 @@
             --radius-md: 12px;
             --radius-lg: 16px;
         }
+        
+        /* Light Mode */
+        :root[data-theme="light"] {
+            --bg-primary: #f5f5f7;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-inner: #fafafa;
+            --bg-input: rgba(0, 0, 0, 0.04);
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --text-dim: #9ca3af;
+            --text-muted: #d1d5db;
+            --border: rgba(0, 0, 0, 0.08);
+            --border-subtle: rgba(0, 0, 0, 0.05);
+            --border-hover: rgba(0, 0, 0, 0.12);
+        }
 
         body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;

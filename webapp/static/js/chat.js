@@ -367,151 +367,210 @@
             resultsDiv.innerHTML = html;
         }
         
+        // Selected recipients for new message
+        let selectedMessageRecipients = [];
+        
         function startNewMessage() {
             // Close the write dropdown
             document.getElementById('writePanel').classList.remove('show');
             activePanel = null;
             
-            // Reset tabs to Recent
-            switchMessageTab('recent');
+            // Reset selected recipients
+            selectedMessageRecipients = [];
+            updateSelectedRecipientsUI();
             
             // Clear search
             const searchInput = document.getElementById('newMessageSearchInput');
             if (searchInput) searchInput.value = '';
-            document.getElementById('messageSearchResults').innerHTML = `
-                <div class="search-placeholder" style="text-align: center; padding: 2rem;">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 0.5rem;">
-                        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-                    </svg>
-                    <p style="color: var(--text-muted); font-size: 0.8125rem;">Type a username to find users</p>
-                </div>`;
             
-            // Load recent contacts
-            loadRecentContacts();
+            // Load initial user list (known users first)
+            loadMessageUserList('');
             
             // Open the new message modal
             document.getElementById('newMessageModal').classList.add('show');
+            
+            // Focus search input
+            setTimeout(() => searchInput && searchInput.focus(), 100);
         }
         
-        function switchMessageTab(tab) {
-            // Update tab buttons
-            document.querySelectorAll('#newMessageModal .group-tab').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.closest('.group-tab').classList.add('active');
-            
-            // Update tab content
-            document.getElementById('messageRecentTab').classList.remove('active');
-            document.getElementById('messageSearchTab').classList.remove('active');
-            
-            if (tab === 'recent') {
-                document.getElementById('messageRecentTab').classList.add('active');
-                loadRecentContacts();
-            } else {
-                document.getElementById('messageSearchTab').classList.add('active');
-                document.getElementById('newMessageSearchInput').focus();
-            }
-        }
-        
-        function loadRecentContacts() {
-            const listDiv = document.getElementById('recentContactsList');
+        function loadMessageUserList(query) {
+            const listDiv = document.getElementById('messageUserList');
             listDiv.innerHTML = `
                 <div class="loading-placeholder" style="text-align: center; padding: 2rem; color: var(--text-muted);">
                     <div class="spinner" style="width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 0.5rem;"></div>
-                    Loading contacts...
+                    Loading...
                 </div>`;
             
-            fetch('/api/users/contacts')
+            // Use smart search endpoint that prioritizes known users
+            fetch(`/api/users/smart-search?q=${encodeURIComponent(query)}`)
                 .then(res => res.json())
                 .then(data => {
-                    if (data.contacts && data.contacts.length > 0) {
-                        let html = '';
-                        data.contacts.forEach(contact => {
-                            const initial = contact.display_name ? contact.display_name[0].toUpperCase() : contact.username[0].toUpperCase();
-                            const displayName = contact.display_name || contact.username;
-                            html += `
-                                <div class="user-select-item" onclick="selectUserForMessage('${contact.username}')">
-                                    <div class="user-select-avatar">${initial}</div>
-                                    <div class="user-select-info" style="flex: 1;">
-                                        <div class="user-select-name">${displayName}</div>
-                                        ${contact.display_name && contact.display_name !== contact.username ? `<div style="font-size: 0.75rem; color: var(--text-muted);">@${contact.username}</div>` : ''}
-                                    </div>
-                                    <span style="font-size: 0.6875rem; color: var(--text-muted);">${contact.message_count} msgs</span>
-                                </div>`;
+                    let html = '';
+                    
+                    // Show known users section if any
+                    if (data.known_users && data.known_users.length > 0) {
+                        html += `<div style="font-size: 0.6875rem; color: var(--accent-primary); font-weight: 600; padding: 0.5rem 0.75rem; background: rgba(168, 85, 247, 0.08); border-radius: var(--radius-sm); margin-bottom: 0.5rem;">👥 CONTACTS</div>`;
+                        data.known_users.forEach(user => {
+                            html += renderMessageUserItem(user, true);
                         });
-                        listDiv.innerHTML = html;
-                    } else {
-                        listDiv.innerHTML = `
-                            <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 0.5rem;">
-                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                                </svg>
-                                <p style="font-size: 0.8125rem;">No recent conversations</p>
-                                <p style="font-size: 0.75rem; margin-top: 0.25rem;">Search for users to start a chat</p>
-                            </div>`;
                     }
-                })
-                .catch(err => {
-                    listDiv.innerHTML = `
-                        <div style="text-align: center; padding: 2rem; color: var(--error);">
-                            Failed to load contacts
-                        </div>`;
-                });
-        }
-        
-        function searchUsersForMessage(query) {
-            const resultsDiv = document.getElementById('messageSearchResults');
-            
-            if (!query.trim() || query.length < 2) {
-                resultsDiv.innerHTML = `
-                    <div class="search-placeholder" style="text-align: center; padding: 2rem;">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 0.5rem;">
-                            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-                        </svg>
-                        <p style="color: var(--text-muted); font-size: 0.8125rem;">Type at least 2 characters to search</p>
-                    </div>`;
-                return;
-            }
-            
-            resultsDiv.innerHTML = `
-                <div style="text-align: center; padding: 1rem; color: var(--text-muted);">
-                    <div class="spinner" style="width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto;"></div>
-                </div>`;
-            
-            fetch(`/api/users/search?q=${encodeURIComponent(query)}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.users && data.users.length > 0) {
-                        let html = '';
-                        data.users.forEach(user => {
-                            const initial = user.display_name ? user.display_name[0].toUpperCase() : user.username[0].toUpperCase();
-                            const displayName = user.display_name || user.username;
-                            html += `
-                                <div class="user-select-item" onclick="selectUserForMessage('${user.username}')">
-                                    <div class="user-select-avatar">${initial}</div>
-                                    <div class="user-select-info" style="flex: 1;">
-                                        <div class="user-select-name">${displayName}</div>
-                                        ${user.display_name && user.display_name !== user.username ? `<div style="font-size: 0.75rem; color: var(--text-muted);">@${user.username}</div>` : ''}
-                                    </div>
-                                </div>`;
+                    
+                    // Show other users section if any
+                    if (data.other_users && data.other_users.length > 0) {
+                        if (data.known_users && data.known_users.length > 0) {
+                            html += `<div style="font-size: 0.6875rem; color: var(--text-muted); font-weight: 600; padding: 0.5rem 0.75rem; margin-top: 0.75rem; margin-bottom: 0.5rem;">🔍 OTHER USERS</div>`;
+                        }
+                        data.other_users.forEach(user => {
+                            html += renderMessageUserItem(user, false);
                         });
-                        resultsDiv.innerHTML = html;
-                    } else {
-                        resultsDiv.innerHTML = `
+                    }
+                    
+                    if (!html) {
+                        html = `
                             <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.5; margin-bottom: 0.5rem;">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                                 </svg>
-                                <p style="font-size: 0.8125rem;">No users found for "${query}"</p>
+                                <p style="font-size: 0.8125rem;">${query ? `No users found for "${query}"` : 'No users available'}</p>
                             </div>`;
                     }
+                    
+                    listDiv.innerHTML = html;
+                    
+                    // Update selected state visually
+                    updateUserListSelectedState();
                 })
                 .catch(err => {
-                    resultsDiv.innerHTML = `
+                    listDiv.innerHTML = `
                         <div style="text-align: center; padding: 2rem; color: var(--error);">
-                            Search failed. Please try again.
+                            Failed to load users
                         </div>`;
                 });
+        }
+        
+        function renderMessageUserItem(user, isKnown) {
+            const initial = user.display_name ? user.display_name[0].toUpperCase() : user.username[0].toUpperCase();
+            const displayName = user.display_name || user.username;
+            const isSelected = selectedMessageRecipients.includes(user.username);
+            
+            return `
+                <div class="user-select-item ${isSelected ? 'selected' : ''}" data-username="${user.username}" onclick="toggleMessageRecipient('${user.username}')">
+                    <div class="user-select-avatar" style="${isKnown ? 'border: 2px solid var(--accent-primary);' : ''}">${initial}</div>
+                    <div class="user-select-info" style="flex: 1;">
+                        <div class="user-select-name">${displayName}</div>
+                        ${user.display_name && user.display_name !== user.username ? `<div style="font-size: 0.75rem; color: var(--text-muted);">@${user.username}</div>` : ''}
+                    </div>
+                    ${user.message_count ? `<span style="font-size: 0.6875rem; color: var(--text-muted); margin-right: 0.5rem;">${user.message_count} msgs</span>` : ''}
+                    <div class="user-select-check" style="${isSelected ? 'opacity: 1;' : ''}">✓</div>
+                </div>`;
+        }
+        
+        function toggleMessageRecipient(username) {
+            const index = selectedMessageRecipients.indexOf(username);
+            if (index === -1) {
+                selectedMessageRecipients.push(username);
+            } else {
+                selectedMessageRecipients.splice(index, 1);
+            }
+            updateSelectedRecipientsUI();
+            updateUserListSelectedState();
+        }
+        
+        function removeMessageRecipient(username) {
+            const index = selectedMessageRecipients.indexOf(username);
+            if (index !== -1) {
+                selectedMessageRecipients.splice(index, 1);
+            }
+            updateSelectedRecipientsUI();
+            updateUserListSelectedState();
+        }
+        
+        function updateUserListSelectedState() {
+            document.querySelectorAll('#messageUserList .user-select-item').forEach(item => {
+                const username = item.getAttribute('data-username');
+                if (selectedMessageRecipients.includes(username)) {
+                    item.classList.add('selected');
+                    item.querySelector('.user-select-check').style.opacity = '1';
+                } else {
+                    item.classList.remove('selected');
+                    item.querySelector('.user-select-check').style.opacity = '';
+                }
+            });
+        }
+        
+        function updateSelectedRecipientsUI() {
+            const preview = document.getElementById('selectedRecipientsPreview');
+            const list = document.getElementById('selectedRecipientsList');
+            const countSpan = document.getElementById('selectedRecipientsCount');
+            const btn = document.getElementById('startConversationBtn');
+            const btnText = document.getElementById('startConversationBtnText');
+            
+            if (selectedMessageRecipients.length === 0) {
+                preview.style.display = 'none';
+                btn.disabled = true;
+                btnText.textContent = 'Select Recipients';
+            } else {
+                preview.style.display = 'block';
+                countSpan.textContent = selectedMessageRecipients.length;
+                
+                // Render selected recipient chips
+                list.innerHTML = selectedMessageRecipients.map(username => `
+                    <div style="display: inline-flex; align-items: center; gap: 0.25rem; background: var(--accent-primary); color: white; padding: 0.25rem 0.5rem; border-radius: 999px; font-size: 0.75rem;">
+                        <span>${username}</span>
+                        <button onclick="removeMessageRecipient('${username}')" style="background: none; border: none; color: white; cursor: pointer; padding: 0; font-size: 1rem; line-height: 1; opacity: 0.8;">×</button>
+                    </div>
+                `).join('');
+                
+                btn.disabled = false;
+                if (selectedMessageRecipients.length === 1) {
+                    btnText.textContent = 'Start Chat';
+                } else {
+                    btnText.textContent = `Create Group (${selectedMessageRecipients.length})`;
+                }
+            }
+        }
+        
+        function searchUsersForMessage(query) {
+            // Debounce the search
+            clearTimeout(window.messageSearchTimeout);
+            window.messageSearchTimeout = setTimeout(() => {
+                loadMessageUserList(query);
+            }, 300);
+        }
+        
+        function startConversation() {
+            if (selectedMessageRecipients.length === 0) return;
+            
+            if (selectedMessageRecipients.length === 1) {
+                // Start DM with single user
+                closeModal('newMessageModal');
+                selectContact(selectedMessageRecipients[0]);
+            } else {
+                // Create a group with multiple users
+                const groupName = selectedMessageRecipients.slice(0, 3).join(', ') + (selectedMessageRecipients.length > 3 ? ` +${selectedMessageRecipients.length - 3}` : '');
+                
+                // Use socket to create group
+                if (typeof socket !== 'undefined') {
+                    socket.emit('create_group', {
+                        name: groupName,
+                        members: selectedMessageRecipients
+                    });
+                    
+                    closeModal('newMessageModal');
+                    
+                    // Show feedback
+                    showToast(`Creating group with ${selectedMessageRecipients.length} members...`);
+                }
+            }
+        }
+        
+        // Toast notification helper
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--bg-card); border: 1px solid var(--border); padding: 0.75rem 1.5rem; border-radius: var(--radius-md); box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10000; font-size: 0.875rem;';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
         
         function startNewGroup() {
@@ -809,6 +868,8 @@
             
             socket.on('connect', () => {
                 console.log('Connected to server');
+                // Load user's bots when connected
+                loadUserBots();
             });
             
             socket.on('online_list', (data) => {
@@ -1057,10 +1118,24 @@
         
         let activeConversations = []; // Stores both groups and DMs
         let userGroups = [];
+        let userBots = []; // Bots added by user
         
         function loadUserGroups() {
             if (socket && socket.connected) {
                 socket.emit('get_user_groups');
+            }
+        }
+        
+        async function loadUserBots() {
+            try {
+                const response = await fetch('/api/bots/my');
+                const data = await response.json();
+                if (data.bots) {
+                    userBots = data.bots;
+                    renderActiveConversations();
+                }
+            } catch (error) {
+                console.error('Error loading bots:', error);
             }
         }
         
@@ -1115,6 +1190,23 @@
                 }
             });
             
+            // Add bots to conversations
+            userBots.forEach(bot => {
+                const exists = allConversations.find(c => c.type === 'bot' && c.id === bot.id);
+                if (!exists) {
+                    allConversations.push({
+                        type: 'bot',
+                        id: bot.id,
+                        name: bot.name,
+                        avatar: bot.avatar,
+                        description: bot.description,
+                        commands: bot.commands,
+                        lastMessage: 'Type a command to get started',
+                        lastActivity: new Date().toISOString() // Keep bots near top
+                    });
+                }
+            });
+            
             // Sort by last activity (most recent first)
             allConversations.sort((a, b) => {
                 const timeA = new Date(a.lastActivity || 0);
@@ -1144,6 +1236,18 @@
                             </div>
                             <span class="conv-badge group-badge">Group</span>
                         </div>`;
+                } else if (conv.type === 'bot') {
+                    return `
+                        <div class="contact bot-item" data-bot-id="${conv.id}" onclick="selectBot('${conv.id}')">
+                            <div class="contact-avatar" style="background: linear-gradient(135deg, #10b981, #059669); font-size: 1.25rem;">
+                                ${conv.avatar || '🤖'}
+                            </div>
+                            <div class="contact-info">
+                                <div class="contact-name">${conv.name}</div>
+                                <div class="contact-status">${conv.lastMessage || conv.description}</div>
+                            </div>
+                            <span class="conv-badge bot-badge" style="background: #10b981;">Bot</span>
+                        </div>`;
                 } else {
                     // Direct message
                     return `
@@ -1169,7 +1273,153 @@
         }
         
         let currentGroup = null; // Currently selected group
-        let currentChatType = 'dm'; // 'dm' or 'group'
+        let currentBot = null; // Currently selected bot
+        let currentChatType = 'dm'; // 'dm', 'group', or 'bot'
+        let botMessages = {}; // Store messages per bot
+        
+        function selectBot(botId) {
+            const bot = userBots.find(b => b.id === botId);
+            if (!bot) {
+                showToast('Bot not found', 'error');
+                return;
+            }
+            
+            // Clear other states
+            currentFriend = null;
+            currentGroup = null;
+            currentBot = bot;
+            currentChatType = 'bot';
+            
+            // Update UI
+            document.querySelectorAll('.contact').forEach(c => c.classList.remove('active'));
+            const botEl = document.querySelector(`[data-bot-id="${botId}"]`);
+            if (botEl) botEl.classList.add('active');
+            
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('active-chat').classList.add('visible');
+            document.getElementById('active-chat').style.display = 'flex';
+            
+            // Hide shared notes panel
+            const notesPanel = document.getElementById('sharedNotesPanel');
+            if (notesPanel) {
+                notesPanel.style.display = 'none';
+                sharedNotesVisible = false;
+            }
+            
+            // Update header
+            const chatUsername = document.getElementById('chat-username');
+            const chatAvatar = document.getElementById('chat-avatar');
+            const chatStatusText = document.getElementById('chat-status-text');
+            
+            if (chatUsername) chatUsername.textContent = bot.name;
+            if (chatAvatar) {
+                chatAvatar.textContent = bot.avatar || '🤖';
+                chatAvatar.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            }
+            if (chatStatusText) {
+                chatStatusText.innerHTML = `<span style="color: #10b981;">● Online</span> • Bot • ${bot.commands?.length || 0} commands`;
+            }
+            
+            // Show bot commands help
+            renderBotChat(bot);
+        }
+        
+        function renderBotChat(bot) {
+            const chatContainer = document.getElementById('messages');
+            if (!chatContainer) return;
+            
+            // Get saved messages for this bot, or create welcome message
+            if (!botMessages[bot.id]) {
+                botMessages[bot.id] = [{
+                    type: 'bot',
+                    content: `👋 **Welcome to ${bot.name}!**\n\n${bot.description}\n\n**Available Commands:**\n${bot.commands.map(cmd => `• \`${cmd.command}\` - ${cmd.description}`).join('\n')}\n\nType a command to get started!`,
+                    timestamp: new Date().toISOString()
+                }];
+            }
+            
+            const messages = botMessages[bot.id];
+            
+            chatContainer.innerHTML = messages.map(msg => {
+                if (msg.type === 'bot') {
+                    return `
+                        <div class="message-wrapper received">
+                            <div class="message-bubble received" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1)); border: 1px solid rgba(16, 185, 129, 0.3);">
+                                <div class="message-content" style="white-space: pre-wrap;">${formatBotMessage(msg.content)}</div>
+                                <div class="message-time">${formatTime(msg.timestamp)}</div>
+                            </div>
+                        </div>`;
+                } else {
+                    return `
+                        <div class="message-wrapper sent">
+                            <div class="message-bubble sent">
+                                <div class="message-content">${msg.content}</div>
+                                <div class="message-time">${formatTime(msg.timestamp)}</div>
+                            </div>
+                        </div>`;
+                }
+            }).join('');
+            
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        function formatBotMessage(content) {
+            // Simple markdown-like formatting
+            return content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`(.*?)`/g, '<code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">$1</code>')
+                .replace(/\n/g, '<br>');
+        }
+        
+        async function sendBotCommand(command) {
+            if (!currentBot) return;
+            
+            // Add user message
+            const userMsg = {
+                type: 'user',
+                content: command,
+                timestamp: new Date().toISOString()
+            };
+            
+            if (!botMessages[currentBot.id]) {
+                botMessages[currentBot.id] = [];
+            }
+            botMessages[currentBot.id].push(userMsg);
+            renderBotChat(currentBot);
+            
+            // Parse command
+            const parts = command.trim().split(' ');
+            const cmd = parts[0];
+            const args = parts.slice(1);
+            
+            try {
+                const response = await fetch(`/api/bots/${currentBot.id}/command`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: cmd, args: args })
+                });
+                
+                const data = await response.json();
+                
+                // Add bot response
+                const botMsg = {
+                    type: 'bot',
+                    content: data.response || 'No response from bot',
+                    timestamp: new Date().toISOString()
+                };
+                botMessages[currentBot.id].push(botMsg);
+                renderBotChat(currentBot);
+                
+            } catch (error) {
+                console.error('Bot command error:', error);
+                const errorMsg = {
+                    type: 'bot',
+                    content: '❌ Error processing command. Please try again.',
+                    timestamp: new Date().toISOString()
+                };
+                botMessages[currentBot.id].push(errorMsg);
+                renderBotChat(currentBot);
+            }
+        }
         
         function selectGroup(groupId) {
             const group = userGroups.find(g => g.id === groupId);
@@ -1392,6 +1642,20 @@
             const message = input.value.trim();
             
             if (!message) return;
+            
+            // Haptic feedback on send (iOS native)
+            if (window.NativeBridge?.hapticFeedback) {
+                window.NativeBridge.hapticFeedback('light');
+            }
+            
+            // Handle bot commands
+            if (currentChatType === 'bot' && currentBot) {
+                input.value = '';
+                input.style.height = 'auto';
+                input.focus();
+                sendBotCommand(message);
+                return;
+            }
             
             // Handle group messages
             if (currentChatType === 'group' && currentGroup) {

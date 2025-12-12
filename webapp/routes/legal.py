@@ -16,6 +16,12 @@ def privacy():
     return render_template('privacy.html')
 
 
+@legal_bp.route('/app/privacy')
+def app_privacy():
+    """App Store Privacy Policy page (iOS/Android)"""
+    return render_template('app_privacy.html')
+
+
 @legal_bp.route('/terms')
 def terms():
     """Terms of Service page"""
