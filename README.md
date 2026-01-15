@@ -1,8 +1,10 @@
-# Menza
+# Menza Backend (Persay)
 
-**Secure Encrypted Messaging Platform**
+**Secure Encrypted Messaging Platform - Backend API**
 
 A privacy-first messaging application featuring end-to-end encryption, real-time communication, voice/video calling, and channel broadcasting.
+
+> **📱 Looking for the iOS app?** See the [Menza iOS repository](https://github.com/YOUR_USERNAME/menza)
 
 ---
 
